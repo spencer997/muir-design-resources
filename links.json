@@ -1,0 +1,20 @@
+[
+  {
+    "id": "example-1",
+    "title": "示例：结账流程",
+    "description": "把这条改成你们真实项目；可删掉示例条目。",
+    "figma": "https://www.figma.com/file/placeholder",
+    "prototype": "",
+    "tags": ["示例", "checkout"],
+    "updatedAt": "2026-04-15"
+  },
+  {
+    "id": "example-2",
+    "title": "示例：仅有 Figma",
+    "description": "没有 HTML 原型时，原型按钮会隐藏。",
+    "figma": "https://www.figma.com/file/placeholder",
+    "prototype": "",
+    "tags": ["示例", "figma-only"],
+    "updatedAt": "2026-04-10"
+  }
+]
