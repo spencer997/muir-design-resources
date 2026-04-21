@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>团队原型与 Figma</title>
+  <title>Design resources</title>
   <style>
     :root {
       --bg: #0f1419;
@@ -175,19 +175,19 @@
 <body>
   <div class="wrap">
     <header>
-      <h1>团队原型与 Figma</h1>
-      <p class="sub">搜索标题与标签；点标签可多选筛选（需同时包含所选标签）。</p>
+      <h1>Design resources</h1>
+      <p class="sub">Search titles and tags. Tag filters use AND (entry must include every selected tag).</p>
     </header>
 
     <div class="toolbar">
-      <input type="search" id="q" placeholder="搜索标题或标签…" autocomplete="off" />
+      <input type="search" id="q" placeholder="Search title or tags…" autocomplete="off" />
     </div>
-    <p class="tags-label">标签筛选（点击切换）</p>
+    <p class="tags-label">Tags (click to toggle)</p>
     <div class="tag-filters" id="tagFilters"></div>
 
     <p class="count" id="count"></p>
     <ul class="list" id="list"></ul>
-    <div id="empty" class="empty" hidden>没有匹配的条目，试试清空搜索或标签。</div>
+    <div id="empty" class="empty" hidden>No matches. Clear the search or tag filters.</div>
     <div id="err" class="err" hidden></div>
   </div>
 
@@ -224,7 +224,7 @@
 
     function render() {
       const filtered = allItems.filter(itemMatches);
-      $count.textContent = `共 ${filtered.length} / ${allItems.length} 条`;
+      $count.textContent = `${filtered.length} / ${allItems.length} items`;
       $list.innerHTML = "";
       $empty.hidden = filtered.length !== 0;
       filtered.forEach((item) => {
@@ -250,7 +250,7 @@
         if (item.updatedAt) {
           const span = document.createElement("span");
           span.className = "pill";
-          span.textContent = "更新 " + item.updatedAt;
+          span.textContent = "Updated " + item.updatedAt;
           meta.appendChild(span);
         }
         if (meta.childNodes.length) li.appendChild(meta);
@@ -272,7 +272,7 @@
           a.href = item.prototype;
           a.target = "_blank";
           a.rel = "noopener noreferrer";
-          a.textContent = "HTML 原型";
+          a.textContent = "Prototype";
           actions.appendChild(a);
         }
         if (actions.childNodes.length) li.appendChild(actions);
@@ -284,7 +284,7 @@
     function allTags() {
       const set = new Set();
       allItems.forEach((i) => (i.tags || []).forEach((t) => set.add(t)));
-      return [...set].sort((a, b) => a.localeCompare(b, "zh-CN"));
+      return [...set].sort((a, b) => a.localeCompare(b, "en"));
     }
 
     function renderTagButtons() {
@@ -308,7 +308,7 @@
 
     fetch("data/links.json")
       .then((r) => {
-        if (!r.ok) throw new Error("无法加载 data/links.json（" + r.status + "）");
+        if (!r.ok) throw new Error("Failed to load data/links.json (" + r.status + ")");
         return r.json();
       })
       .then((data) => {
