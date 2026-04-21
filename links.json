@@ -1,20 +1,20 @@
 [
   {
     "id": "example-1",
-    "title": "示例：结账流程",
-    "description": "把这条改成你们真实项目；可删掉示例条目。",
+    "title": "Sample: Checkout flow",
+    "description": "Replace with real projects; remove sample rows when ready.",
     "figma": "https://www.figma.com/file/placeholder",
     "prototype": "",
-    "tags": ["示例", "checkout"],
+    "tags": ["sample", "checkout"],
     "updatedAt": "2026-04-15"
   },
   {
     "id": "example-2",
-    "title": "示例：仅有 Figma",
-    "description": "没有 HTML 原型时，原型按钮会隐藏。",
+    "title": "Sample: Figma only",
+    "description": "Prototype button is hidden when prototype URL is empty.",
     "figma": "https://www.figma.com/file/placeholder",
     "prototype": "",
-    "tags": ["示例", "figma-only"],
+    "tags": ["sample", "figma-only"],
     "updatedAt": "2026-04-10"
   }
 ]
