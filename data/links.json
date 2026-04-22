@@ -1,0 +1,205 @@
+{
+  "resources": [
+    {
+      "name": "Homepage redesign",
+      "tag": "product-design",
+      "view": "on-hold",
+      "links": [
+        {
+          "label": "Inspiration",
+          "href": "https://www.figma.com/board/WPGRhJR5JVvFm6p3TvDFmA/Homepage-redesign?node-id=0-1&p=f&t=IoSSAjPGUx0lSSe9-0"
+        },
+        {
+          "label": "Design",
+          "href": "https://www.figma.com/design/GAWVOEH6sehUsTHfCfNDpU/Homepage-redesign?t=IoSSAjPGUx0lSSe9-0"
+        },
+        {
+          "label": "Prototype v0",
+          "href": "https://drive.google.com/file/d/1BAF8KhDZl_5IWZ2QL9JO8zHejgyamKcm/view?usp=sharing"
+        }
+      ]
+    },
+    {
+      "name": "Onboarding redesign",
+      "tag": "product-design",
+      "view": "on-hold",
+      "links": [
+        {
+          "label": "Design doc",
+          "href": "https://docs.google.com/document/d/1ep5hj3tiMQkr3mcLCYQXeJiurlFkTJES2Kz4IPjt_mE/edit?tab=t.v4n4txp6yev1#heading=h.jhxwtib2pn4n"
+        },
+        {
+          "label": "Clarity recording insights",
+          "href": "https://www.figma.com/board/CRPDD4JGa6esvdpUEzXLcI/Onboarding?node-id=53-85&t=ZHStshKgX3DJrRkn-0"
+        },
+        {
+          "label": "Inspiration",
+          "href": "https://www.figma.com/board/CRPDD4JGa6esvdpUEzXLcI/Onboarding?node-id=87-417&t=NTDKH1m8DcfjASlJ-0"
+        },
+        {
+          "label": "User personas & goals",
+          "href": "https://www.figma.com/board/CRPDD4JGa6esvdpUEzXLcI/Onboarding?node-id=130-85&t=d9yx2H2x2cJq1bWY-0"
+        }
+      ]
+    },
+    {
+      "name": "Creation improvements",
+      "tag": "product-design",
+      "links": [
+        {
+          "label": "Design doc",
+          "href": "https://docs.google.com/document/d/1ep5hj3tiMQkr3mcLCYQXeJiurlFkTJES2Kz4IPjt_mE/edit?tab=t.gqfajdvglpc5#heading=h.va9l8ynxk13z"
+        },
+        {
+          "label": "Design",
+          "href": "https://www.figma.com/design/TFyzTHUAM3XOqbOU7EnC3d/Creation-improvements?node-id=0-1&p=f&t=yjpMOJLGXFYWvlub-0"
+        },
+        {
+          "label": "Prototype v1",
+          "href": "https://drive.google.com/file/d/1Si0c7xK-1jrAhjdYR4jqeRR9EQx9vLI4/view?usp=sharing"
+        }
+      ]
+    },
+    {
+      "name": "Linking v2",
+      "tag": "product-design",
+      "links": [
+        {
+          "label": "Design doc",
+          "href": "https://docs.google.com/document/d/1ep5hj3tiMQkr3mcLCYQXeJiurlFkTJES2Kz4IPjt_mE/edit?tab=t.zhesl8fvb1fy"
+        },
+        {
+          "label": "Prototype v1",
+          "href": "https://drive.google.com/file/d/1Imyvmd8l11Xgbjx_CxVz3QPyJSB5KmF3/view?usp=sharing"
+        }
+      ]
+    },
+    {
+      "name": "Workflow v2",
+      "tag": "product-design",
+      "links": [
+        {
+          "label": "Design doc",
+          "href": "https://docs.google.com/document/d/1ep5hj3tiMQkr3mcLCYQXeJiurlFkTJES2Kz4IPjt_mE/edit?tab=t.9l56mtk56zoh#heading=h.a7e0eis4a3ps"
+        },
+        {
+          "label": "Design",
+          "href": "https://www.figma.com/design/8ufFWdmZH5UtOGQsQshhQ8/Workflow_v2?node-id=442-44501&p=f&t=so8jbto03PakPUNu-0"
+        }
+      ]
+    },
+    {
+      "name": "Design system v2",
+      "tag": "design-guideline",
+      "links": [
+        {
+          "label": "Design",
+          "href": "https://www.figma.com/design/fbeJw3rPQLq14eTt3NGfI9/Muir-Design-system_v2?node-id=0-1&p=f&t=Ym087odmeCtdCGT6-0"
+        }
+      ]
+    },
+    {
+      "name": "Website design system",
+      "tags": ["design-guideline", "website"],
+      "view": "complete",
+      "links": [
+        {
+          "label": "Design",
+          "href": "https://www.figma.com/design/m5XskbydT4HR58OdwDSs4e/Website-design-system?t=so8jbto03PakPUNu-0"
+        }
+      ]
+    },
+    {
+      "name": "Website revamp",
+      "tag": "website",
+      "view": "complete",
+      "links": [
+        {
+          "label": "Board",
+          "href": "https://www.figma.com/board/oCE87knLr4OmLIeWO4GogT/Editing-feature-redesign_Whiteboard?node-id=0-1&p=f&t=so8jbto03PakPUNu-0"
+        }
+      ]
+    },
+    {
+      "name": "Tariff landing page",
+      "tag": "website",
+      "view": "complete",
+      "links": [
+        {
+          "label": "Design",
+          "href": "https://www.figma.com/design/iotC2Rnxs7PGqPGrMBqwxi/Tariff-landing-page?t=so8jbto03PakPUNu-0"
+        }
+      ]
+    },
+    {
+      "name": "Cost landing page",
+      "tag": "website",
+      "view": "complete",
+      "links": [
+        {
+          "label": "Design doc",
+          "href": "https://docs.google.com/document/d/1E4Okkc2x21LV1vKPIiXa5G9AdENEXAiEFhicgtlJYgk/edit?tab=t.0"
+        },
+        {
+          "label": "Design",
+          "href": "https://www.figma.com/design/gqpk5LXnGDwBq81qrUJtlu/Cost-landing-page?node-id=0-1&p=f&t=so8jbto03PakPUNu-0"
+        }
+      ]
+    },
+    {
+      "name": "Public product model landing page",
+      "tag": "website",
+      "view": "complete",
+      "links": [
+        {
+          "label": "Board",
+          "href": "https://www.figma.com/board/oCE87knLr4OmLIeWO4GogT/Editing-feature-redesign_Whiteboard?node-id=0-1&p=f&t=so8jbto03PakPUNu-0"
+        }
+      ]
+    },
+    {
+      "name": "Listing",
+      "tag": "product-design",
+      "view": "complete",
+      "links": [
+        {
+          "label": "Design",
+          "href": "https://www.figma.com/design/LvsgGwq2siSihGj2TXwzN0/Listing?node-id=931-3&p=f&t=so8jbto03PakPUNu-0"
+        }
+      ]
+    },
+    {
+      "name": "Bom import v1",
+      "tag": "product-design",
+      "view": "complete",
+      "links": [
+        {
+          "label": "Design",
+          "href": "https://www.figma.com/design/VZL7SmMMVnGBJnlivUoXMl/Bom-import_v1?node-id=385-36909&p=f&t=so8jbto03PakPUNu-0"
+        }
+      ]
+    },
+    {
+      "name": "Editing redesign v1",
+      "tag": "product-design",
+      "view": "complete",
+      "links": [
+        {
+          "label": "User flow",
+          "href": "https://www.figma.com/board/oCE87knLr4OmLIeWO4GogT/Editing-feature-redesign_Whiteboard?node-id=0-1&p=f&t=so8jbto03PakPUNu-0"
+        }
+      ]
+    },
+    {
+      "name": "AWS climate week demo",
+      "tag": "demo",
+      "view": "complete",
+      "links": [
+        {
+          "label": "Demo",
+          "href": "https://drive.google.com/file/d/1S-1e2jHPtjKtqLByapTzcCzu1nZtcj-H/view?usp=sharing"
+        }
+      ]
+    }
+  ]
+}

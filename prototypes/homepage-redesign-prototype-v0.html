@@ -1,0 +1,1913 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Muir AI - Homepage</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'border-neutral-1': '#e9ecef',
+              'background-neutral-2': '#f8f9fa',
+              'content-primary-black': '#212529',
+              'content-secondary-gray': '#868e96',
+              'content-primary-brand': '#b27444',
+              'green-50': '#ebfbee',
+              'green-600': '#40c057',
+              'brand-50': '#f9f6ed',
+              'blue-50': '#eff6ff',
+              'blue-600': '#2563eb',
+              'purple-50': '#faf5ff',
+              'orange-50': '#fff7ed',
+              'orange-600': '#ea580c',
+              'cyan-50': '#ecfeff',
+            },
+            fontFamily: {
+              inter: ['Inter', 'sans-serif'],
+            },
+          },
+        },
+      }
+    </script>
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Inter', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      #root {
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+      }
+      /* Hide scrollbar */
+      .overflow-hidden::-webkit-scrollbar {
+        display: none;
+      }
+      .overflow-hidden {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // Tab functionality
+      let currentTab = 'in-progress';
+      let productView = 'list';
+      
+      // Opportunities data
+      const opportunities = [
+        { id: 1, title: 'Switch to Renewable Energy', description: 'Replace coal power with solar energy', emissions: '15.2 t CO₂', cost: '$12,500', savings: 'High' },
+        { id: 2, title: 'Optimize Transportation Routes', description: 'Reduce delivery distances by 30%', emissions: '8.5 t CO₂', cost: '$3,200', savings: 'Medium' },
+        { id: 3, title: 'Upgrade to LED Lighting', description: 'Replace all facility lighting with LEDs', emissions: '2.1 t CO₂', cost: '$8,900', savings: 'High' },
+        { id: 4, title: 'Implement Waste Reduction', description: 'Reduce packaging waste by 40%', emissions: '5.8 t CO₂', cost: '$1,800', savings: 'Low' },
+        { id: 5, title: 'Switch to Electric Vehicles', description: 'Replace fleet with electric vehicles', emissions: '12.3 t CO₂', cost: '$45,000', savings: 'High' },
+        { id: 6, title: 'Improve Building Insulation', description: 'Upgrade insulation in warehouses', emissions: '3.4 t CO₂', cost: '$15,000', savings: 'Medium' },
+        { id: 7, title: 'Optimize Production Process', description: 'Reduce energy consumption by 25%', emissions: '9.7 t CO₂', cost: '$22,000', savings: 'High' },
+        { id: 8, title: 'Use Recycled Materials', description: 'Increase recycled content to 80%', emissions: '4.2 t CO₂', cost: '$5,500', savings: 'Medium' },
+        { id: 9, title: 'Install Solar Panels', description: 'Add solar panels to facility roof', emissions: '18.6 t CO₂', cost: '$35,000', savings: 'High' },
+        { id: 10, title: 'Reduce Water Usage', description: 'Implement water recycling system', emissions: '1.5 t CO₂', cost: '$7,200', savings: 'Low' },
+      ];
+      
+      function renderOpportunities() {
+        // Sort by emissions
+        const sortedByEmissions = [...opportunities].sort((a, b) => {
+          const aValue = parseFloat(a.emissions);
+          const bValue = parseFloat(b.emissions);
+          return bValue - aValue;
+        });
+        
+        // Sort by cost
+        const sortedByCost = [...opportunities].sort((a, b) => {
+          const aValue = parseFloat(a.cost.replace(/[$,]/g, ''));
+          const bValue = parseFloat(b.cost.replace(/[$,]/g, ''));
+          return bValue - aValue;
+        });
+        
+        const topByEmissions = sortedByEmissions.slice(0, 3);
+        const topByCost = sortedByCost.slice(0, 3);
+        
+        const emissionsContainer = document.getElementById('opportunities-emissions');
+        const costContainer = document.getElementById('opportunities-cost');
+        
+        if (emissionsContainer) {
+          emissionsContainer.innerHTML = topByEmissions.map(opp => `
+            <div class="bg-white border border-border-neutral-1 border-solid flex flex-col items-start relative rounded-[8px] p-[12px] hover:shadow-md transition-shadow">
+              <div class="flex flex-col items-start relative shrink-0 w-full">
+                <div class="flex items-start justify-between gap-[12px] w-full mb-[8px]">
+                  <div class="flex flex-col items-start flex-1 min-w-0">
+                    <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px] mb-[4px]">
+                      <p class="leading-[20px]">${opp.title}</p>
+                    </div>
+                    <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[12px]">
+                      <p class="leading-[18px]">${opp.description}</p>
+                    </div>
+                  </div>
+                  <div class="px-[6px] py-[2px] rounded-[4px] shrink-0 ${
+                    opp.savings === 'High' ? 'bg-green-50' : 
+                    opp.savings === 'Medium' ? 'bg-blue-50' : 
+                    'bg-orange-50'
+                  }">
+                    <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-[11px] ${
+                      opp.savings === 'High' ? 'text-green-600' : 
+                      opp.savings === 'Medium' ? 'text-blue-600' : 
+                      'text-orange-600'
+                    }">
+                      <p class="leading-[16px]">${opp.savings}</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-[16px] relative shrink-0 w-full">
+                  <div class="flex flex-col items-start relative shrink-0">
+                    <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[11px] mb-[2px]">
+                      <p class="leading-[16px]">Emissions</p>
+                    </div>
+                    <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[13px]">
+                      <p class="leading-[18px]">${opp.emissions}</p>
+                    </div>
+                  </div>
+                  <div class="flex flex-col items-start relative shrink-0">
+                    <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[11px] mb-[2px]">
+                      <p class="leading-[16px]">Cost</p>
+                    </div>
+                    <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[13px]">
+                      <p class="leading-[18px]">${opp.cost}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `).join('');
+        }
+        
+        if (costContainer) {
+          costContainer.innerHTML = topByCost.map(opp => `
+            <div class="bg-white border border-border-neutral-1 border-solid flex flex-col items-start relative rounded-[8px] p-[12px] hover:shadow-md transition-shadow">
+              <div class="flex flex-col items-start relative shrink-0 w-full">
+                <div class="flex items-start justify-between gap-[12px] w-full mb-[8px]">
+                  <div class="flex flex-col items-start flex-1 min-w-0">
+                    <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px] mb-[4px]">
+                      <p class="leading-[20px]">${opp.title}</p>
+                    </div>
+                    <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[12px]">
+                      <p class="leading-[18px]">${opp.description}</p>
+                    </div>
+                  </div>
+                  <div class="px-[6px] py-[2px] rounded-[4px] shrink-0 ${
+                    opp.savings === 'High' ? 'bg-green-50' : 
+                    opp.savings === 'Medium' ? 'bg-blue-50' : 
+                    'bg-orange-50'
+                  }">
+                    <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-[11px] ${
+                      opp.savings === 'High' ? 'text-green-600' : 
+                      opp.savings === 'Medium' ? 'text-blue-600' : 
+                      'text-orange-600'
+                    }">
+                      <p class="leading-[16px]">${opp.savings}</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-[16px] relative shrink-0 w-full">
+                  <div class="flex flex-col items-start relative shrink-0">
+                    <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[11px] mb-[2px]">
+                      <p class="leading-[16px]">Emissions</p>
+                    </div>
+                    <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[13px]">
+                      <p class="leading-[18px]">${opp.emissions}</p>
+                    </div>
+                  </div>
+                  <div class="flex flex-col items-start relative shrink-0">
+                    <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[11px] mb-[2px]">
+                      <p class="leading-[16px]">Cost</p>
+                    </div>
+                    <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[13px]">
+                      <p class="leading-[18px]">${opp.cost}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `).join('');
+        }
+      }
+
+      function setProductView(view) {
+        productView = view;
+        const listView = document.getElementById('products-list-view');
+        const kanbanView = document.getElementById('products-kanban-view');
+        const viewButtons = document.querySelectorAll('[data-product-view]');
+
+        viewButtons.forEach(btn => {
+          const value = btn.getAttribute('data-product-view');
+          if (value === view) {
+            btn.classList.remove('bg-transparent', 'border-border-neutral-1', 'text-content-secondary-gray');
+            btn.classList.add('bg-content-primary-brand', 'border-content-primary-brand', 'text-white');
+          } else {
+            btn.classList.remove('bg-content-primary-brand', 'border-content-primary-brand', 'text-white');
+            btn.classList.add('bg-transparent', 'border-border-neutral-1', 'text-content-secondary-gray');
+          }
+        });
+
+        if (listView && kanbanView) {
+          if (view === 'list') {
+            listView.style.display = 'block';
+            kanbanView.style.display = 'none';
+          } else {
+            listView.style.display = 'none';
+            kanbanView.style.display = 'block';
+          }
+        }
+      }
+      
+      window.filterProducts = function(tab) {
+        currentTab = tab;
+        const rows = document.querySelectorAll('[data-product-row]');
+        const tabButtons = document.querySelectorAll('[data-tab-button]');
+        
+        // Update tab buttons
+        tabButtons.forEach(btn => {
+          const tabValue = btn.getAttribute('data-tab-button');
+          const textDiv = btn.querySelector('div > p');
+          if (tabValue === tab) {
+            btn.classList.remove('border-transparent');
+            btn.classList.add('border-content-primary-brand');
+            if (textDiv) {
+              textDiv.classList.remove('text-content-secondary-gray');
+              textDiv.classList.add('text-content-primary-black');
+            }
+          } else {
+            btn.classList.remove('border-content-primary-brand');
+            btn.classList.add('border-transparent');
+            if (textDiv) {
+              textDiv.classList.remove('text-content-primary-black');
+              textDiv.classList.add('text-content-secondary-gray');
+            }
+          }
+        });
+        
+        // Filter rows and show only first 5 for ALL tabs
+        let visibleCount = 0;
+        const maxVisible = 5;
+        const goToAllButton = document.getElementById('go-to-all-button');
+        const emptyState = document.getElementById('products-empty-state');
+        
+        rows.forEach(row => {
+          const status = row.getAttribute('data-status');
+          const matchesTab = tab === 'all' || status === tab;
+          
+          if (matchesTab) {
+            if (visibleCount < maxVisible) {
+              row.style.display = 'flex';
+              visibleCount++;
+            } else {
+              row.style.display = 'none';
+            }
+          } else {
+            row.style.display = 'none';
+          }
+        });
+        
+        // Count how many products match this tab (ignores maxVisible)
+        const totalFiltered = Array.from(rows).filter(row => {
+          const status = row.getAttribute('data-status');
+          return tab === 'all' || status === tab;
+        }).length;
+        
+        // Show/hide "Go to all products" button for ALL tabs
+        if (goToAllButton) {
+          if (totalFiltered > maxVisible) {
+            goToAllButton.classList.remove('hidden');
+            goToAllButton.classList.add('flex');
+          } else {
+            goToAllButton.classList.remove('flex');
+            goToAllButton.classList.add('hidden');
+          }
+        }
+
+        // Temporarily keep empty state hidden (logic retained for future use)
+        if (emptyState) {
+          emptyState.classList.remove('flex');
+          emptyState.classList.add('hidden');
+        }
+      };
+      
+      // Initialize page state
+      window.addEventListener('DOMContentLoaded', function() {
+        // Default to in-progress tab with visible products
+        filterProducts('in-progress');
+        renderOpportunities();
+        setProductView('list');
+      });
+    </script>
+    <script type="module">
+      
+      const img = "http://localhost:3845/assets/d804ebe286e9cc054496cdfd17826c481de05dfa.svg";
+      const img1 = "http://localhost:3845/assets/5a9767ae8cf1f8011fd4d0cdbfb02a49e08deb62.svg";
+      const img2 = "http://localhost:3845/assets/0e25552d3825caf41e6befbad3cdeebaa058102a.svg";
+      const img3 = "./assets/logo.svg";
+      const img4 = "http://localhost:3845/assets/784e8e09b73bf02f1bbca9d1965e310c3a84d4ba.svg";
+      const img5 = "http://localhost:3845/assets/9a75b7b7ade461fe27ea005c8f42966270108c94.svg";
+      const img6 = "http://localhost:3845/assets/100c3919e31d7dad96c46b523d74437cac8ed16b.svg";
+      const img7 = "http://localhost:3845/assets/4b0bbb95c79c513e6497854ede74093ad568652a.svg";
+      const img8 = "http://localhost:3845/assets/acfec241e9c4e6bee9b38afd89647ae512e934d8.svg";
+      const img9 = "./assets/help-circle.svg";
+      const img10 = "http://localhost:3845/assets/00822d492a1676f672ed5fb063907bd67a1ac58f.svg";
+      const img9179 = "http://localhost:3845/assets/71954e3556fa5ce6b3568f15cadf4a7f71c1a2e3.svg";
+      const img9180 = "http://localhost:3845/assets/91ec3d047c33b4a58198175705886a8e2e430bca.svg";
+
+      const root = document.getElementById('root');
+      
+      root.innerHTML = `
+        <div class="bg-background-neutral-2 flex items-start relative w-full h-screen">
+          <!-- Sidebar -->
+          <div class="bg-white border-border-neutral-1 border-r border-solid flex flex-col h-full items-start justify-between p-[10px] relative shrink-0 w-[240px]">
+            <div class="flex flex-col items-start flex-1 min-h-0 min-w-0 relative w-full overflow-hidden">
+              <!-- Logo -->
+              <div class="flex h-[62px] items-center px-[12px] py-[16px] relative shrink-0 w-[220px]">
+                <div class="flex flex-1 flex-col items-start min-h-0 min-w-0 relative">
+                  <div class="h-[20px] relative shrink-0 w-[115px]">
+                    <img alt="Muir AI Logo" class="block max-w-none w-full h-full" src="${img3}" />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Navigation -->
+              <div class="flex flex-col items-start relative shrink-0 w-full">
+                <!-- Home (Selected) -->
+                <div class="bg-brand-50 flex gap-[12px] h-[38px] items-center px-[12px] py-[8px] rounded-[8px] shrink-0 w-full">
+                  <div class="flex flex-1 gap-[12px] items-center min-h-0 min-w-0 relative">
+                    <div class="flex flex-col items-start overflow-clip relative shrink-0 w-[16px] h-[16px]">
+                      <div class="aspect-[24/24] flex-1 min-h-0 min-w-0 overflow-clip relative">
+                        <div class="absolute inset-[12.5%]">
+                          <div class="absolute inset-[-4.17%]">
+                            <img alt="" class="block max-w-none w-full h-full" src="${img9179}" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex flex-col font-inter font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-content-primary-black whitespace-nowrap">
+                      <p class="leading-[22px]">Home</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Products -->
+                <div class="flex gap-[12px] h-[38px] items-center px-[12px] py-[8px] relative rounded-[8px] shrink-0 w-full">
+                  <div class="flex flex-1 gap-[12px] items-center min-h-0 min-w-0 relative">
+                    <div class="flex flex-col items-start overflow-clip relative shrink-0 w-[16px] h-[16px]">
+                      <div class="flex-1 min-h-0 min-w-0 overflow-clip relative w-[16px]">
+                        <div class="absolute inset-[12.5%_8.33%_12.5%_16.67%]">
+                          <div class="absolute inset-[-4.17%]">
+                            <img alt="" class="block max-w-none w-full h-full" src="${img4}" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex flex-col font-inter font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-content-primary-black whitespace-nowrap">
+                      <p class="leading-[22px]">Products</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Suppliers -->
+                <div class="flex gap-[12px] h-[38px] items-center px-[12px] py-[8px] relative rounded-[8px] shrink-0 w-full">
+                  <div class="flex flex-1 gap-[12px] items-center min-h-0 min-w-0 relative">
+                    <div class="flex flex-col items-start overflow-clip relative shrink-0 w-[16px] h-[16px]">
+                      <div class="aspect-[24/24] flex-1 min-h-0 min-w-0 overflow-clip relative">
+                        <div class="absolute inset-[12.5%]">
+                          <div class="absolute inset-[-4.17%]">
+                            <img alt="" class="block max-w-none w-full h-full" src="${img5}" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex flex-col font-inter font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-content-primary-black whitespace-nowrap">
+                      <p class="leading-[22px]">Suppliers</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Supply Trace -->
+                <div class="flex gap-[12px] h-[38px] items-center px-[12px] py-[8px] relative rounded-[8px] shrink-0 w-full">
+                  <div class="flex flex-1 gap-[12px] items-center min-h-0 min-w-0 relative">
+                    <div class="flex flex-col items-start overflow-clip relative shrink-0 w-[16px] h-[16px]">
+                      <div class="aspect-[24/24] flex-1 min-h-0 min-w-0 overflow-clip relative">
+                        <div class="absolute inset-[16.67%]">
+                          <div class="absolute inset-[-4.69%]">
+                            <img alt="" class="block max-w-none w-full h-full" src="${img6}" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex flex-col font-inter font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-content-primary-black whitespace-nowrap">
+                      <p class="leading-[22px]">Supply Trace</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom Section -->
+            <div class="flex flex-col gap-[24px] items-start relative shrink-0 w-full">
+              <div class="flex flex-col items-start relative shrink-0 w-full">
+                <!-- Settings -->
+                <div class="flex gap-[12px] h-[38px] items-center px-[12px] py-[8px] relative rounded-[8px] shrink-0 w-full">
+                  <div class="flex flex-1 gap-[12px] items-center min-h-0 min-w-0 relative">
+                    <div class="flex flex-col items-start overflow-clip relative shrink-0 w-[16px] h-[16px]">
+                      <div class="flex-1 min-h-0 min-w-0 overflow-clip relative w-[16px]">
+                        <div class="absolute inset-[12.5%]">
+                          <div class="absolute inset-[-4.17%]">
+                            <img alt="" class="block max-w-none w-full h-full" src="${img7}" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex flex-col font-inter font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-content-primary-black whitespace-nowrap">
+                      <p class="leading-[22px]">Settings</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Supports -->
+                <div class="flex gap-[12px] h-[38px] items-center px-[12px] py-[8px] relative rounded-[8px] shrink-0 w-full">
+                  <div class="flex flex-1 gap-[12px] items-center min-h-0 min-w-0 relative">
+                    <div class="flex flex-col items-start overflow-clip relative shrink-0 w-[16px] h-[16px]">
+                      <div class="aspect-[24/24] flex-1 min-h-0 min-w-0 overflow-clip relative">
+                        <div class="absolute inset-[16.58%_12.51%_8.29%_12.5%]">
+                          <div class="absolute inset-[-4.16%_-4.17%]">
+                            <img alt="" class="block max-w-none w-full h-full" src="${img8}" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex flex-col font-inter font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-content-primary-black whitespace-nowrap">
+                      <p class="leading-[22px]">Supports</p>
+                    </div>
+                  </div>
+                  <div class="flex flex-col items-start overflow-clip relative shrink-0 w-[16px] h-[16px]">
+                    <div class="flex-1 min-h-0 min-w-0 overflow-clip relative w-[16px]">
+                      <div class="absolute bottom-1/4 left-[37.5%] right-[37.5%] top-1/4">
+                        <div class="absolute inset-[-6.25%_-12.5%]">
+                          <img alt="" class="block max-w-none w-full h-full" src="${img1}" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Help Center -->
+                <div class="flex gap-[12px] h-[38px] items-center px-[12px] py-[8px] relative rounded-[8px] shrink-0 w-full">
+                  <div class="flex flex-1 gap-[12px] items-center min-h-0 min-w-0 relative">
+                    <div class="flex flex-col items-start overflow-clip relative shrink-0 w-[16px] h-[16px]">
+                      <div class="aspect-[24/24] flex-1 min-h-0 min-w-0 overflow-clip relative">
+                        <div class="absolute inset-[12.5%]">
+                          <div class="absolute inset-[-4.17%]">
+                            <img alt="" class="block max-w-none w-full h-full" src="${img9}" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex flex-col font-inter font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-content-primary-black whitespace-nowrap">
+                      <p class="leading-[22px]">Help Center</p>
+                    </div>
+                  </div>
+                  <div class="flex flex-col items-start overflow-clip relative shrink-0 w-[16px] h-[16px]">
+                    <div class="flex-1 min-h-0 min-w-0 overflow-clip relative w-[16px]">
+                      <div class="absolute inset-[16.67%]">
+                        <div class="absolute inset-[-4.69%]">
+                          <img alt="" class="block max-w-none w-full h-full" src="${img10}" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- User Card -->
+              <div class="border border-border-neutral-1 border-solid flex flex-col gap-[8px] h-[113px] items-start p-[10px] rounded-[8px] shrink-0 w-[220px]">
+                <div class="flex gap-[16px] items-center relative shrink-0 w-full">
+                  <div class="bg-green-50 flex items-center justify-center relative rounded-[4px] shrink-0 w-[38px] h-[38px]">
+                    <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-[16px] text-green-600 text-center whitespace-nowrap">
+                      <p class="leading-[24px]">SL</p>
+                    </div>
+                  </div>
+                  <div class="flex flex-1 flex-col items-start leading-[0] min-h-0 min-w-0 relative">
+                    <div class="flex flex-col font-inter font-medium justify-center relative shrink-0 text-[14px] text-black w-full">
+                      <p class="leading-[22px] whitespace-pre-wrap">Spencer Li</p>
+                    </div>
+                    <div class="flex flex-col font-inter font-normal justify-center relative shrink-0 text-[12px] text-content-secondary-gray w-full">
+                      <p class="leading-[18px] whitespace-pre-wrap">Muir AI</p>
+                    </div>
+                  </div>
+                  <div class="flex flex-col items-start overflow-clip relative shrink-0 w-[16px] h-[16px]">
+                    <div class="aspect-[24/24] flex-1 min-h-0 min-w-0 overflow-clip relative">
+                      <div class="absolute inset-[20.83%_33.33%]">
+                        <div class="absolute inset-[-5.36%_-9.37%]">
+                          <img alt="" class="block max-w-none w-full h-full" src="${img}" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="bg-background-neutral-2 flex font-inter font-medium items-center leading-[0] p-[10px] relative rounded-[8px] shrink-0 w-[200px]">
+                  <div class="flex flex-1 flex-col justify-center min-h-0 min-w-0 relative text-black">
+                    <p class="text-[12px] leading-[18px] whitespace-pre-wrap">Tokens Remaining</p>
+                  </div>
+                  <div class="flex flex-col justify-center relative shrink-0 text-content-primary-brand whitespace-nowrap">
+                    <p class="text-[12px] leading-[18px]">9179</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Content Area -->
+          <div class="flex flex-1 flex-col h-full items-start min-h-0 min-w-0 relative overflow-y-auto">
+            <div class="bg-white border-border-neutral-1 border-b border-solid flex items-center px-[32px] py-[12px] sticky top-0 z-10 shrink-0 w-full">
+              <div class="flex flex-1 flex-col items-start justify-center min-h-0 min-w-0 relative">
+                <div class="flex flex-col font-inter font-bold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[26px] w-full">
+                  <p class="leading-[36px] whitespace-pre-wrap">Home</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Quick Actions Section -->
+            <div class="flex flex-col gap-[24px] items-start px-[32px] py-[24px] relative w-full">
+              <div class="flex flex-col items-start relative shrink-0 w-full">
+                <div class="flex flex-col font-inter font-bold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[20px] w-full">
+                  <p class="leading-[28px]">Quick Actions</p>
+                </div>
+              </div>
+              
+              <!-- Action Cards Grid -->
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-[16px] w-full">
+                <!-- Create Product Card -->
+                <button class="bg-white border border-border-neutral-1 border-solid flex flex-col gap-[12px] items-start p-[16px] relative rounded-[8px] hover:border-content-primary-brand hover:shadow-sm transition-all cursor-pointer text-left w-full">
+                  <div class="flex items-center gap-[12px] relative shrink-0 w-full">
+                    <div class="bg-green-50 flex items-center justify-center relative rounded-[6px] shrink-0 w-[40px] h-[40px]">
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 4V16M4 10H16" stroke="#40c057" stroke-width="2" stroke-linecap="round"/>
+                      </svg>
+                    </div>
+                    <div class="flex flex-col items-start flex-1 min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px] w-full">
+                        <p class="leading-[20px]">Create Product</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex flex-col items-start relative shrink-0 w-full">
+                    <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[12px] w-full">
+                      <p class="leading-[18px]">Create a new product entry</p>
+                    </div>
+                  </div>
+                </button>
+
+                <!-- Create Supplier Card -->
+                <button class="bg-white border border-border-neutral-1 border-solid flex flex-col gap-[12px] items-start p-[16px] relative rounded-[8px] hover:border-content-primary-brand hover:shadow-sm transition-all cursor-pointer text-left w-full">
+                  <div class="flex items-center gap-[12px] relative shrink-0 w-full">
+                    <div class="bg-brand-50 flex items-center justify-center relative rounded-[6px] shrink-0 w-[40px] h-[40px]">
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="#b27444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z" stroke="#b27444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </div>
+                    <div class="flex flex-col items-start flex-1 min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px] w-full">
+                        <p class="leading-[20px]">Create Supplier</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex flex-col items-start relative shrink-0 w-full">
+                    <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[12px] w-full">
+                      <p class="leading-[18px]">Add a new supplier</p>
+                    </div>
+                  </div>
+                </button>
+
+                <!-- Create Users Card -->
+                <button class="bg-white border border-border-neutral-1 border-solid flex flex-col gap-[12px] items-start p-[16px] relative rounded-[8px] hover:border-content-primary-brand hover:shadow-sm transition-all cursor-pointer text-left w-full">
+                  <div class="flex items-center gap-[12px] relative shrink-0 w-full">
+                    <div class="bg-blue-50 flex items-center justify-center relative rounded-[6px] shrink-0 w-[40px] h-[40px]">
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M13 6C13 7.65685 11.6569 9 10 9C8.34315 9 7 7.65685 7 6C7 4.34315 8.34315 3 10 3C11.6569 3 13 4.34315 13 6Z" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M10 11C7.23858 11 5 13.2386 5 16H15C15 13.2386 12.7614 11 10 11Z" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M15 8V10M16 9H14" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round"/>
+                      </svg>
+                    </div>
+                    <div class="flex flex-col items-start flex-1 min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px] w-full">
+                        <p class="leading-[20px]">Create Users</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex flex-col items-start relative shrink-0 w-full">
+                    <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[12px] w-full">
+                      <p class="leading-[18px]">Add new team members</p>
+                    </div>
+                  </div>
+                </button>
+
+                <!-- Send Supplier Survey Card -->
+                <button class="bg-white border border-border-neutral-1 border-solid flex flex-col gap-[12px] items-start p-[16px] relative rounded-[8px] hover:border-content-primary-brand hover:shadow-sm transition-all cursor-pointer text-left w-full">
+                  <div class="flex items-center gap-[12px] relative shrink-0 w-full">
+                    <div class="bg-purple-50 flex items-center justify-center relative rounded-[6px] shrink-0 w-[40px] h-[40px]">
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2 4H18V16H2V4Z" stroke="#9333ea" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 6L10 11L18 6" stroke="#9333ea" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M14 9L18 12V16H2V12L6 9" stroke="#9333ea" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </div>
+                    <div class="flex flex-col items-start flex-1 min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px] w-full">
+                        <p class="leading-[20px]">Send Supplier Survey</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex flex-col items-start relative shrink-0 w-full">
+                    <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[12px] w-full">
+                      <p class="leading-[18px]">Collect supplier feedback</p>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+            
+            <!-- Product List Section -->
+            <div class="flex flex-col gap-[24px] items-start px-[32px] py-[24px] relative w-full">
+              <div class="flex flex-col items-start relative shrink-0 w-full">
+                <div class="flex flex-col font-inter font-bold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[20px] w-full">
+                  <p class="leading-[28px]">Products</p>
+                </div>
+              </div>
+
+              <!-- Status Tabs + View Buttons Row (always visible) -->
+              <div class="flex items-center justify-between relative shrink-0 w-full border-b border-border-neutral-1 mt-[8px]">
+                  <div class="flex gap-[8px] items-start">
+                    <button data-tab-button="in-progress" onclick="filterProducts('in-progress')" class="bg-transparent border-b-2 border-content-primary-brand flex items-center justify-center px-[16px] py-[12px] relative shrink-0 cursor-pointer">
+                      <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">In Progress</p>
+                      </div>
+                    </button>
+                    <button data-tab-button="finalized" onclick="filterProducts('finalized')" class="bg-transparent border-b-2 border-transparent flex items-center justify-center px-[16px] py-[12px] relative shrink-0 cursor-pointer hover:border-content-primary-brand">
+                      <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[14px]">
+                        <p class="leading-[20px]">Finalized</p>
+                      </div>
+                    </button>
+                    <button data-tab-button="all" onclick="filterProducts('all')" class="bg-transparent border-b-2 border-transparent flex items-center justify-center px-[16px] py-[12px] relative shrink-0 cursor-pointer hover:border-content-primary-brand">
+                      <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[14px]">
+                        <p class="leading-[20px]">All</p>
+                      </div>
+                    </button>
+                  </div>
+
+                <div class="flex gap-[8px] items-center">
+                    <button
+                      data-product-view="list"
+                      onclick="setProductView('list')"
+                      class="flex items-center justify-center px-[12px] py-[6px] relative shrink-0 cursor-pointer rounded-[999px] border text-[13px] bg-content-primary-brand border-content-primary-brand text-white"
+                    >
+                      <p class="font-inter font-semibold leading-[18px]">List</p>
+                    </button>
+                    <button
+                      data-product-view="kanban"
+                      onclick="setProductView('kanban')"
+                      class="flex items-center justify-center px-[12px] py-[6px] relative shrink-0 cursor-pointer rounded-[999px] border text-[13px] bg-transparent border-border-neutral-1 text-content-secondary-gray hover:border-content-primary-brand"
+                    >
+                      <p class="font-inter font-semibold leading-[18px]">Task Kanban</p>
+                    </button>
+                </div>
+                </div>
+                
+                <!-- Product Table -->
+                <div id="products-list-view" class="bg-white border border-border-neutral-1 border-solid flex flex-col items-start relative rounded-[8px] w-full overflow-hidden mt-[8px]" style="min-height: 400px;">
+                <!-- Table Header -->
+                <div class="bg-background-neutral-2 border-b border-border-neutral-1 border-solid flex items-center px-[16px] py-[12px] relative shrink-0 w-full">
+                  <div class="flex flex-[2_0_0] items-center min-h-0 min-w-0 relative">
+                    <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[12px]">
+                      <p class="leading-[18px]">Name</p>
+                    </div>
+                  </div>
+                  <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                    <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[12px]">
+                      <p class="leading-[18px]">Status</p>
+                    </div>
+                  </div>
+                  <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                    <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[12px]">
+                      <p class="leading-[18px]">Mass</p>
+                    </div>
+                  </div>
+                  <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                    <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[12px]">
+                      <p class="leading-[18px]">Cost</p>
+                    </div>
+                  </div>
+                  <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                    <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[12px]">
+                      <p class="leading-[18px]">Emission</p>
+                    </div>
+                  </div>
+                  <div class="flex flex-1 items-center justify-end min-h-0 min-w-0 relative">
+                    <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[12px]">
+                      <p class="leading-[18px]">Actions</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Product Rows -->
+                <div class="flex flex-col items-start relative w-full" style="min-height: 300px;">
+                  <!-- Product Row 1 -->
+                  <div data-product-row data-status="in-progress" class="border-b border-border-neutral-1 border-solid flex items-center px-[16px] py-[16px] relative shrink-0 w-full hover:bg-background-neutral-2 transition-colors">
+                    <div class="flex flex-[2_0_0] items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">Organic Cotton T-Shirt</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="bg-blue-50 flex items-center justify-center px-[8px] py-[4px] relative rounded-[4px] shrink-0">
+                        <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-blue-600 text-[12px]">
+                          <p class="leading-[18px]">In Progress</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">250g</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">$24.99</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">2.4 kg CO₂</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center justify-end gap-[8px] min-h-0 min-w-0 relative">
+                      <button class="bg-content-primary-brand flex items-center justify-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[12px]">
+                          <p class="leading-[18px]">Start Review</p>
+                        </div>
+                      </button>
+                      <button class="bg-transparent flex items-center justify-center relative rounded-[4px] shrink-0 w-[24px] h-[24px] cursor-pointer hover:bg-background-neutral-2 transition-colors">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="8" cy="4" r="1" fill="#212529"/>
+                          <circle cx="8" cy="8" r="1" fill="#212529"/>
+                          <circle cx="8" cy="12" r="1" fill="#212529"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- Product Row 2 -->
+                  <div data-product-row data-status="finalized" class="border-b border-border-neutral-1 border-solid flex items-center px-[16px] py-[16px] relative shrink-0 w-full hover:bg-background-neutral-2 transition-colors">
+                    <div class="flex flex-[2_0_0] items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">Recycled Polyester Jacket</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="bg-green-50 flex items-center justify-center px-[8px] py-[4px] relative rounded-[4px] shrink-0">
+                        <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-green-600 text-[12px]">
+                          <p class="leading-[18px]">Finalized</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">850g</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">$89.99</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">5.8 kg CO₂</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center justify-end gap-[8px] min-h-0 min-w-0 relative">
+                      <button class="bg-content-primary-brand flex items-center justify-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[12px]">
+                          <p class="leading-[18px]">Export</p>
+                        </div>
+                      </button>
+                      <button class="bg-content-primary-brand flex items-center justify-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[12px]">
+                          <p class="leading-[18px]">Scenario</p>
+                        </div>
+                      </button>
+                      <button class="bg-transparent flex items-center justify-center relative rounded-[4px] shrink-0 w-[24px] h-[24px] cursor-pointer hover:bg-background-neutral-2 transition-colors">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="8" cy="4" r="1" fill="#212529"/>
+                          <circle cx="8" cy="8" r="1" fill="#212529"/>
+                          <circle cx="8" cy="12" r="1" fill="#212529"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- Product Row 3 -->
+                  <div data-product-row data-status="in-progress" class="border-b border-border-neutral-1 border-solid flex items-center px-[16px] py-[16px] relative shrink-0 w-full hover:bg-background-neutral-2 transition-colors">
+                    <div class="flex flex-[2_0_0] items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">Bamboo Fiber Pants</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="bg-blue-50 flex items-center justify-center px-[8px] py-[4px] relative rounded-[4px] shrink-0">
+                        <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-blue-600 text-[12px]">
+                          <p class="leading-[18px]">In Progress</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">420g</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">$45.00</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">1.2 kg CO₂</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center justify-end gap-[8px] min-h-0 min-w-0 relative">
+                      <button class="bg-content-primary-brand flex items-center justify-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[12px]">
+                          <p class="leading-[18px]">Start Review</p>
+                        </div>
+                      </button>
+                      <button class="bg-transparent flex items-center justify-center relative rounded-[4px] shrink-0 w-[24px] h-[24px] cursor-pointer hover:bg-background-neutral-2 transition-colors">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="8" cy="4" r="1" fill="#212529"/>
+                          <circle cx="8" cy="8" r="1" fill="#212529"/>
+                          <circle cx="8" cy="12" r="1" fill="#212529"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- Product Row 4 -->
+                  <div data-product-row data-status="finalized" class="border-b border-border-neutral-1 border-solid flex items-center px-[16px] py-[16px] relative shrink-0 w-full hover:bg-background-neutral-2 transition-colors">
+                    <div class="flex flex-[2_0_0] items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">Hemp Canvas Bag</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="bg-green-50 flex items-center justify-center px-[8px] py-[4px] relative rounded-[4px] shrink-0">
+                        <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-green-600 text-[12px]">
+                          <p class="leading-[18px]">Finalized</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">180g</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">$32.50</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">0.8 kg CO₂</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center justify-end gap-[8px] min-h-0 min-w-0 relative">
+                      <button class="bg-content-primary-brand flex items-center justify-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[12px]">
+                          <p class="leading-[18px]">Export</p>
+                        </div>
+                      </button>
+                      <button class="bg-content-primary-brand flex items-center justify-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[12px]">
+                          <p class="leading-[18px]">Scenario</p>
+                        </div>
+                      </button>
+                      <button class="bg-transparent flex items-center justify-center relative rounded-[4px] shrink-0 w-[24px] h-[24px] cursor-pointer hover:bg-background-neutral-2 transition-colors">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="8" cy="4" r="1" fill="#212529"/>
+                          <circle cx="8" cy="8" r="1" fill="#212529"/>
+                          <circle cx="8" cy="12" r="1" fill="#212529"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- Product Row 5 -->
+                  <div data-product-row data-status="in-progress" class="border-b border-border-neutral-1 border-solid flex items-center px-[16px] py-[16px] relative shrink-0 w-full hover:bg-background-neutral-2 transition-colors">
+                    <div class="flex flex-[2_0_0] items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">Linen Blouse</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="bg-blue-50 flex items-center justify-center px-[8px] py-[4px] relative rounded-[4px] shrink-0">
+                        <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-blue-600 text-[12px]">
+                          <p class="leading-[18px]">In Progress</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">320g</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">$38.00</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">1.8 kg CO₂</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center justify-end gap-[8px] min-h-0 min-w-0 relative">
+                      <button class="bg-content-primary-brand flex items-center justify-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[12px]">
+                          <p class="leading-[18px]">Start Review</p>
+                        </div>
+                      </button>
+                      <button class="bg-transparent flex items-center justify-center relative rounded-[4px] shrink-0 w-[24px] h-[24px] cursor-pointer hover:bg-background-neutral-2 transition-colors">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="8" cy="4" r="1" fill="#212529"/>
+                          <circle cx="8" cy="8" r="1" fill="#212529"/>
+                          <circle cx="8" cy="12" r="1" fill="#212529"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- Product Row 6 -->
+                  <div data-product-row data-status="in-progress" class="border-b border-border-neutral-1 border-solid flex items-center px-[16px] py-[16px] relative shrink-0 w-full hover:bg-background-neutral-2 transition-colors">
+                    <div class="flex flex-[2_0_0] items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">Wool Sweater</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="bg-blue-50 flex items-center justify-center px-[8px] py-[4px] relative rounded-[4px] shrink-0">
+                        <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-blue-600 text-[12px]">
+                          <p class="leading-[18px]">In Progress</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">680g</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">$65.00</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">4.2 kg CO₂</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center justify-end gap-[8px] min-h-0 min-w-0 relative">
+                      <button class="bg-content-primary-brand flex items-center justify-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[12px]">
+                          <p class="leading-[18px]">Start Review</p>
+                        </div>
+                      </button>
+                      <button class="bg-transparent flex items-center justify-center relative rounded-[4px] shrink-0 w-[24px] h-[24px] cursor-pointer hover:bg-background-neutral-2 transition-colors">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="8" cy="4" r="1" fill="#212529"/>
+                          <circle cx="8" cy="8" r="1" fill="#212529"/>
+                          <circle cx="8" cy="12" r="1" fill="#212529"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- Product Row 7 -->
+                  <div data-product-row data-status="finalized" class="border-b border-border-neutral-1 border-solid flex items-center px-[16px] py-[16px] relative shrink-0 w-full hover:bg-background-neutral-2 transition-colors">
+                    <div class="flex flex-[2_0_0] items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">Silk Scarf</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="bg-green-50 flex items-center justify-center px-[8px] py-[4px] relative rounded-[4px] shrink-0">
+                        <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-green-600 text-[12px]">
+                          <p class="leading-[18px]">Finalized</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">95g</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">$28.00</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">0.5 kg CO₂</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center justify-end gap-[8px] min-h-0 min-w-0 relative">
+                      <button class="bg-content-primary-brand flex items-center justify-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[12px]">
+                          <p class="leading-[18px]">Export</p>
+                        </div>
+                      </button>
+                      <button class="bg-content-primary-brand flex items-center justify-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[12px]">
+                          <p class="leading-[18px]">Scenario</p>
+                        </div>
+                      </button>
+                      <button class="bg-transparent flex items-center justify-center relative rounded-[4px] shrink-0 w-[24px] h-[24px] cursor-pointer hover:bg-background-neutral-2 transition-colors">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="8" cy="4" r="1" fill="#212529"/>
+                          <circle cx="8" cy="8" r="1" fill="#212529"/>
+                          <circle cx="8" cy="12" r="1" fill="#212529"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- Product Row 8 -->
+                  <div data-product-row data-status="finalized" class="border-b border-border-neutral-1 border-solid flex items-center px-[16px] py-[16px] relative shrink-0 w-full hover:bg-background-neutral-2 transition-colors">
+                    <div class="flex flex-[2_0_0] items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">Denim Jeans</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="bg-green-50 flex items-center justify-center px-[8px] py-[4px] relative rounded-[4px] shrink-0">
+                        <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-green-600 text-[12px]">
+                          <p class="leading-[18px]">Finalized</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">920g</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">$75.00</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">6.1 kg CO₂</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center justify-end gap-[8px] min-h-0 min-w-0 relative">
+                      <button class="bg-content-primary-brand flex items-center justify-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[12px]">
+                          <p class="leading-[18px]">Export</p>
+                        </div>
+                      </button>
+                      <button class="bg-content-primary-brand flex items-center justify-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[12px]">
+                          <p class="leading-[18px]">Scenario</p>
+                        </div>
+                      </button>
+                      <button class="bg-transparent flex items-center justify-center relative rounded-[4px] shrink-0 w-[24px] h-[24px] cursor-pointer hover:bg-background-neutral-2 transition-colors">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="8" cy="4" r="1" fill="#212529"/>
+                          <circle cx="8" cy="8" r="1" fill="#212529"/>
+                          <circle cx="8" cy="12" r="1" fill="#212529"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- Product Row 9 -->
+                  <div data-product-row data-status="in-progress" class="border-b border-border-neutral-1 border-solid flex items-center px-[16px] py-[16px] relative shrink-0 w-full hover:bg-background-neutral-2 transition-colors">
+                    <div class="flex flex-[2_0_0] items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">Organic Cotton Dress</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="bg-blue-50 flex items-center justify-center px-[8px] py-[4px] relative rounded-[4px] shrink-0">
+                        <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-blue-600 text-[12px]">
+                          <p class="leading-[18px]">In Progress</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">380g</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">$52.00</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">2.1 kg CO₂</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center justify-end gap-[8px] min-h-0 min-w-0 relative">
+                      <button class="bg-content-primary-brand flex items-center justify-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[12px]">
+                          <p class="leading-[18px]">Start Review</p>
+                        </div>
+                      </button>
+                      <button class="bg-transparent flex items-center justify-center relative rounded-[4px] shrink-0 w-[24px] h-[24px] cursor-pointer hover:bg-background-neutral-2 transition-colors">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="8" cy="4" r="1" fill="#212529"/>
+                          <circle cx="8" cy="8" r="1" fill="#212529"/>
+                          <circle cx="8" cy="12" r="1" fill="#212529"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- Product Row 10 -->
+                  <div data-product-row data-status="finalized" class="border-b border-border-neutral-1 border-solid flex items-center px-[16px] py-[16px] relative shrink-0 w-full hover:bg-background-neutral-2 transition-colors">
+                    <div class="flex flex-[2_0_0] items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">Recycled Nylon Backpack</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="bg-green-50 flex items-center justify-center px-[8px] py-[4px] relative rounded-[4px] shrink-0">
+                        <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-green-600 text-[12px]">
+                          <p class="leading-[18px]">Finalized</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">450g</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">$68.00</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">3.2 kg CO₂</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center justify-end gap-[8px] min-h-0 min-w-0 relative">
+                      <button class="bg-content-primary-brand flex items-center justify-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[12px]">
+                          <p class="leading-[18px]">Export</p>
+                        </div>
+                      </button>
+                      <button class="bg-content-primary-brand flex items-center justify-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[12px]">
+                          <p class="leading-[18px]">Scenario</p>
+                        </div>
+                      </button>
+                      <button class="bg-transparent flex items-center justify-center relative rounded-[4px] shrink-0 w-[24px] h-[24px] cursor-pointer hover:bg-background-neutral-2 transition-colors">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="8" cy="4" r="1" fill="#212529"/>
+                          <circle cx="8" cy="8" r="1" fill="#212529"/>
+                          <circle cx="8" cy="12" r="1" fill="#212529"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- Product Row 11 -->
+                  <div data-product-row data-status="finalized" class="border-b border-border-neutral-1 border-solid flex items-center px-[16px] py-[16px] relative shrink-0 w-full hover:bg-background-neutral-2 transition-colors">
+                    <div class="flex flex-[2_0_0] items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">Cork Wallet</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="bg-green-50 flex items-center justify-center px-[8px] py-[4px] relative rounded-[4px] shrink-0">
+                        <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-green-600 text-[12px]">
+                          <p class="leading-[18px]">Finalized</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">120g</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">$22.00</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">0.3 kg CO₂</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center justify-end gap-[8px] min-h-0 min-w-0 relative">
+                      <button class="bg-content-primary-brand flex items-center justify-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[12px]">
+                          <p class="leading-[18px]">Export</p>
+                        </div>
+                      </button>
+                      <button class="bg-content-primary-brand flex items-center justify-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[12px]">
+                          <p class="leading-[18px]">Scenario</p>
+                        </div>
+                      </button>
+                      <button class="bg-transparent flex items-center justify-center relative rounded-[4px] shrink-0 w-[24px] h-[24px] cursor-pointer hover:bg-background-neutral-2 transition-colors">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="8" cy="4" r="1" fill="#212529"/>
+                          <circle cx="8" cy="8" r="1" fill="#212529"/>
+                          <circle cx="8" cy="12" r="1" fill="#212529"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- Product Row 12 -->
+                  <div data-product-row data-status="in-progress" class="flex items-center px-[16px] py-[16px] relative shrink-0 w-full hover:bg-background-neutral-2 transition-colors">
+                    <div class="flex flex-[2_0_0] items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">Tencel Blazer</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="bg-blue-50 flex items-center justify-center px-[8px] py-[4px] relative rounded-[4px] shrink-0">
+                        <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-blue-600 text-[12px]">
+                          <p class="leading-[18px]">In Progress</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">560g</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">$78.00</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center min-h-0 min-w-0 relative">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                        <p class="leading-[20px]">2.8 kg CO₂</p>
+                      </div>
+                    </div>
+                    <div class="flex flex-1 items-center justify-end gap-[8px] min-h-0 min-w-0 relative">
+                      <button class="bg-content-primary-brand flex items-center justify-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[12px]">
+                          <p class="leading-[18px]">Start Review</p>
+                        </div>
+                      </button>
+                      <button class="bg-transparent flex items-center justify-center relative rounded-[4px] shrink-0 w-[24px] h-[24px] cursor-pointer hover:bg-background-neutral-2 transition-colors">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="8" cy="4" r="1" fill="#212529"/>
+                          <circle cx="8" cy="8" r="1" fill="#212529"/>
+                          <circle cx="8" cy="12" r="1" fill="#212529"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Empty state for product list -->
+                <div
+                  id="products-empty-state"
+                  class="hidden flex-col items-center justify-center px-[24px] py-[32px] gap-[8px] w-full"
+                >
+                  <div class="flex flex-col items-center text-center max-w-[320px]">
+                    <p class="font-inter font-semibold text-[14px] leading-[20px] text-content-primary-black">
+                      No products to show
+                    </p>
+                    <p class="mt-[4px] font-inter text-[12px] leading-[18px] text-content-secondary-gray">
+                      Create a new product or change the filter to see items here.
+                    </p>
+                  </div>
+                </div>
+                
+                <!-- Go to All Products Button -->
+                <div id="go-to-all-button" class="hidden flex items-center justify-center px-[16px] py-[16px] relative shrink-0 w-full">
+                  <button class="bg-white border border-border-neutral-1 border-solid flex items-center justify-center px-[16px] py-[8px] relative rounded-[6px] shrink-0 cursor-pointer hover:bg-background-neutral-2 transition-colors">
+                    <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[14px]">
+                      <p class="leading-[20px]">Go to all products</p>
+                    </div>
+                  </button>
+                </div>
+              </div>
+          
+          <!-- Kanban View Container -->
+          <div id="products-kanban-view" class="w-full mt-[8px]" style="display: none;">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-[16px] w-full">
+              <!-- In Progress Column -->
+              <div class="bg-white border border-border-neutral-1 border-solid flex flex-col items-start relative rounded-[8px] p-[16px] min-h-[220px]">
+                <div class="flex items-center justify-between w-full mb-[12px]">
+                  <div class="flex flex-col font-inter font-semibold justify-center leading-[0] text-content-primary-black text-[14px]">
+                    <p class="leading-[20px]">In Progress</p>
+                  </div>
+                  <div class="bg-blue-50 flex items-center justify-center px-[8px] py-[2px] rounded-[999px]">
+                    <div class="flex flex-col font-inter font-medium justify-center leading-[0] text-blue-600 text-[12px]">
+                      <p class="leading-[18px]">6</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex flex-col gap-[8px] w-full">
+                  <!-- In Progress Card 1 -->
+                  <div class="bg-background-neutral-2 flex flex-col gap-[6px] items-start relative rounded-[6px] px-[10px] py-[8px]">
+                    <div class="flex items-start justify-between gap-[8px] w-full">
+                      <div class="flex flex-col items-start flex-1 min-w-0">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[13px] mb-[2px]">
+                          <p class="leading-[18px] truncate">Organic Cotton T-Shirt</p>
+                        </div>
+                        <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[11px]">
+                          <p class="leading-[16px]">Mass 250g · Cost $24.99</p>
+                        </div>
+                      </div>
+                      <div class="bg-blue-50 flex items-center justify-center px-[6px] py-[2px] rounded-[999px] shrink-0">
+                        <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-blue-600 text-[11px]">
+                          <p class="leading-[16px]">In Progress</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex items-center justify-between w-full">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[11px]">
+                        <p class="leading-[16px]">Emission 2.4 kg CO₂</p>
+                      </div>
+                      <button class="bg-content-primary-brand flex items-center justify-center px-[8px] py-[4px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[11px]">
+                          <p class="leading-[16px]">Start review</p>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- In Progress Card 2 -->
+                  <div class="bg-background-neutral-2 flex flex-col gap-[6px] items-start relative rounded-[6px] px-[10px] py-[8px]">
+                    <div class="flex items-start justify-between gap-[8px] w-full">
+                      <div class="flex flex-col items-start flex-1 min-w-0">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[13px] mb-[2px]">
+                          <p class="leading-[18px] truncate">Bamboo Fiber Pants</p>
+                        </div>
+                        <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[11px]">
+                          <p class="leading-[16px]">Mass 420g · Cost $45.00</p>
+                        </div>
+                      </div>
+                      <div class="bg-blue-50 flex items-center justify-center px-[6px] py-[2px] rounded-[999px] shrink-0">
+                        <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-blue-600 text-[11px]">
+                          <p class="leading-[16px]">In Progress</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex items-center justify-between w-full">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[11px]">
+                        <p class="leading-[16px]">Emission 1.2 kg CO₂</p>
+                      </div>
+                      <button class="bg-content-primary-brand flex items-center justify-center px-[8px] py-[4px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[11px]">
+                          <p class="leading-[16px]">Start review</p>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- In Progress Card 3 -->
+                  <div class="bg-background-neutral-2 flex flex-col gap-[6px] items-start relative rounded-[6px] px-[10px] py-[8px]">
+                    <div class="flex items-start justify-between gap-[8px] w-full">
+                      <div class="flex flex-col items-start flex-1 min-w-0">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[13px] mb-[2px]">
+                          <p class="leading-[18px] truncate">Linen Blouse</p>
+                        </div>
+                        <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[11px]">
+                          <p class="leading-[16px]">Mass 320g · Cost $38.00</p>
+                        </div>
+                      </div>
+                      <div class="bg-blue-50 flex items-center justify-center px-[6px] py-[2px] rounded-[999px] shrink-0">
+                        <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-blue-600 text-[11px]">
+                          <p class="leading-[16px]">In Progress</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex items-center justify-between w-full">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[11px]">
+                        <p class="leading-[16px]">Emission 1.8 kg CO₂</p>
+                      </div>
+                      <button class="bg-content-primary-brand flex items-center justify-center px-[8px] py-[4px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[11px]">
+                          <p class="leading-[16px]">Start review</p>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Finalized Column -->
+              <div class="bg-white border border-border-neutral-1 border-solid flex flex-col items-start relative rounded-[8px] p-[16px] min-h-[220px]">
+                <div class="flex items-center justify-between w-full mb-[12px]">
+                  <div class="flex flex-col font-inter font-semibold justify-center leading-[0] text-content-primary-black text-[14px]">
+                    <p class="leading-[20px]">Finalized</p>
+                  </div>
+                  <div class="bg-green-50 flex items-center justify-center px-[8px] py-[2px] rounded-[999px]">
+                    <div class="flex flex-col font-inter font-medium justify-center leading-[0] text-green-600 text-[12px]">
+                      <p class="leading-[18px]">6</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex flex-col gap-[8px] w-full">
+                  <!-- Finalized Card 1 -->
+                  <div class="bg-background-neutral-2 flex flex-col gap-[6px] items-start relative rounded-[6px] px-[10px] py-[8px]">
+                    <div class="flex items-start justify-between gap-[8px] w-full">
+                      <div class="flex flex-col items-start flex-1 min-w-0">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[13px] mb-[2px]">
+                          <p class="leading-[18px] truncate">Recycled Polyester Jacket</p>
+                        </div>
+                        <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[11px]">
+                          <p class="leading-[16px]">Mass 850g · Cost $89.99</p>
+                        </div>
+                      </div>
+                      <div class="bg-green-50 flex items-center justify-center px-[6px] py-[2px] rounded-[999px] shrink-0">
+                        <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-green-600 text-[11px]">
+                          <p class="leading-[16px]">Finalized</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex items-center justify-between w-full">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[11px]">
+                        <p class="leading-[16px]">Emission 5.8 kg CO₂</p>
+                      </div>
+                      <div class="flex items-center gap-[8px]">
+                        <button class="bg-content-primary-brand flex items-center justify-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                          <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[12px]">
+                            <p class="leading-[18px]">Export</p>
+                          </div>
+                        </button>
+                        <button class="bg-content-primary-brand flex items-center justify-center px-[12px] py-[6px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                          <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[12px]">
+                            <p class="leading-[18px]">Scenario</p>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Finalized Card 2 -->
+                  <div class="bg-background-neutral-2 flex flex-col gap-[6px] items-start relative rounded-[6px] px-[10px] py-[8px]">
+                    <div class="flex items-start justify_between gap-[8px] w-full">
+                      <div class="flex flex-col items-start flex-1 min-w-0">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[13px] mb-[2px]">
+                          <p class="leading-[18px] truncate">Denim Jeans</p>
+                        </div>
+                        <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[11px]">
+                          <p class="leading-[16px]">Mass 920g · Cost $75.00</p>
+                        </div>
+                      </div>
+                      <div class="bg-green-50 flex items-center justify-center px-[6px] py-[2px] rounded-[999px] shrink-0">
+                        <div class="flex flex-col font-inter font-medium justify_center leading-[0] relative shrink-0 text-green-600 text-[11px]">
+                          <p class="leading-[16px]">Finalized</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex items-center justify-between w-full">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[11px]">
+                        <p class="leading_[16px]">Emission 6.1 kg CO₂</p>
+                      </div>
+                      <div class="flex items-center gap-[6px]">
+                        <button class="bg-content-primary-brand flex items-center justify-center px-[8px] py-[4px] relative rounded-[6px] shrink-0 cursor_pointer hover:opacity-90 transition-opacity">
+                          <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[11px]">
+                            <p class="leading-[16px]">Export</p>
+                          </div>
+                        </button>
+                        <button class="bg-content-primary-brand flex items-center justify-center px-[8px] py-[4px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                          <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[11px]">
+                            <p class="leading-[16px]">Scenario</p>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Finalized Card 3 -->
+                  <div class="bg-background-neutral-2 flex flex-col gap-[6px] items-start relative rounded-[6px] px-[10px] py-[8px]">
+                    <div class="flex items-start justify-between gap-[8px] w-full">
+                      <div class="flex flex-col items-start flex-1 min-w-0">
+                        <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[13px] mb-[2px]">
+                          <p class="leading-[18px] truncate">Hemp Canvas Bag</p>
+                        </div>
+                        <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[11px]">
+                          <p class="leading-[16px]">Mass 180g · Cost $32.50</p>
+                        </div>
+                      </div>
+                      <div class="bg-green-50 flex items-center justify-center px-[6px] py-[2px] rounded-[999px] shrink-0">
+                        <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-green-600 text-[11px]">
+                          <p class="leading-[16px]">Finalized</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex items-center justify-between w-full">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[11px]">
+                        <p class="leading-[16px]">Emission 0.8 kg CO₂</p>
+                      </div>
+                      <div class="flex items-center gap-[6px]">
+                        <button class="bg-content-primary-brand flex items-center justify-center px_[8px] py-[4px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                          <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[11px]">
+                            <p class="leading-[16px]">Export</p>
+                          </div>
+                        </button>
+                        <button class="bg-content-primary-brand flex items-center justify-center px_[8px] py-[4px] relative rounded-[6px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                          <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-white text-[11px]">
+                            <p class="leading_[16px]">Scenario</p>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+
+          <!-- Reduction Opportunities Section -->
+          <div class="flex flex-col gap-[24px] items-start px-[32px] py-[24px] relative w-full">
+            <div class="flex flex-col items-start relative shrink-0 w-full">
+              <div class="flex flex-col font-inter font-bold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[20px] w-full">
+                <p class="leading-[28px]">Reduction Opportunities</p>
+              </div>
+            </div>
+            
+            <!-- Two Column Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-[16px] w-full">
+              <!-- Left Column - Top 3 by Emissions -->
+              <div class="flex flex-col gap-[16px] items-start relative w-full">
+                <div class="flex flex-col items-start relative shrink-0 w-full">
+                  <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[16px] w-full">
+                    <p class="leading-[24px]">Top 3 by Emissions</p>
+                  </div>
+                </div>
+                <div id="opportunities-emissions" class="flex flex-col gap-[12px] w-full">
+                  <!-- Cards will be dynamically inserted here -->
+                </div>
+              </div>
+              
+              <!-- Right Column - Top 3 by Cost -->
+              <div class="flex flex-col gap-[16px] items-start relative w-full">
+                <div class="flex flex-col items-start relative shrink-0 w-full">
+                  <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[16px] w-full">
+                    <p class="leading-[24px]">Top 3 by Cost</p>
+                  </div>
+                </div>
+                <div id="opportunities-cost" class="flex flex-col gap-[12px] w-full">
+                  <!-- Cards will be dynamically inserted here -->
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Metrics Section -->
+          <div class="flex flex-col gap-[24px] items-start px-[32px] py-[24px] relative w-full">
+            <div class="flex flex-col items-start relative shrink-0 w-full">
+              <div class="flex flex-col font-inter font-bold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[20px] w-full">
+                <p class="leading-[28px]">Key Metrics</p>
+              </div>
+            </div>
+            
+            <!-- Metrics Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[16px] w-full">
+              <!-- Total Products Metric -->
+              <div class="bg-white border border-border-neutral-1 border-solid flex flex-col items-start relative rounded-[8px] p-[16px]">
+                <div class="flex flex-col items-start relative shrink-0 w-full">
+                  <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[12px] mb-[8px]">
+                    <p class="leading-[18px]">Total Products</p>
+                  </div>
+                  <div class="flex flex-col font-inter font-bold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[32px] mb-[4px]">
+                    <p class="leading-[40px]">12</p>
+                  </div>
+                  <div class="flex items-center gap-[4px] relative shrink-0">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M8 12V4M4 8L8 4L12 8" stroke="#40c057" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-green-600 text-[12px]">
+                      <p class="leading-[18px]">+3 this month</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Total Emissions Saved Metric -->
+              <div class="bg-white border border-border-neutral-1 border-solid flex flex-col items-start relative rounded-[8px] p-[16px]">
+                <div class="flex flex-col items-start relative shrink-0 w-full">
+                  <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[12px] mb-[8px]">
+                    <p class="leading-[18px]">Emissions Saved</p>
+                  </div>
+                  <div class="flex flex-col font-inter font-bold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[32px] mb-[4px]">
+                    <p class="leading-[40px]">28.4 t</p>
+                  </div>
+                  <div class="flex items-center gap-[4px] relative shrink-0">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M8 12V4M4 8L8 4L12 8" stroke="#40c057" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-green-600 text-[12px]">
+                      <p class="leading-[18px]">CO₂ reduced</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Completion Rate Metric -->
+              <div class="bg-white border border-border-neutral-1 border-solid flex flex-col items-start relative rounded-[8px] p-[16px]">
+                <div class="flex flex-col items-start relative shrink-0 w-full">
+                  <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[12px] mb-[8px]">
+                    <p class="leading-[18px]">Completion Rate</p>
+                  </div>
+                  <div class="flex flex-col font-inter font-bold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[32px] mb-[4px]">
+                    <p class="leading-[40px]">50%</p>
+                  </div>
+                  <div class="flex items-center gap-[4px] relative shrink-0">
+                    <div class="w-[60px] h-[4px] bg-background-neutral-2 rounded-full overflow-hidden">
+                      <div class="h-full bg-content-primary-brand rounded-full" style="width: 50%;"></div>
+                    </div>
+                    <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[12px]">
+                      <p class="leading-[18px]">6/12 finalized</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Average Cost Metric -->
+              <div class="bg-white border border-border-neutral-1 border-solid flex flex-col items-start relative rounded-[8px] p-[16px]">
+                <div class="flex flex-col items-start relative shrink-0 w-full">
+                  <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[12px] mb-[8px]">
+                    <p class="leading-[18px]">Avg. Product Cost</p>
+                  </div>
+                  <div class="flex flex-col font-inter font-bold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[32px] mb-[4px]">
+                    <p class="leading-[40px]">$48.50</p>
+                  </div>
+                  <div class="flex items-center gap-[4px] relative shrink-0">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M8 4V12M4 8L8 12L12 8" stroke="#868e96" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[12px]">
+                      <p class="leading-[18px]">-2.5% vs last month</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Charts Section -->
+          <div class="flex flex-col gap-[24px] items-start px-[32px] py-[24px] relative w-full">
+            <div class="flex flex-col items-start relative shrink-0 w-full">
+              <div class="flex flex-col font-inter font-bold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[20px] w-full">
+                <p class="leading-[28px]">Analytics & Insights</p>
+              </div>
+            </div>
+            
+            <!-- Charts Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-[16px] w-full">
+              <!-- Bar Chart - Emissions by Status -->
+              <div class="bg-white border border-border-neutral-1 border-solid flex flex-col items-start relative rounded-[8px] p-[16px]">
+                <div class="flex flex-col items-start relative shrink-0 w-full mb-[16px]">
+                  <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[16px] mb-[4px]">
+                    <p class="leading-[24px]">Emissions by Status</p>
+                  </div>
+                  <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[12px]">
+                    <p class="leading-[18px]">Total CO₂ emissions by product status</p>
+                  </div>
+                </div>
+                <div class="flex items-end justify-between gap-[12px] w-full h-[200px]">
+                  <div class="flex flex-col items-center gap-[8px] flex-1">
+                    <div class="w-full flex items-end justify-center" style="height: 100%;">
+                      <div class="w-full bg-blue-50 rounded-t-[4px] flex items-end justify-center" style="height: 65%;">
+                        <div class="w-full bg-blue-600 rounded-t-[4px]" style="height: 100%;"></div>
+                      </div>
+                    </div>
+                    <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-content-primary-black text-[12px]">
+                      <p class="leading-[18px]">In Progress</p>
+                    </div>
+                    <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[11px]">
+                      <p class="leading-[16px]">12.5 t</p>
+                    </div>
+                  </div>
+                  <div class="flex flex-col items-center gap-[8px] flex-1">
+                    <div class="w-full flex items-end justify-center" style="height: 100%;">
+                      <div class="w-full bg-green-50 rounded-t-[4px] flex items-end justify-center" style="height: 100%;">
+                        <div class="w-full bg-green-600 rounded-t-[4px]" style="height: 100%;"></div>
+                      </div>
+                    </div>
+                    <div class="flex flex-col font-inter font-medium justify-center leading-[0] relative shrink-0 text-content-primary-black text-[12px]">
+                      <p class="leading-[18px]">Finalized</p>
+                    </div>
+                    <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[11px]">
+                      <p class="leading-[16px]">15.9 t</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Line Chart - Monthly Trends -->
+              <div class="bg-white border border-border-neutral-1 border-solid flex flex-col items-start relative rounded-[8px] p-[16px]">
+                <div class="flex flex-col items-start relative shrink-0 w-full mb-[16px]">
+                  <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[16px] mb-[4px]">
+                    <p class="leading-[24px]">Monthly Product Trends</p>
+                  </div>
+                  <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[12px]">
+                    <p class="leading-[18px]">Products added over the last 6 months</p>
+                  </div>
+                </div>
+                <div class="w-full h-[200px] relative">
+                  <svg width="100%" height="200" viewBox="0 0 400 200" class="overflow-visible">
+                    <line x1="40" y1="20" x2="40" y2="180" stroke="#e9ecef" stroke-width="1"/>
+                    <line x1="40" y1="180" x2="380" y2="180" stroke="#e9ecef" stroke-width="1"/>
+                    <line x1="40" y1="100" x2="380" y2="100" stroke="#f8f9fa" stroke-width="1" stroke-dasharray="4,4"/>
+                    <polyline points="60,160 100,140 140,120 180,100 220,80 260,60 300,70 340,50" fill="none" stroke="#b27444" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="60" cy="160" r="4" fill="#b27444"/>
+                    <circle cx="100" cy="140" r="4" fill="#b27444"/>
+                    <circle cx="140" cy="120" r="4" fill="#b27444"/>
+                    <circle cx="180" cy="100" r="4" fill="#b27444"/>
+                    <circle cx="220" cy="80" r="4" fill="#b27444"/>
+                    <circle cx="260" cy="60" r="4" fill="#b27444"/>
+                    <circle cx="300" cy="70" r="4" fill="#b27444"/>
+                    <circle cx="340" cy="50" r="4" fill="#b27444"/>
+                    <text x="60" y="195" text-anchor="middle" class="text-[10px] fill-[#868e96] font-inter">Jan</text>
+                    <text x="100" y="195" text-anchor="middle" class="text-[10px] fill-[#868e96] font-inter">Feb</text>
+                    <text x="140" y="195" text-anchor="middle" class="text-[10px] fill-[#868e96] font-inter">Mar</text>
+                    <text x="180" y="195" text-anchor="middle" class="text-[10px] fill-[#868e96] font-inter">Apr</text>
+                    <text x="220" y="195" text-anchor="middle" class="text-[10px] fill-[#868e96] font-inter">May</text>
+                    <text x="260" y="195" text-anchor="middle" class="text-[10px] fill-[#868e96] font-inter">Jun</text>
+                    <text x="300" y="195" text-anchor="middle" class="text-[10px] fill-[#868e96] font-inter">Jul</text>
+                    <text x="340" y="195" text-anchor="middle" class="text-[10px] fill-[#868e96] font-inter">Aug</text>
+                  </svg>
+                </div>
+              </div>
+              
+              <!-- Donut Chart - Cost Distribution -->
+              <div class="bg-white border border-border-neutral-1 border-solid flex flex-col items-start relative rounded-[8px] p-[16px]">
+                <div class="flex flex-col items-start relative shrink-0 w-full mb-[16px]">
+                  <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[16px] mb-[4px]">
+                    <p class="leading-[24px]">Cost Distribution</p>
+                  </div>
+                  <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[12px]">
+                    <p class="leading-[18px]">Product costs by category</p>
+                  </div>
+                </div>
+                <div class="w-full flex items-center justify-center">
+                  <div class="relative w-[180px] h-[180px]">
+                    <svg width="180" height="180" viewBox="0 0 180 180" class="transform -rotate-90" style="transform: rotate(-90deg);">
+                      <circle cx="90" cy="90" r="70" fill="none" stroke="#ebfbee" stroke-width="40" />
+                      <circle cx="90" cy="90" r="70" fill="none" stroke="#40c057" stroke-width="40" stroke-dasharray="175.9 439.8" stroke-dashoffset="0" />
+                      <circle cx="90" cy="90" r="70" fill="none" stroke="#b27444" stroke-width="40" stroke-dasharray="153.9 439.8" stroke-dashoffset="-175.9" />
+                      <circle cx="90" cy="90" r="70" fill="none" stroke="#2563eb" stroke-width="40" stroke-dasharray="110.0 439.8" stroke-dashoffset="-329.9" />
+                    </svg>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                      <div class="flex flex-col items-center">
+                        <div class="flex flex-col font-inter font-bold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[24px]">
+                          <p class="leading-[32px]">$582</p>
+                        </div>
+                        <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[12px]">
+                          <p class="leading-[18px]">Total</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex flex-col gap-[8px] w-full mt-[16px]">
+                  <div class="flex items-center gap-[8px]">
+                    <div class="w-[12px] h-[12px] rounded-full bg-green-600"></div>
+                    <div class="flex flex-1 items-center justify-between">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[12px]">
+                        <p class="leading-[18px]">Finalized</p>
+                      </div>
+                      <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[12px]">
+                        <p class="leading-[18px]">40%</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-[8px]">
+                    <div class="w-[12px] h-[12px] rounded-full bg-content-primary-brand"></div>
+                    <div class="flex flex-1 items-center justify-between">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[12px]">
+                        <p class="leading-[18px]">In Progress</p>
+                      </div>
+                      <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[12px]">
+                        <p class="leading-[18px]">35%</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-[8px]">
+                    <div class="w-[12px] h-[12px] rounded-full bg-blue-600"></div>
+                    <div class="flex flex-1 items-center justify-between">
+                      <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-primary-black text-[12px]">
+                        <p class="leading-[18px]">Other</p>
+                      </div>
+                      <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[12px]">
+                        <p class="leading-[18px]">25%</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Stacked Bar Chart - Emissions by Product -->
+              <div class="bg-white border border-border-neutral-1 border-solid flex flex-col items-start relative rounded-[8px] p-[16px]">
+                <div class="flex flex-col items-start relative shrink-0 w-full mb-[16px]">
+                  <div class="flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[16px] mb-[4px]">
+                    <p class="leading-[24px]">Top Products by Emissions</p>
+                  </div>
+                  <div class="flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[12px]">
+                    <p class="leading-[18px]">Highest emission products</p>
+                  </div>
+                </div>
+                <div class="w-full flex flex-col gap-[12px]">
+                  <div class="flex items-center gap-[12px]">
+                    <div class="w-[80px] flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[11px]">
+                      <p class="leading-[16px]">Jacket</p>
+                    </div>
+                    <div class="flex-1 h-[24px] bg-background-neutral-2 rounded-[4px] overflow-hidden">
+                      <div class="h-full bg-green-600 rounded-[4px]" style="width: 100%;"></div>
+                    </div>
+                    <div class="w-[50px] flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[11px] text-right">
+                      <p class="leading-[16px]">5.8 t</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-[12px]">
+                    <div class="w-[80px] flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[11px]">
+                      <p class="leading-[16px]">Jeans</p>
+                    </div>
+                    <div class="flex-1 h-[24px] bg-background-neutral-2 rounded-[4px] overflow-hidden">
+                      <div class="h-full bg-green-600 rounded-[4px]" style="width: 85%;"></div>
+                    </div>
+                    <div class="w-[50px] flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[11px] text-right">
+                      <p class="leading-[16px]">6.1 t</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-[12px]">
+                    <div class="w-[80px] flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[11px]">
+                      <p class="leading-[16px]">Sweater</p>
+                    </div>
+                    <div class="flex-1 h-[24px] bg-background-neutral-2 rounded-[4px] overflow-hidden">
+                      <div class="h-full bg-blue-600 rounded-[4px]" style="width: 70%;"></div>
+                    </div>
+                    <div class="w-[50px] flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[11px] text-right">
+                      <p class="leading-[16px]">4.2 t</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-[12px]">
+                    <div class="w-[80px] flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[11px]">
+                      <p class="leading-[16px]">Backpack</p>
+                    </div>
+                    <div class="flex-1 h-[24px] bg-background-neutral-2 rounded-[4px] overflow-hidden">
+                      <div class="h-full bg-blue-600 rounded-[4px]" style="width: 55%;"></div>
+                    </div>
+                    <div class="w-[50px] flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[11px] text-right">
+                      <p class="leading-[16px]">3.2 t</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-[12px]">
+                    <div class="w-[80px] flex flex-col font-inter font-normal justify-center leading-[0] relative shrink-0 text-content-secondary-gray text-[11px]">
+                      <p class="leading-[16px]">T-Shirt</p>
+                    </div>
+                    <div class="flex-1 h-[24px] bg-background-neutral-2 rounded-[4px] overflow-hidden">
+                      <div class="h-full bg-blue-600 rounded-[4px]" style="width: 40%;"></div>
+                    </div>
+                    <div class="w-[50px] flex flex-col font-inter font-semibold justify-center leading-[0] relative shrink-0 text-content-primary-black text-[11px] text-right">
+                      <p class="leading-[16px]">2.4 t</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    </script>
+  </body>
+</html>

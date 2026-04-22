@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Design resources</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="tokens.css" />
+  </head>
+  <body>
+    <main class="resources-page">
+      <header class="resources-header">
+        <h1>Design resources</h1>
+      </header>
+
+      <div id="resource-search-wrap" class="resource-search-wrap" hidden>
+        <div class="resource-search-field" role="search">
+          <span class="resource-search-icon" aria-hidden="true">
+            <img
+              src="assets/search.svg"
+              alt=""
+              width="18"
+              height="18"
+              decoding="async"
+            />
+          </span>
+          <input
+            id="resource-search"
+            class="resource-search-input"
+            type="search"
+            placeholder="Search by name"
+            autocomplete="off"
+            enterkeyhint="search"
+            aria-label="Search by name"
+          />
+        </div>
+      </div>
+
+      <div class="resources-toolbar">
+        <div
+          id="quick-filters"
+          class="resource-quick-filters"
+          role="toolbar"
+          aria-label="Filter by tag"
+          hidden
+        ></div>
+        <div
+          id="view-filters"
+          class="resource-view-filters"
+          role="toolbar"
+          aria-label="View filter"
+          hidden
+        ></div>
+      </div>
+
+      <div id="grid" class="resource-grid" aria-live="polite"></div>
+      <p id="empty" class="resources-empty" hidden>No resources in data file yet.</p>
+      <p id="empty-filter" class="resources-empty" hidden>No resources match this filter.</p>
+      <p id="err" class="resources-err" hidden></p>
+    </main>
+
+    <!-- Same shape as data/links.json; used when the page is opened via file:// (fetch to JSON is blocked). Keep in sync when editing the file. -->
+    <script type="application/json" id="fallback-links">
+{
+  "resources": [
+    {
+      "name": "Homepage redesign",
+      "tag": "product-design",
+      "view": "on-hold",
+      "links": [
+        {
+          "label": "Inspiration",
+          "href": "https://www.figma.com/board/WPGRhJR5JVvFm6p3TvDFmA/Homepage-redesign?node-id=0-1&p=f&t=IoSSAjPGUx0lSSe9-0"
+        },
+        {
+          "label": "Design",
+          "href": "https://www.figma.com/design/GAWVOEH6sehUsTHfCfNDpU/Homepage-redesign?t=IoSSAjPGUx0lSSe9-0"
+        },
+        {
+          "label": "Prototype v0",
+          "href": "https://drive.google.com/file/d/1BAF8KhDZl_5IWZ2QL9JO8zHejgyamKcm/view?usp=sharing"
+        }
+      ]
+    },
+    {
+      "name": "Onboarding redesign",
+      "tag": "product-design",
+      "view": "on-hold",
+      "links": [
+        {
+          "label": "Design doc",
+          "href": "https://docs.google.com/document/d/1ep5hj3tiMQkr3mcLCYQXeJiurlFkTJES2Kz4IPjt_mE/edit?tab=t.v4n4txp6yev1#heading=h.jhxwtib2pn4n"
+        },
+        {
+          "label": "Clarity recording insights",
+          "href": "https://www.figma.com/board/CRPDD4JGa6esvdpUEzXLcI/Onboarding?node-id=53-85&t=ZHStshKgX3DJrRkn-0"
+        },
+        {
+          "label": "Inspiration",
+          "href": "https://www.figma.com/board/CRPDD4JGa6esvdpUEzXLcI/Onboarding?node-id=87-417&t=NTDKH1m8DcfjASlJ-0"
+        },
+        {
+          "label": "User personas & goals",
+          "href": "https://www.figma.com/board/CRPDD4JGa6esvdpUEzXLcI/Onboarding?node-id=130-85&t=d9yx2H2x2cJq1bWY-0"
+        }
+      ]
+    },
+    {
+      "name": "Creation improvements",
+      "tag": "product-design",
+      "links": [
+        {
+          "label": "Design doc",
+          "href": "https://docs.google.com/document/d/1ep5hj3tiMQkr3mcLCYQXeJiurlFkTJES2Kz4IPjt_mE/edit?tab=t.gqfajdvglpc5#heading=h.va9l8ynxk13z"
+        },
+        {
+          "label": "Design",
+          "href": "https://www.figma.com/design/TFyzTHUAM3XOqbOU7EnC3d/Creation-improvements?node-id=0-1&p=f&t=yjpMOJLGXFYWvlub-0"
+        },
+        {
+          "label": "Prototype v1",
+          "href": "https://drive.google.com/file/d/1Si0c7xK-1jrAhjdYR4jqeRR9EQx9vLI4/view?usp=sharing"
+        }
+      ]
+    },
+    {
+      "name": "Linking v2",
+      "tag": "product-design",
+      "links": [
+        {
+          "label": "Design doc",
+          "href": "https://docs.google.com/document/d/1ep5hj3tiMQkr3mcLCYQXeJiurlFkTJES2Kz4IPjt_mE/edit?tab=t.zhesl8fvb1fy"
+        },
+        {
+          "label": "Prototype v1",
+          "href": "https://drive.google.com/file/d/1Imyvmd8l11Xgbjx_CxVz3QPyJSB5KmF3/view?usp=sharing"
+        }
+      ]
+    },
+    {
+      "name": "Workflow v2",
+      "tag": "product-design",
+      "links": [
+        {
+          "label": "Design doc",
+          "href": "https://docs.google.com/document/d/1ep5hj3tiMQkr3mcLCYQXeJiurlFkTJES2Kz4IPjt_mE/edit?tab=t.9l56mtk56zoh#heading=h.a7e0eis4a3ps"
+        },
+        {
+          "label": "Design",
+          "href": "https://www.figma.com/design/8ufFWdmZH5UtOGQsQshhQ8/Workflow_v2?node-id=442-44501&p=f&t=so8jbto03PakPUNu-0"
+        }
+      ]
+    },
+    {
+      "name": "Design system v2",
+      "tag": "design-guideline",
+      "links": [
+        {
+          "label": "Design",
+          "href": "https://www.figma.com/design/fbeJw3rPQLq14eTt3NGfI9/Muir-Design-system_v2?node-id=0-1&p=f&t=Ym087odmeCtdCGT6-0"
+        }
+      ]
+    },
+    {
+      "name": "Website design system",
+      "tags": ["design-guideline", "website"],
+      "view": "complete",
+      "links": [
+        {
+          "label": "Design",
+          "href": "https://www.figma.com/design/m5XskbydT4HR58OdwDSs4e/Website-design-system?t=so8jbto03PakPUNu-0"
+        }
+      ]
+    },
+    {
+      "name": "Website revamp",
+      "tag": "website",
+      "view": "complete",
+      "links": [
+        {
+          "label": "Board",
+          "href": "https://www.figma.com/board/oCE87knLr4OmLIeWO4GogT/Editing-feature-redesign_Whiteboard?node-id=0-1&p=f&t=so8jbto03PakPUNu-0"
+        }
+      ]
+    },
+    {
+      "name": "Tariff landing page",
+      "tag": "website",
+      "view": "complete",
+      "links": [
+        {
+          "label": "Design",
+          "href": "https://www.figma.com/design/iotC2Rnxs7PGqPGrMBqwxi/Tariff-landing-page?t=so8jbto03PakPUNu-0"
+        }
+      ]
+    },
+    {
+      "name": "Cost landing page",
+      "tag": "website",
+      "view": "complete",
+      "links": [
+        {
+          "label": "Design doc",
+          "href": "https://docs.google.com/document/d/1E4Okkc2x21LV1vKPIiXa5G9AdENEXAiEFhicgtlJYgk/edit?tab=t.0"
+        },
+        {
+          "label": "Design",
+          "href": "https://www.figma.com/design/gqpk5LXnGDwBq81qrUJtlu/Cost-landing-page?node-id=0-1&p=f&t=so8jbto03PakPUNu-0"
+        }
+      ]
+    },
+    {
+      "name": "Public product model landing page",
+      "tag": "website",
+      "view": "complete",
+      "links": [
+        {
+          "label": "Board",
+          "href": "https://www.figma.com/board/oCE87knLr4OmLIeWO4GogT/Editing-feature-redesign_Whiteboard?node-id=0-1&p=f&t=so8jbto03PakPUNu-0"
+        }
+      ]
+    },
+    {
+      "name": "Listing",
+      "tag": "product-design",
+      "view": "complete",
+      "links": [
+        {
+          "label": "Design",
+          "href": "https://www.figma.com/design/LvsgGwq2siSihGj2TXwzN0/Listing?node-id=931-3&p=f&t=so8jbto03PakPUNu-0"
+        }
+      ]
+    },
+    {
+      "name": "Bom import v1",
+      "tag": "product-design",
+      "view": "complete",
+      "links": [
+        {
+          "label": "Design",
+          "href": "https://www.figma.com/design/VZL7SmMMVnGBJnlivUoXMl/Bom-import_v1?node-id=385-36909&p=f&t=so8jbto03PakPUNu-0"
+        }
+      ]
+    },
+    {
+      "name": "Editing redesign v1",
+      "tag": "product-design",
+      "view": "complete",
+      "links": [
+        {
+          "label": "User flow",
+          "href": "https://www.figma.com/board/oCE87knLr4OmLIeWO4GogT/Editing-feature-redesign_Whiteboard?node-id=0-1&p=f&t=so8jbto03PakPUNu-0"
+        }
+      ]
+    },
+    {
+      "name": "AWS climate week demo",
+      "tag": "demo",
+      "view": "complete",
+      "links": [
+        {
+          "label": "Demo",
+          "href": "https://drive.google.com/file/d/1S-1e2jHPtjKtqLByapTzcCzu1nZtcj-H/view?usp=sharing"
+        }
+      ]
+    }
+  ]
+}
+    </script>
+
+    <script>
+      (function () {
+        var TAG_FILTERS = [
+          { id: "all", label: "All" },
+          { id: "product-design", label: "Product design" },
+          { id: "website", label: "Website" },
+          { id: "demo", label: "Demo" },
+          { id: "design-guideline", label: "Design guideline" },
+        ];
+
+        var VIEW_OPTIONS = [
+          {
+            id: "ongoing",
+            label: "Ongoing",
+            dotClass: "resource-view-filter-dot--ongoing",
+          },
+          {
+            id: "on-hold",
+            label: "On hold",
+            dotClass: "resource-view-filter-dot--on-hold",
+          },
+          {
+            id: "complete",
+            label: "Complete",
+            dotClass: "resource-view-filter-dot--complete",
+          },
+        ];
+
+        var grid = document.getElementById("grid");
+        var emptyEl = document.getElementById("empty");
+        var emptyFilterEl = document.getElementById("empty-filter");
+        var errEl = document.getElementById("err");
+        var quickFiltersEl = document.getElementById("quick-filters");
+        var viewFiltersEl = document.getElementById("view-filters");
+        var searchWrapEl = document.getElementById("resource-search-wrap");
+        var searchInputEl = document.getElementById("resource-search");
+
+        var allResources = [];
+        var activeFilterId = "all";
+        var activeViewId = "ongoing";
+        var searchQuery = "";
+
+        function getResourceTags(item) {
+          var tags = item && item.tags;
+          if (tags && Array.isArray(tags)) {
+            var out = [];
+            tags.forEach(function (t) {
+              if (typeof t === "string" && t.trim()) out.push(t.trim());
+            });
+            if (out.length) return out;
+          }
+          var single = item && item.tag;
+          if (typeof single === "string" && single.trim()) return [single.trim()];
+          return ["product-design"];
+        }
+
+        function itemMatchesFilter(item) {
+          if (activeFilterId === "all") return true;
+          var ids = getResourceTags(item);
+          for (var i = 0; i < ids.length; i++) {
+            if (ids[i] === activeFilterId) return true;
+          }
+          return false;
+        }
+
+        function getResourceView(item) {
+          var v = item && item.view;
+          if (typeof v !== "string" || !v.trim()) return "ongoing";
+          v = v.trim();
+          if (v === "complete" || v === "archived") return "complete";
+          if (v === "on-hold" || v.toLowerCase() === "on hold") return "on-hold";
+          return "ongoing";
+        }
+
+        function itemMatchesViewFilter(item) {
+          if (activeViewId === "all") return true;
+          return getResourceView(item) === activeViewId;
+        }
+
+        function itemMatchesSearch(item) {
+          var q = searchQuery.trim().toLowerCase();
+          if (!q) return true;
+          return resourceName(item).toLowerCase().indexOf(q) !== -1;
+        }
+
+        function getFilteredList() {
+          return allResources.filter(function (item) {
+            return (
+              itemMatchesFilter(item) &&
+              itemMatchesViewFilter(item) &&
+              itemMatchesSearch(item)
+            );
+          });
+        }
+
+        function tagLabel(tagId) {
+          for (var i = 0; i < TAG_FILTERS.length; i++) {
+            if (TAG_FILTERS[i].id === tagId) return TAG_FILTERS[i].label;
+          }
+          return tagId;
+        }
+
+        function renderCardTags(item) {
+          var ids = getResourceTags(item);
+          var wrap = document.createElement("div");
+          wrap.className = "resource-card__tags";
+          wrap.setAttribute("aria-label", "Tags");
+          ids.forEach(function (id) {
+            var span = document.createElement("span");
+            span.className = "resource-card__tag";
+            span.textContent = tagLabel(id);
+            wrap.appendChild(span);
+          });
+          return wrap;
+        }
+
+        function renderQuickFilters() {
+          quickFiltersEl.innerHTML = "";
+          quickFiltersEl.hidden = !allResources.length;
+          if (!allResources.length) return;
+
+          TAG_FILTERS.forEach(function (def) {
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "resource-filter-chip";
+            btn.textContent = def.label;
+            btn.setAttribute(
+              "aria-pressed",
+              String(def.id === activeFilterId)
+            );
+            btn.dataset.filterId = def.id;
+
+            btn.addEventListener("click", function () {
+              activeFilterId = def.id;
+              renderQuickFilters();
+              renderGrid();
+            });
+
+            quickFiltersEl.appendChild(btn);
+          });
+        }
+
+        function renderViewFilters() {
+          viewFiltersEl.innerHTML = "";
+          viewFiltersEl.hidden = !allResources.length;
+          if (!allResources.length) return;
+
+          VIEW_OPTIONS.forEach(function (def) {
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "resource-view-filter-chip";
+            btn.setAttribute(
+              "aria-pressed",
+              String(activeViewId !== "all" && def.id === activeViewId)
+            );
+            btn.dataset.viewId = def.id;
+
+            var dot = document.createElement("span");
+            dot.className =
+              "resource-view-filter-dot " + def.dotClass;
+            dot.setAttribute("aria-hidden", "true");
+            btn.appendChild(dot);
+
+            var labelEl = document.createElement("span");
+            labelEl.textContent = def.label;
+            btn.appendChild(labelEl);
+
+            btn.addEventListener("click", function () {
+              if (activeViewId === def.id) {
+                activeViewId = "all";
+              } else {
+                activeViewId = def.id;
+              }
+              renderViewFilters();
+              renderGrid();
+            });
+
+            viewFiltersEl.appendChild(btn);
+          });
+        }
+
+        function resourceName(item) {
+          if (item && typeof item.name === "string" && item.name.trim()) return item.name.trim();
+          if (item && typeof item.title === "string" && item.title.trim()) return item.title.trim();
+          return "Untitled";
+        }
+
+        function linkHrefPointsToHtml(href) {
+          if (!href || typeof href !== "string") return false;
+          var path = href.trim().split("#")[0].split("?")[0];
+          return /\.html?$/i.test(path);
+        }
+
+        function linkUsesAppWindowIcon(href) {
+          if (!href || typeof href !== "string") return false;
+          var h = href.trim();
+          if (linkHrefPointsToHtml(href)) return true;
+          if (/drive\.google\.com/i.test(h)) return true;
+          return false;
+        }
+
+        function linkUsesGoogleDocsIcon(href) {
+          if (!href || typeof href !== "string") return false;
+          return /docs\.google\.com/i.test(href.trim());
+        }
+
+        function renderLinks(item) {
+          var links = item && item.links;
+          if (!links || !Array.isArray(links) || !links.length) return null;
+          var wrap = document.createElement("div");
+          wrap.className = "resource-card__links";
+          var count = 0;
+          links.forEach(function (link) {
+            if (!link || typeof link.href !== "string" || !link.href.trim()) return;
+            var href = link.href.trim();
+            var label =
+              link.label && typeof link.label === "string" && link.label.trim()
+                ? link.label.trim()
+                : "Link";
+
+            var a = document.createElement("a");
+            a.className = "resource-card__link";
+            a.href = href;
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+
+            var iconWrap = document.createElement("span");
+            iconWrap.className = "resource-card__link-icon";
+            var iconImg = document.createElement("img");
+            iconImg.alt = "";
+            iconImg.decoding = "async";
+            if (linkUsesGoogleDocsIcon(href)) {
+              iconImg.src = "assets/file-description.svg";
+            } else if (linkUsesAppWindowIcon(href)) {
+              iconImg.src = "assets/app-window.svg";
+            } else {
+              iconImg.src = "assets/figma-symbol.svg";
+            }
+            iconWrap.appendChild(iconImg);
+
+            var labelEl = document.createElement("span");
+            labelEl.className = "resource-card__link-text";
+            labelEl.textContent = label;
+
+            var external = document.createElement("span");
+            external.className = "resource-card__link-external";
+            external.setAttribute("aria-hidden", "true");
+            external.innerHTML =
+              '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="12" height="12" fill="none" focusable="false"><path d="M3 9 9 3M9 3H5M9 3v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+            a.appendChild(iconWrap);
+            a.appendChild(labelEl);
+            a.appendChild(external);
+            wrap.appendChild(a);
+            count += 1;
+          });
+          if (!count) return null;
+          var sectionTitle = document.createElement("h3");
+          sectionTitle.className = "resource-card__links-title";
+          sectionTitle.textContent = "Links";
+          wrap.insertBefore(sectionTitle, wrap.firstChild);
+          return wrap;
+        }
+
+        function appendHighlightedTitle(el, text, query) {
+          el.textContent = "";
+          var q = typeof query === "string" ? query.trim() : "";
+          if (!q) {
+            el.textContent = text;
+            return;
+          }
+          var lowerText = text.toLowerCase();
+          var lowerQ = q.toLowerCase();
+          var start = 0;
+          var idx;
+          var found = false;
+          while ((idx = lowerText.indexOf(lowerQ, start)) !== -1) {
+            found = true;
+            if (idx > start) {
+              el.appendChild(document.createTextNode(text.slice(start, idx)));
+            }
+            var mark = document.createElement("mark");
+            mark.className = "resource-card__title-highlight";
+            mark.textContent = text.slice(idx, idx + q.length);
+            el.appendChild(mark);
+            start = idx + q.length;
+          }
+          if (found) {
+            if (start < text.length) {
+              el.appendChild(document.createTextNode(text.slice(start)));
+            }
+          } else {
+            el.textContent = text;
+          }
+        }
+
+        function renderCard(item) {
+          var card = document.createElement("article");
+          card.className = "resource-card";
+          var h2 = document.createElement("h2");
+          h2.className = "resource-card__title";
+          appendHighlightedTitle(h2, resourceName(item), searchQuery);
+          card.appendChild(h2);
+          card.appendChild(renderCardTags(item));
+          var slot = document.createElement("div");
+          slot.className = "resource-card__link-slot";
+          var linksEl = renderLinks(item);
+          if (linksEl) {
+            var divider = document.createElement("hr");
+            divider.className = "resource-card__divider";
+            divider.setAttribute("aria-hidden", "true");
+            slot.appendChild(divider);
+            slot.appendChild(linksEl);
+          } else {
+            var placeholder = document.createElement("div");
+            placeholder.className = "resource-card__link-slot-placeholder";
+            placeholder.setAttribute("aria-hidden", "true");
+            slot.appendChild(placeholder);
+          }
+          card.appendChild(slot);
+          return card;
+        }
+
+        function renderGrid() {
+          grid.innerHTML = "";
+          errEl.hidden = true;
+          emptyEl.hidden = true;
+          emptyFilterEl.hidden = true;
+
+          if (!allResources.length) {
+            emptyEl.hidden = false;
+            quickFiltersEl.hidden = true;
+            quickFiltersEl.innerHTML = "";
+            viewFiltersEl.hidden = true;
+            viewFiltersEl.innerHTML = "";
+            searchWrapEl.hidden = true;
+            return;
+          }
+
+          searchWrapEl.hidden = false;
+
+          var list = getFilteredList();
+          if (!list.length) {
+            emptyFilterEl.hidden = false;
+            return;
+          }
+
+          list.forEach(function (item) {
+            grid.appendChild(renderCard(item));
+          });
+        }
+
+        function run(data) {
+          allResources =
+            data && Array.isArray(data.resources) ? data.resources : [];
+          activeFilterId = "all";
+          activeViewId = "ongoing";
+          searchQuery = "";
+          searchInputEl.value = "";
+          renderQuickFilters();
+          renderViewFilters();
+          renderGrid();
+        }
+
+        function tryFallback() {
+          var node = document.getElementById("fallback-links");
+          if (!node || !node.textContent) return null;
+          try {
+            return JSON.parse(node.textContent);
+          } catch (e) {
+            return null;
+          }
+        }
+
+        fetch("data/links.json")
+          .then(function (r) {
+            if (!r.ok) throw new Error("HTTP " + r.status);
+            return r.json();
+          })
+          .then(function (data) {
+            run(data);
+          })
+          .catch(function () {
+            var fb = tryFallback();
+            if (fb) {
+              run(fb);
+              return;
+            }
+            grid.innerHTML = "";
+            emptyEl.hidden = true;
+            emptyFilterEl.hidden = true;
+            quickFiltersEl.hidden = true;
+            quickFiltersEl.innerHTML = "";
+            viewFiltersEl.hidden = true;
+            viewFiltersEl.innerHTML = "";
+            searchWrapEl.hidden = true;
+            errEl.hidden = false;
+            errEl.textContent =
+              "Could not load data/links.json. If you opened this file directly from disk, use a local server (python3 -m http.server) or push to GitHub Pages.";
+          });
+
+        searchInputEl.addEventListener("input", function () {
+          searchQuery = searchInputEl.value;
+          renderGrid();
+        });
+      })();
+    </script>
+  </body>
+</html>
