@@ -1,0 +1,5512 @@
+<!DOCTYPE html>
+<!-- Single-file demo: regenerate with scripts/build_standalone_demo.py -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BOM Import v2 — Products &amp; Import (standalone demo)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <style>
+/* --- design-system/tokens.css --- */
+/**
+ * Muir Design System v2 — semantic tokens (HTML/CSS)
+ * Colors resolved from Figma export: Mode 1.tokens 5.json (Mode 1).
+ * See DESIGN_SYSTEM.md for Figma variable name ↔ property mapping.
+ */
+
+:root {
+  /* Typography */
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, monospace;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* Text sizes (align with text/xs … text/xl — tune in Figma) */
+  --text-xxs: 0.6875rem; /* 11px */
+  --text-xs: 0.75rem; /* 12px */
+  --text-sm: 0.875rem; /* 14px */
+  --text-md: 1rem; /* 16px */
+  --text-lg: 1.125rem; /* 18px */
+  --text-xl: 1.5rem; /* 24px */
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  /* text/sm — Inter 14 / 20 (Figma Dev Mode; Creation-flow toolbar Input inner row h 20) */
+  --leading-text-sm: 20px;
+
+  /* Radius — cards vs controls (controls match tight corners in Muir button/input sets) */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 12px;
+  --radius-control: 4px;
+  --radius-ui: 8px; /* Creation-flow controls: buttons, inputs, nav items, icon buttons */
+  --radius-pill: 9999px;
+
+  /* Control sizes (8px grid; tune against Figma “Buttons” / “Text area” frames in Dev Mode) */
+  --control-height-md: 40px;
+  --control-height-sm: 32px;
+  --control-padding-x: 16px;
+  --control-padding-y: 0;
+
+  /* Spacing (no Muir float tokens surfaced in search — simple 4px scale) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-8: 48px;
+
+  /* Icon stroke — Muir "icon" Figma 54:20491 — canvas sizes lg 24 / md 20 / sm 16 / xs 12.
+     Inline Tabler paths use viewBox 0 0 24 24; values are stroke-width in SVG user units (inherited by paths).
+     Baseline matches Tabler outline (2); smaller canvases render thinner hairlines automatically when scaled. */
+  --icon-stroke-xs: 2;
+  --icon-stroke-sm: 2;
+  --icon-stroke-md: 2;
+  --icon-stroke-lg: 2;
+
+  /* Text & icon — Figma: text & icon/* → basic.* */
+  --color-text-primary: #171717; /* primary-gray → gray.900 */
+  --color-text-secondary: #737373; /* secondary-gray → gray.500 */
+  --color-text-tertiary: #d4d4d4; /* tertiary-gary → gray.300 */
+  --color-text-on-brand: #ffffff; /* primary-white */
+  --color-text-brand: #cea371; /* primary-brand → brand.400 */
+  --color-text-brand-muted: #955c39; /* secondary-brand → brand.700 */
+  --color-text-input: #4f46e5; /* user input → indigo.600 */
+  --color-text-info: #2563eb; /* info → blue.600 */
+  --color-text-success: #16a34a; /* success → green.600 */
+  --color-text-warning: #ca8a04; /* warning → yellow.600 */
+  --color-text-danger: #dc2626; /* danger → red.600 */
+
+  /* Background — Figma: background/netural-1…6 */
+  --color-bg-neutral-1: #ffffff; /* netural-1 */
+  --color-bg-neutral-2: #fafafa; /* netural-2 → gray.50 */
+  --color-bg-neutral-3: #f5f5f5; /* netural-3 → gray.100 */
+  --color-bg-neutral-4: #d4d4d4; /* netural-4 → gray.300 */
+  --color-bg-neutral-5: #171717; /* netural-5 → gray.900 */
+  --color-bg-neutral-6: #000000; /* netural-6 → black */
+
+  --color-bg-brand: #955c39; /* brand-4 → brand.700 (primary actions) */
+  --color-bg-brand-hover: #784b34; /* brand.800 */
+  --color-bg-brand-active: #623f2c; /* brand.900 */
+  --color-bg-brand-subtle: #fbfbf1; /* brand-1 → brand.50 */
+  /* Figma background/user input → indigo.50; use for tinted field variant only */
+  --color-bg-input-tinted: #eef2ff;
+  --color-bg-danger-fill: #dc2626; /* red.600 */
+  --color-bg-danger-hover: #b91c1c; /* red.700 */
+  --color-bg-info: #eff6ff; /* info → blue.50 */
+  --color-bg-success: #f0fdf4; /* success → green.50 */
+  --color-bg-warning: #fefce8; /* warning → yellow.50 */
+
+  /* Border — Figma: border/netural-1…4, brand-1…3, info */
+  --color-border-neutral-1: #f5f5f5; /* border/netural-1 — table row + header bottom rules (Creation-flow 28:1641) */
+  --color-border-neutral-2: #e5e5e5; /* gray.200 */
+  --color-border-neutral-3: #d4d4d4; /* gray.300 */
+  --color-border-neutral-4: #171717; /* gray.900 */
+  --color-border-brand-1: #c1874e; /* brand.500 */
+  --color-border-brand-2: #b37343; /* brand.600 */
+  --color-border-brand-3: #955c39; /* brand.700 */
+  --color-border-info: #2563eb; /* blue.600 */
+  --color-border-strong: #171717; /* outlined secondary / emphasis — border/netural-4 */
+
+  /* Focus ring */
+  --color-focus-ring: #c1874e; /* brand.500 */
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+
+  /* Shadow (tinted with semantic gray.900) */
+  --shadow-sm: 0 1px 2px rgb(23 23 23 / 0.06);
+  --shadow-md: 0 4px 12px rgb(23 23 23 / 0.08);
+}
+
+/* --- design-system/styles.css --- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  line-height: var(--leading-normal);
+  color: var(--color-text-primary);
+  background: var(--color-bg-neutral-2);
+}
+
+/* —— Typography utilities (Figma text/* styles) —— */
+.text-xxs {
+  font-size: var(--text-xxs);
+  line-height: var(--leading-tight);
+}
+.text-xs {
+  font-size: var(--text-xs);
+  line-height: var(--leading-normal);
+}
+.text-sm {
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+.text-md {
+  font-size: var(--text-md);
+  line-height: var(--leading-normal);
+}
+.text-lg {
+  font-size: var(--text-lg);
+  line-height: var(--leading-tight);
+}
+.text-xl {
+  font-size: var(--text-xl);
+  line-height: var(--leading-tight);
+}
+
+.text-xs-strong,
+.text-sm-strong,
+.text-md-strong,
+.text-lg-strong,
+.text-xl-strong {
+  font-weight: var(--font-weight-semibold);
+}
+.text-xs-strong {
+  font-size: var(--text-xs);
+}
+.text-sm-strong {
+  font-size: var(--text-sm);
+}
+.text-md-strong {
+  font-size: var(--text-md);
+}
+.text-lg-strong {
+  font-size: var(--text-lg);
+}
+.text-xl-strong {
+  font-size: var(--text-xl);
+}
+
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+.text-tertiary {
+  color: var(--color-text-tertiary);
+}
+.text-brand {
+  color: var(--color-text-brand);
+}
+.text-danger {
+  color: var(--color-text-danger);
+}
+.text-success {
+  color: var(--color-text-success);
+}
+.text-warning {
+  color: var(--color-text-warning);
+}
+
+/* —— Layout helpers —— */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.stack-tight {
+  gap: var(--space-2);
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+/* —— Card / surface —— */
+.card {
+  background: var(--color-bg-neutral-1);
+  border: 1px solid var(--color-border-neutral-2);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+}
+
+/* —— Buttons (Muir: “Buttons” component set — filled / outline / text patterns) —— */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--control-height-md);
+  padding: var(--control-padding-y) var(--control-padding-x);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  border-radius: var(--radius-control);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Filled primary — background/brand-4 (brand.700) */
+.btn--primary {
+  background-color: var(--color-bg-brand);
+  color: var(--color-text-on-brand);
+  border-color: transparent;
+}
+.btn--primary:hover:not(:disabled) {
+  background-color: var(--color-bg-brand-hover);
+}
+.btn--primary:active:not(:disabled) {
+  background-color: var(--color-bg-brand-active);
+}
+
+/* Outlined secondary — neutral surface + strong border (border/netural-4) */
+.btn--secondary {
+  background-color: var(--color-bg-neutral-1);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-strong);
+}
+.btn--secondary:hover:not(:disabled) {
+  background-color: var(--color-bg-neutral-3);
+  border-color: var(--color-border-strong);
+}
+
+/* Text / ghost — text & icon/primary-brand */
+.btn--ghost {
+  background-color: transparent;
+  color: var(--color-text-brand);
+  border-color: transparent;
+}
+.btn--ghost:hover:not(:disabled) {
+  background-color: var(--color-bg-brand-subtle);
+}
+
+/* Destructive filled — red scale from basic.* */
+.btn--danger {
+  background-color: var(--color-bg-danger-fill);
+  color: var(--color-text-on-brand);
+  border-color: transparent;
+}
+.btn--danger:hover:not(:disabled) {
+  background-color: var(--color-bg-danger-hover);
+}
+
+/* —— Text field (Muir: “Text area” — default field uses neutral surface; see .input--tinted for token “background/user input”) —— */
+.field-label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-2);
+  color: var(--color-text-primary);
+}
+
+.input,
+.textarea {
+  width: 100%;
+  max-width: 100%;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-neutral-1);
+  border: 1px solid var(--color-border-neutral-2);
+  border-radius: var(--radius-control);
+  min-height: var(--control-height-md);
+  padding: 10px 12px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.textarea {
+  min-height: 7.5rem;
+  resize: vertical;
+}
+
+.input--tinted,
+.textarea--tinted {
+  background-color: var(--color-bg-input-tinted);
+  color: var(--color-text-input);
+  border-color: var(--color-border-neutral-3);
+}
+
+.input:hover,
+.textarea:hover {
+  border-color: var(--color-border-neutral-3);
+}
+
+.input:focus-visible,
+.textarea:focus-visible {
+  outline: none;
+  border-color: var(--color-border-brand-1);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus-ring) 28%, transparent);
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-1);
+}
+
+/* —— Status chips (pill tags) —— */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.2;
+  border-radius: var(--radius-pill);
+}
+.chip--info {
+  background: var(--color-bg-info);
+  color: var(--color-text-info);
+}
+.chip--success {
+  background: var(--color-bg-success);
+  color: var(--color-text-success);
+}
+.chip--warning {
+  background: var(--color-bg-warning);
+  color: var(--color-text-warning);
+}
+
+/* Compact chip — 2px 6px padding (table badges, Figma 28:1641) */
+.chip--sm {
+  padding: 2px 6px;
+  line-height: 16px;
+}
+
+/*
+ * —— Badge / Normal Badge (Muir Design system_v2, Figma 157:2010) ——
+ * 3 types × 2 sizes. Base = Tertiary/sm (most common in tables).
+ *
+ * Types:
+ *   (default / --tertiary)  bg-neutral-2, primary-gray text, no border
+ *   --secondary              bg-neutral-1 (white), primary-gray text, neutral-2 border
+ *   --primary                bg-neutral-5 (black), white text, no border
+ *
+ * Sizes:
+ *   (default / sm)  12px / 16px lh, px-6
+ *   --lg            14px / 20px lh, px-8
+ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  font-size: var(--text-xs);       /* 12px */
+  font-weight: var(--font-weight-medium);
+  line-height: 16px;
+  letter-spacing: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-bg-neutral-2);
+  color: var(--color-text-primary);
+  border: 1px solid transparent;   /* keeps layout stable across variants */
+  white-space: nowrap;
+}
+
+/* Secondary — white bg, neutral-2 border */
+.badge--secondary {
+  background: var(--color-bg-neutral-1);
+  border-color: var(--color-border-neutral-2);
+}
+
+/* Primary — dark fill, white text */
+.badge--primary {
+  background: var(--color-bg-neutral-5);
+  color: var(--color-text-on-brand);
+}
+
+/* Large — 14px/20px, px-8 */
+.badge--lg {
+  padding: 2px 8px;
+  font-size: var(--text-sm);
+  line-height: var(--leading-text-sm);
+}
+
+.badge-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.badge--more {
+  min-width: 1.5rem;
+  justify-content: center;
+}
+
+/* —— Unit suffix (numeric cells — e.g. "g", "kgCO2e", "USD") —— */
+.unit {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-regular);
+}
+
+/* —— Button size modifier: sm (h 32, px 10, radius-ui) —— */
+.btn--sm {
+  min-height: var(--control-height-sm);
+  padding: 0 10px;
+  gap: 6px;
+  font-size: var(--text-sm);
+  line-height: var(--leading-text-sm);
+  border-radius: var(--radius-ui);
+}
+
+/* —— Dark / inverse filled button (bg neutral-5) —— */
+.btn--dark {
+  background: var(--color-bg-neutral-5);
+  color: var(--color-text-on-brand);
+  border-color: transparent;
+}
+.btn--dark:hover:not(:disabled) {
+  background: var(--color-bg-neutral-6);
+}
+.btn--dark svg {
+  color: currentColor;
+}
+
+/* —— Outline sm button (toolbar secondary, h 32, border neutral-3) —— */
+.btn--outline-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: var(--control-height-sm);
+  padding: 0 10px;
+  background: var(--color-bg-neutral-1);
+  border: 1px solid var(--color-border-neutral-3);
+  border-radius: var(--radius-ui);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--leading-text-sm);
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+.btn--outline-sm:hover:not(:disabled) {
+  background: var(--color-bg-neutral-3);
+}
+.btn--outline-sm svg {
+  flex-shrink: 0;
+}
+
+/* —— Icon button (24×24, no bg, hover neutral-3) —— */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-ui);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+.btn-icon:hover {
+  background: var(--color-bg-neutral-3);
+  color: var(--color-text-primary);
+}
+.btn-icon:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* —— Tabler icon helpers (raster <img> + inline <svg>) —— */
+.tabler {
+  display: block;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+/* Inline SVG — stroke driven by size class → token */
+.tabler-svg {
+  flex-shrink: 0;
+  color: currentColor;
+  stroke-width: var(--icon-stroke-sm);
+}
+.tabler-svg.tabler--12 { stroke-width: var(--icon-stroke-xs); }
+.tabler-svg.tabler--16 { stroke-width: var(--icon-stroke-sm); }
+.tabler-svg.tabler--18 { stroke-width: var(--icon-stroke-md); }
+.tabler-svg.tabler--20 { stroke-width: var(--icon-stroke-md); }
+.tabler-svg.tabler--24 { stroke-width: var(--icon-stroke-lg); }
+.tabler--12 { width: 12px; height: 12px; }
+.tabler--16 { width: 16px; height: 16px; }
+.tabler--18 { width: 18px; height: 18px; }
+.tabler--20 { width: 20px; height: 20px; }
+.tabler--24 { width: 24px; height: 24px; }
+
+/* —— Search input (Muir Input 647:3268 / Creation-flow 1:1398) —— */
+.search-input {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: var(--control-height-sm);
+  padding: 5px 10px;
+  background: var(--color-bg-neutral-1);
+  border: 1px solid var(--color-border-neutral-2);
+  border-radius: var(--radius-ui);
+  overflow: hidden;
+}
+.search-input:focus-within {
+  border-color: var(--color-border-brand-3);
+}
+.search-input__main {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.search-input__icon {
+  flex-shrink: 0;
+  color: var(--color-text-tertiary);
+}
+/* Overlay wrapper — enables custom hint that renders identically to Figma text/sm 400 */
+.search-input__input-wrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: var(--leading-text-sm);
+  display: flex;
+  align-items: center;
+}
+/* Custom hint span replaces native ::placeholder for precise font rendering */
+.search-input__hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  color: var(--color-text-tertiary);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-regular);
+  font-style: normal;
+  font-synthesis: none;
+  line-height: var(--leading-text-sm);
+  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+  transition: opacity 0.08s ease;
+}
+.search-input.has-value .search-input__hint,
+.search-input.is-focused .search-input__hint {
+  opacity: 0;
+}
+.search-input__input-wrap input {
+  width: 100%;
+  height: var(--leading-text-sm);
+  margin: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-regular);
+  font-style: normal;
+  font-synthesis: none;
+  line-height: var(--leading-text-sm);
+  letter-spacing: 0;
+  color: var(--color-text-primary);
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+}
+.search-input__input-wrap input:focus {
+  outline: none;
+}
+.search-input__trailing {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.search-input__clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+.search-input__clear:hover {
+  color: var(--color-text-primary);
+}
+.search-input__clear:focus-visible {
+  outline: 2px solid var(--color-border-brand-3);
+  outline-offset: 1px;
+}
+.search-input__clear[hidden] {
+  display: none !important;
+}
+
+/* --- listing.css --- */
+/**
+ * BOM Import v2 — Products screen (page layout only)
+ * Components (buttons, search, chips, badges, icons) live in design-system/styles.css.
+ * Figma: Creation-flow-improvements, node 1:1398
+ */
+
+@import url("design-system/styles.css");
+
+/* —— Page-level layout tokens —— */
+:root {
+  --bom-sidebar-w: 74px;
+  --bom-header-h: 64px;
+  --bom-toolbar-h: 48px;
+  --bom-table-row-h: 40px;
+  --bom-sidebar-logo-border: #ced4da;
+  --bom-avatar-bg: #ebfbee;
+  --bom-avatar-text: #40c057;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body.bom-page {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: var(--leading-text-sm);
+  color: var(--color-text-primary);
+  background: var(--color-bg-neutral-1);
+}
+
+/* —— App shell —— */
+.bom-app {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* —— Sidebar (Figma node 1:4347) —— */
+.bom-sidebar {
+  width: var(--bom-sidebar-w);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 10px;
+  background: var(--color-bg-neutral-1);
+  border-right: 1px solid var(--color-border-neutral-2);
+}
+
+.bom-sidebar__grow {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 0;
+  width: 100%;
+}
+
+.bom-sidebar__logo-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 16px 12px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: var(--radius-ui);
+}
+.bom-sidebar__logo-btn:hover {
+  background: var(--color-bg-neutral-2);
+}
+
+.bom-sidebar__logo-box {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-neutral-1);
+  border: 1px solid var(--bom-sidebar-logo-border);
+  border-radius: var(--radius-ui);
+}
+
+.bom-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  width: 54px;
+  margin: 0 auto;
+}
+
+.bom-sidebar__nav--util {
+  width: 54px;
+}
+
+.bom-sidebar__foot {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+}
+
+.bom-nav-item {
+  width: 100%;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-ui);
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+.bom-nav-item:hover {
+  background: var(--color-bg-neutral-2);
+}
+.bom-nav-item--active {
+  background: var(--color-bg-brand-subtle);
+}
+
+.bom-sidebar__user {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  background: var(--bom-avatar-bg);
+  color: var(--bom-avatar-text);
+  font-size: 16px;
+  font-weight: var(--font-weight-semibold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* —— Main column —— */
+.bom-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* —— Header (h 64, px 24) —— */
+.bom-header {
+  height: var(--bom-header-h);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: var(--color-bg-neutral-1);
+  border-bottom: 1px solid var(--color-border-neutral-2);
+}
+
+.bom-header__title {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-semibold);
+  line-height: 28px;
+  letter-spacing: 0;
+  color: var(--color-text-primary);
+}
+
+/* —— Toolbar (h 48, px 24) —— */
+.bom-toolbar {
+  height: var(--bom-toolbar-h);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  gap: 16px;
+  background: var(--color-bg-neutral-1);
+  border-bottom: 1px solid var(--color-border-neutral-2);
+}
+
+.bom-toolbar__left,
+.bom-toolbar__right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.bom-toolbar__filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Search width is page-specific; component styles are in the design system */
+.bom-toolbar .search-input {
+  width: 280px;
+  max-width: 100%;
+}
+
+/*
+ * Table — Creation-flow-improvements, node 28:1641
+ */
+.bom-table-wrap {
+  flex: 1;
+  overflow: auto;
+  background: var(--color-bg-neutral-1);
+  padding: 12px 24px 24px;
+}
+
+.bom-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: var(--text-sm);
+  line-height: var(--leading-text-sm);
+  letter-spacing: 0;
+  background: var(--color-bg-neutral-1);
+}
+
+.bom-table thead th {
+  box-sizing: border-box;
+  height: var(--bom-table-row-h);
+  padding: 8px;
+  text-align: left;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  background: var(--color-bg-neutral-2);
+  border-bottom: 1px solid var(--color-border-neutral-1);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.bom-table thead th .th-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bom-table thead th .th-inner > img.tabler {
+  opacity: 0.5;
+}
+
+.bom-table tbody td {
+  box-sizing: border-box;
+  height: var(--bom-table-row-h);
+  padding: 8px;
+  vertical-align: middle;
+  background: var(--color-bg-neutral-1);
+  border-bottom: 1px solid var(--color-border-neutral-1);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Product name: medium weight (Figma 28:1708) */
+.bom-table .bom-col-product td {
+  font-weight: var(--font-weight-medium);
+}
+
+.bom-table tbody td.bom-td-tags {
+  white-space: normal;
+}
+
+.bom-table tbody tr:hover td {
+  background: var(--color-bg-neutral-2);
+}
+
+/* 24px narrow rail — Figma 28:1677 */
+.bom-table .bom-col-lead-narrow th,
+.bom-table .bom-col-lead-narrow td {
+  padding: 8px 4px;
+}
+
+/* —— Column widths (Figma column frames) —— */
+.bom-col-lead       { width: 32px; }
+.bom-col-lead-narrow { width: 24px; }
+.bom-col-product    { width: 302px; }
+.bom-col-status     { width: 120px; }
+.bom-col-id         { width: 120px; }
+.bom-col-tags       { width: 160px; }
+.bom-col-mass,
+.bom-col-em,
+.bom-col-cost,
+.bom-col-date       { width: 130px; }
+.bom-col-actions    { width: 40px; text-align: center; }
+
+/* —— Create dropdown (Figma node 43-7024) —— */
+.bom-header__create-wrap {
+  position: relative;
+}
+
+.create-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 100;
+  width: 300px;
+  background: var(--color-bg-neutral-1);
+  border: 1px solid var(--color-border-neutral-2);
+  border-radius: var(--radius-ui);
+  box-shadow: var(--shadow-md);
+  padding: 4px;
+}
+
+.create-dropdown[hidden] {
+  display: none;
+}
+
+.create-dropdown__option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  border-radius: calc(var(--radius-ui) - 2px);
+  cursor: pointer;
+  text-align: left;
+  text-decoration: none;
+  font-family: inherit;
+  color: var(--color-text-primary);
+}
+
+.create-dropdown__option:hover {
+  background: var(--color-bg-neutral-2);
+}
+
+.create-dropdown__option:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.create-dropdown__option-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  background: var(--color-bg-neutral-2);
+  border-radius: var(--radius-ui);
+  margin-top: 1px;
+}
+
+.create-dropdown__option-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.create-dropdown__option-title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--leading-text-sm);
+}
+
+.create-dropdown__option-desc {
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+
+/* --- bom_import.css --- */
+/**
+ * BOM Import flow — page-specific styles
+ * Shared layout (sidebar, header, nav) lives in bom_import_v2.css + design-system/styles.css
+ */
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Lock the page — no scroll at any level */
+html, body.bom-page {
+  height: 100%;
+  overflow: hidden;
+}
+
+.bom-app {
+  height: 100%;
+  overflow: hidden;
+}
+
+.bom-main {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Title left, stepper right — single header row */
+.bom-header {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 24px;
+  min-height: var(--bom-header-h);
+  height: auto;
+  padding: 0 24px;
+}
+
+.bom-header__title {
+  flex-shrink: 0;
+}
+
+/* —— Step wizard (inside .bom-header only on this flow) —— */
+.import-steps {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.import-steps__list {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Flex “rails” grow to draw connector lines between step groups */
+.import-steps__list > .import-step__rail {
+  flex: 1 1 16px;
+  min-width: 12px;
+  height: 1px;
+  align-self: center;
+  margin: 0;
+  padding: 0;
+  background: var(--color-border-neutral-2);
+  list-style: none;
+  pointer-events: none;
+}
+
+/* Horizontal step: button = outlined circle + “N. Label” */
+.import-step {
+  display: flex;
+  list-style: none;
+  flex-shrink: 0;
+}
+
+.import-step__hit {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 4px 8px;
+  border: none;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  color: inherit;
+  border-radius: var(--radius-ui);
+  text-align: left;
+}
+
+.import-step__hit:hover {
+  background: var(--color-bg-neutral-2);
+}
+
+.import-step__hit:focus-visible {
+  outline: 2px solid var(--color-border-brand-1);
+  outline-offset: 2px;
+}
+
+.import-step__mark {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  border: 1.5px solid var(--color-border-neutral-3);
+  background: var(--color-bg-neutral-1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-tertiary);
+  line-height: 1;
+}
+
+.import-step__mark--hidden {
+  display: none;
+}
+
+.import-step__check {
+  display: block;
+}
+
+.import-step__label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  letter-spacing: 0;
+}
+
+/* Current step — strong label, dark ring + check */
+.import-step--active .import-step__mark {
+  border-color: var(--color-text-primary);
+  color: var(--color-text-primary);
+  background: var(--color-bg-neutral-1);
+}
+
+.import-step--active .import-step__label {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Completed — soft green ring + check (reference-style) */
+.import-step--done .import-step__mark {
+  border-color: rgba(22, 163, 74, 0.45);
+  color: var(--color-text-success);
+  background: var(--color-bg-success);
+}
+
+.import-step--done .import-step__label {
+  color: var(--color-text-tertiary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Not yet visited — number in ring; last step can be text-only (see JS) */
+.import-step--upcoming:not(.import-step--text-only) .import-step__mark {
+  border-color: var(--color-border-neutral-2);
+  color: var(--color-text-tertiary);
+  background: transparent;
+}
+
+.import-step--upcoming .import-step__label {
+  color: var(--color-text-tertiary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* —— Page body —— */
+.import-body {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 16px 24px;
+  background: var(--color-bg-neutral-2);
+}
+
+/* —— Import card —— */
+.import-card {
+  width: 100%;
+  max-width: 680px;
+  background: var(--color-bg-neutral-1);
+  border: 1px solid var(--color-border-neutral-2);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.import-card__content {
+  flex: 1;
+  padding: 32px;
+}
+
+.import-section__title {
+  margin: 0 0 4px;
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.4;
+  color: var(--color-text-primary);
+}
+
+.import-required {
+  color: var(--color-text-danger);
+  margin-left: 2px;
+}
+
+.import-hints {
+  margin: 0 0 20px;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.import-hints li {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-text-sm);
+}
+
+/* —— Step 1: “last configuration” notice (compact) —— */
+.import-config-notice {
+  margin: 10px 0 0;
+  padding: 8px 10px 8px 8px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-neutral-2);
+  border-left: 2px solid var(--color-border-brand-3);
+  background: var(--color-bg-brand-subtle);
+}
+
+.import-config-notice__row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.import-config-notice__icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-neutral-1);
+  border: 1px solid var(--color-border-neutral-2);
+  color: var(--color-text-brand-muted);
+}
+
+.import-config-notice__main {
+  min-width: 0;
+  flex: 1;
+}
+
+.import-config-notice__title {
+  margin: 0 0 2px;
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
+  line-height: 16px;
+  color: var(--color-text-primary);
+}
+
+.import-config-notice__meta {
+  margin: 0 0 4px;
+  font-size: var(--text-xxs);
+  font-weight: var(--font-weight-regular);
+  line-height: 14px;
+  color: var(--color-text-secondary);
+}
+
+.import-config-notice__text {
+  margin: 0;
+  font-size: var(--text-xxs);
+  font-weight: var(--font-weight-regular);
+  line-height: 16px;
+  color: var(--color-text-secondary);
+}
+
+/* Toggle row: label + switch */
+.import-config-notice__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border-neutral-1);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.import-config-notice__toggle-text {
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 16px;
+  color: var(--color-text-primary);
+}
+
+.import-switch {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+.import-switch__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+  opacity: 0;
+}
+
+.import-switch__input:focus-visible + .import-switch__track {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.import-switch__track {
+  display: block;
+  width: 32px;
+  height: 18px;
+  border-radius: 9px;
+  background: var(--color-bg-neutral-4);
+  transition: background-color 0.15s ease;
+  position: relative;
+}
+
+.import-switch__track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--color-bg-neutral-1);
+  box-shadow: 0 1px 2px rgb(23 23 23 / 0.12);
+  transition: transform 0.15s ease;
+}
+
+.import-switch__input:checked + .import-switch__track {
+  background: var(--color-bg-brand);
+}
+
+.import-switch__input:checked + .import-switch__track::after {
+  transform: translateX(14px);
+}
+
+/* —— Upload drop zone —— */
+.upload-zone {
+  position: relative;
+  border: 1.5px dashed var(--color-border-neutral-3);
+  border-radius: var(--radius-ui);
+  background: var(--color-bg-neutral-1);
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+  cursor: default;
+  overflow: hidden;
+}
+
+.upload-zone--drag {
+  border-color: var(--color-border-brand-1);
+  background: var(--color-bg-brand-subtle);
+}
+
+.upload-zone--has-file {
+  border-style: solid;
+  border-color: var(--color-border-neutral-2);
+}
+
+.upload-zone__input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  /* Hidden except when triggered by label */
+  pointer-events: none;
+}
+
+.upload-zone__idle[hidden],
+.upload-zone__selected[hidden] {
+  display: none;
+}
+
+.upload-zone__idle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px;
+  text-align: center;
+  width: 100%;
+}
+
+.upload-zone__icon {
+  color: var(--color-text-tertiary);
+}
+
+.upload-zone__btn {
+  cursor: pointer;
+}
+
+.upload-zone__or {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+/* Selected file state */
+.upload-zone__selected {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 24px;
+  width: 100%;
+}
+
+.upload-zone__file-icon {
+  flex-shrink: 0;
+  color: var(--color-text-secondary);
+}
+
+.upload-zone__filename {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* —— Step 2: stretch layout so card fills available height —— */
+.import-body--stretch {
+  align-items: stretch;
+  padding: 16px 48px;
+}
+
+.import-body--form {
+  align-items: stretch;
+  padding: 0;
+  background: var(--color-bg-neutral-2);
+}
+
+/* Panel must fill full width and propagate height down the flex chain */
+.import-body--stretch .import-step-panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+}
+
+.import-card--table {
+  width: 100%;
+  max-width: 100%;
+  flex: 1;
+  min-height: 0;
+}
+
+.import-card--table .import-card__content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+  padding: 24px 0 0;
+}
+
+.import-section__header {
+  padding: 0 24px 16px;
+  flex-shrink: 0;
+}
+
+.import-section__subtitle {
+  margin: 4px 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-text-sm);
+}
+
+/* Scrollable table area */
+.select-row-wrap {
+  flex: 1;
+  overflow: scroll;
+  border-top: 1px solid var(--color-border-neutral-2);
+}
+
+.select-row-wrap::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.select-row-wrap::-webkit-scrollbar-track {
+  background: var(--color-bg-neutral-2);
+}
+
+.select-row-wrap::-webkit-scrollbar-thumb {
+  background: var(--color-border-neutral-3);
+  border-radius: 4px;
+}
+
+.select-row-wrap::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-tertiary);
+}
+
+.select-row-wrap::-webkit-scrollbar-corner {
+  background: var(--color-bg-neutral-2);
+}
+
+.select-row-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  line-height: var(--leading-text-sm);
+}
+
+.select-row-table__row {
+  cursor: pointer;
+  border-bottom: 1px solid var(--color-border-neutral-1);
+}
+
+.select-row-table__row:hover {
+  background: var(--color-bg-neutral-2);
+}
+
+.select-row-table__row--selected {
+  background: var(--color-bg-brand-subtle);
+}
+
+.select-row-table__row--selected:hover {
+  background: var(--color-bg-brand-subtle);
+}
+
+.select-row-table__radio-cell {
+  width: 44px;
+  padding: 0 8px 0 16px;
+  vertical-align: middle;
+}
+
+.select-row-radio {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--color-bg-brand);
+  flex-shrink: 0;
+}
+
+.header-row-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  background: var(--color-bg-brand);
+  color: var(--color-text-on-brand);
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.select-row-table__row--header {
+  background: var(--color-bg-neutral-2);
+  cursor: default;
+}
+
+.select-row-table__row--header:hover {
+  background: var(--color-bg-neutral-2);
+}
+
+.select-row-table__cell-label--bold {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+/* Each cell uses a full-width label so the entire row is clickable */
+.select-row-table__cell-label {
+  display: block;
+  padding: 10px 16px 10px 0;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+/* —— Selected file row (replaces drop zone after file chosen) —— */
+.upload-file-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border-neutral-2);
+  border-radius: var(--radius-ui);
+  background: var(--color-bg-neutral-1);
+}
+
+.upload-file-row[hidden] {
+  display: none;
+}
+
+.upload-file-row__check {
+  flex-shrink: 0;
+  color: var(--color-text-success);
+}
+
+.upload-file-row__name {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.upload-file-row__change {
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.upload-hint {
+  margin: 10px 0 0;
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.upload-hint strong {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+/* —— Step 4: Match Columns —— */
+.match-columns-wrap {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-top: 1px solid var(--color-border-neutral-2);
+  min-height: 0;
+}
+
+.match-columns-wrap::-webkit-scrollbar { width: 8px; }
+.match-columns-wrap::-webkit-scrollbar-track { background: var(--color-bg-neutral-2); }
+.match-columns-wrap::-webkit-scrollbar-thumb { background: var(--color-border-neutral-3); border-radius: 4px; }
+.match-columns-wrap::-webkit-scrollbar-thumb:hover { background: var(--color-text-tertiary); }
+
+/* Mapping: destination | ← | your column + clear | data preview (last column width-capped) */
+.match-fields-grid {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.match-map-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) auto minmax(0, 1.35fr) minmax(0, 200px);
+  align-items: center;
+  gap: 8px 12px;
+  padding: 8px 16px;
+  background: var(--color-bg-neutral-2);
+  border-bottom: 1px solid var(--color-border-neutral-2);
+}
+
+.match-map-header__cell--dest,
+.match-map-header__cell--your,
+.match-map-header__cell--preview {
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.match-map-header__cell--arrow {
+  width: 28px;
+}
+
+.match-map-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) auto minmax(0, 1.35fr) minmax(0, 200px);
+  align-items: start;
+  gap: 8px 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border-neutral-1);
+  min-width: 0;
+}
+
+.match-row__arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  flex-shrink: 0;
+  font-size: 14px;
+  color: var(--color-text-tertiary);
+  line-height: 1;
+}
+
+.match-row__map {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  min-width: 0;
+}
+
+.match-row__map--preview {
+  padding-top: 2px;
+}
+
+.match-map-picker__controls {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.match-map-picker__controls .col-select {
+  flex: 1;
+  min-width: 0;
+}
+
+.match-map-picker__clear {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 36px;
+  margin-top: 0;
+  padding: 0;
+  border: 1px solid var(--color-border-neutral-2);
+  border-radius: var(--radius-ui);
+  background: var(--color-bg-neutral-1);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.match-map-picker__clear:hover {
+  background: var(--color-bg-neutral-2);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-neutral-3);
+}
+
+.match-row__preview-wrap {
+  min-width: 0;
+  width: 100%;
+}
+
+.match-col-preview {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+  min-height: 1.4em;
+  max-width: 100%;
+  overflow: hidden;
+  transition: max-height 0.15s ease;
+}
+
+.match-col-preview--expanded {
+  max-height: 12rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 2px;
+}
+
+.match-col-preview__line {
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.match-col-preview__line + .match-col-preview__line {
+  margin-top: 2px;
+}
+
+@media (max-width: 720px) {
+  .match-map-header,
+  .match-map-row {
+    grid-template-columns: 1fr;
+  }
+
+  .match-map-header__cell--arrow,
+  .match-row__arrow {
+    display: none;
+  }
+
+  .match-map-header__cell--preview {
+    display: none;
+  }
+
+  .match-row__map--preview {
+    padding-top: 0;
+  }
+}
+
+.match-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--color-border-neutral-1);
+}
+
+.match-row__map-label {
+  display: none;
+}
+
+.match-row__dest {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.match-row__field-name {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.match-row__field-desc {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.match-row__select-wrap {
+  position: relative;
+}
+
+.match-rows-divider {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 16px;
+  padding: 16px 24px 10px;
+  border-bottom: 1px solid var(--color-border-neutral-2);
+  background: var(--color-bg-neutral-2);
+}
+
+.match-rows-divider__title {
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.match-rows-divider__hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+  flex: 1;
+  min-width: 200px;
+}
+
+.match-row--picked-optional {
+  align-items: stretch;
+}
+
+.match-optional-catalog-select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border-neutral-2);
+  border-radius: var(--radius-ui);
+  font-size: var(--text-sm);
+  font-family: inherit;
+  color: var(--color-text-primary);
+  background: var(--color-bg-neutral-1);
+  cursor: pointer;
+}
+
+.match-optional-catalog-select:focus {
+  outline: none;
+  border-color: var(--color-border-brand-1);
+}
+
+.match-row__field-desc--optional-pick {
+  display: block;
+  margin-top: 6px;
+}
+
+.match-row__optional-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.match-row__optional-title-row .match-optional-catalog-select {
+  flex: 1;
+  min-width: 0;
+}
+
+.match-row__optional-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.match-row__optional-actions .match-row__select-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.match-row__select-wrap--disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.col-select__trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+.match-row__remove-optional {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-ui);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.match-row__remove-optional:hover {
+  background: var(--color-bg-neutral-3);
+  color: var(--color-text-danger);
+}
+
+.match-fields-grid__add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  width: 100%;
+  padding: 14px 24px 0;
+  margin-top: 4px;
+  border-top: 1px solid var(--color-border-neutral-1);
+  box-sizing: border-box;
+}
+
+.match-row--add-optional {
+  display: block;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--color-border-neutral-1);
+  background: var(--color-bg-neutral-2);
+}
+
+.match-row__add-optional-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+}
+
+.match-row__add-optional-hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+/* Custom column select */
+.col-select {
+  position: relative;
+  width: 100%;
+}
+
+.col-select__trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 10px 7px 12px;
+  border: 1px solid var(--color-border-neutral-2);
+  border-radius: var(--radius-ui);
+  background: var(--color-bg-neutral-1);
+  font-size: var(--text-sm);
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.col-select__trigger:hover {
+  border-color: var(--color-border-neutral-3);
+  background: var(--color-bg-neutral-2);
+}
+
+.col-select__placeholder {
+  color: var(--color-text-tertiary);
+  flex: 1;
+}
+
+.col-select__value {
+  color: var(--color-text-primary);
+  flex: 1;
+}
+
+.col-select__chevron {
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.col-select__menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--color-bg-neutral-1);
+  border: 1px solid var(--color-border-neutral-2);
+  border-radius: var(--radius-ui);
+  box-shadow: var(--shadow-md);
+  z-index: 200;
+  overflow: hidden;
+}
+
+.col-select__option {
+  position: relative;
+  padding: 8px 12px;
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.col-select__option:hover {
+  background: var(--color-bg-neutral-2);
+}
+
+/* Data preview tooltip */
+.col-preview {
+  display: none;
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 0;
+  min-width: 200px;
+  background: var(--color-bg-neutral-1);
+  border: 1px solid var(--color-border-neutral-2);
+  border-radius: var(--radius-ui);
+  box-shadow: var(--shadow-md);
+  padding: 10px 12px;
+  z-index: 201;
+  pointer-events: none;
+}
+
+.col-select__option:hover .col-preview {
+  display: block;
+}
+
+.col-preview__title {
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: 6px;
+}
+
+.col-preview__val {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  padding: 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* —— Step 5: Preview Data —— */
+.import-card--preview {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.preview-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--color-border-neutral-2);
+  gap: 16px;
+}
+
+.preview-header__text { display: flex; flex-direction: column; gap: 2px; }
+
+
+.preview-statusbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px 0 12px;
+  height: 38px;
+  border-bottom: 1px solid var(--color-border-neutral-2);
+  background: var(--color-bg-neutral-2);
+}
+
+.preview-statusbar__pills {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.preview-file-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 4px 3px 8px;
+  border: 1px solid var(--color-border-neutral-2);
+  border-radius: var(--radius-ui);
+  background: var(--color-bg-neutral-1);
+}
+.preview-file-row__check {
+  flex-shrink: 0;
+  color: var(--color-text-success);
+}
+.preview-file-row__name {
+  font-size: var(--text-xs);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+.btn--xs {
+  min-height: 24px;
+  padding: 0 8px;
+  gap: 4px;
+  font-size: var(--text-xs);
+  border-radius: var(--radius-ui);
+}
+
+
+.preview-status-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+.preview-status-pill--clickable {
+  cursor: pointer;
+  user-select: none;
+}
+.preview-status-pill--clickable:hover { background: var(--color-bg-neutral-3); }
+
+.preview-status-sep {
+  font-size: var(--text-sm);
+  color: var(--color-border-neutral-3);
+  padding: 0 2px;
+  user-select: none;
+}
+
+.preview-status-details {
+  display: none;
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px 28px 12px;
+  border-bottom: 1px solid var(--color-border-neutral-2);
+  background: var(--color-bg-neutral-2);
+}
+.preview-status-details--open { display: flex; }
+
+.preview-summary__detail-item {
+  display: flex;
+  gap: 8px;
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+.preview-summary__detail-row {
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.preview-summary__detail-row--error   { color: #dc2626; }
+.preview-summary__detail-row--warning { color: #d97706; }
+
+.preview-stat { font-weight: var(--font-weight-semibold); }
+.preview-stat--success { color: #2563eb; }
+.preview-stat--warning { color: #d97706; }
+.preview-stat--error   { color: #dc2626; }
+.preview-warn-chevron  { color: #d97706; }
+.preview-error-chevron { color: #dc2626; }
+
+.preview-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  user-select: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.preview-toggle__input { position: absolute; opacity: 0; width: 0; height: 0; }
+
+.preview-toggle__track {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background: var(--color-border-neutral-3);
+  border-radius: var(--radius-pill);
+  transition: background 0.15s ease;
+  flex-shrink: 0;
+}
+
+.preview-toggle__thumb {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 14px; height: 14px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.preview-toggle__input:checked + .preview-toggle__track { background: var(--color-bg-brand); }
+.preview-toggle__input:checked + .preview-toggle__track .preview-toggle__thumb { transform: translateX(16px); }
+
+.preview-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  border-top: 1px solid var(--color-border-neutral-2);
+}
+
+.preview-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+.preview-scroll::-webkit-scrollbar-track { background: var(--color-bg-neutral-2); }
+.preview-scroll::-webkit-scrollbar-thumb { background: var(--color-border-neutral-3); border-radius: 4px; }
+.preview-scroll::-webkit-scrollbar-thumb:hover { background: var(--color-text-tertiary); }
+.preview-scroll::-webkit-scrollbar-corner { background: var(--color-bg-neutral-2); }
+
+/* Preview grid: same compact density as step “locate / sheet” tables (max columns visible, tight rows) */
+.preview-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  line-height: 1.35;
+  background: var(--color-bg-neutral-1);
+  border: 1px solid var(--color-border-neutral-2);
+  border-radius: var(--radius-ui);
+  overflow: hidden;
+}
+
+.preview-th {
+  padding: 6px 10px;
+  text-align: left;
+  font-weight: var(--font-weight-semibold);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-neutral-3);
+  border-bottom: 1px solid var(--color-border-neutral-2);
+  border-right: 1px solid var(--color-border-neutral-1);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  box-shadow: 0 1px 0 var(--color-border-neutral-2);
+}
+
+.preview-th:last-child {
+  border-right: none;
+}
+
+.preview-th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  width: 40px;
+  min-width: 40px;
+  text-align: right;
+  padding-left: 8px;
+}
+
+.preview-row--warning .preview-td {
+  background: #fffbeb;
+}
+
+.preview-row--error .preview-td {
+  background: #fef2f2;
+}
+
+.preview-td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--color-border-neutral-1);
+  border-right: 1px solid var(--color-border-neutral-1);
+  color: var(--color-text-primary);
+  vertical-align: top;
+  max-width: 280px;
+}
+
+/* Single-line ellipsis for scanability; stacked cells (annotations) wrap */
+.preview-td:not(.preview-td--row-num):not(.preview-td--stacked) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preview-td--stacked {
+  white-space: normal;
+  overflow: visible;
+  word-break: break-word;
+}
+
+.preview-td:last-child {
+  border-right: none;
+}
+
+.preview-td--row-num {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  width: 40px;
+  min-width: 40px;
+  padding: 6px 8px 6px 10px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  background: var(--color-bg-neutral-2);
+  border-right: 1px solid var(--color-border-neutral-2);
+  max-width: none;
+  user-select: none;
+}
+
+.preview-row--warning .preview-td--row-num {
+  background: #fffbeb;
+}
+
+.preview-row--error .preview-td--row-num {
+  background: #fef2f2;
+}
+
+.preview-td--editable {
+  cursor: text;
+  border-radius: 4px;
+  outline: none;
+  transition: background 0.1s ease, box-shadow 0.1s ease;
+}
+
+.preview-td--editable:hover { background: var(--color-bg-neutral-2); }
+.preview-td--editing,
+.preview-td--editable:focus {
+  background: var(--color-bg-neutral-1);
+  box-shadow: 0 0 0 2px var(--color-border-brand-1);
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  position: relative;
+  z-index: 4;
+}
+
+
+.preview-annotation {
+  font-size: 10px;
+  margin-top: 2px;
+  display: block;
+}
+.preview-annotation--warning { color: #d97706; }
+.preview-annotation--error   { color: #dc2626; }
+
+.preview-change-flow {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.preview-change-flow__chip {
+  font-size: 10px;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: rgba(217, 119, 6, 0.1);
+  color: #92400e;
+  border: 1px solid rgba(217, 119, 6, 0.25);
+}
+.preview-change-flow__chip--from {
+  background: var(--color-bg-neutral-2);
+  color: var(--color-text-tertiary);
+  border-color: var(--color-border-neutral-2);
+  font-style: italic;
+}
+
+/* —— Step 6: Confirm Creation —— */
+.import-step-panel--form {
+  width: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.confirm-layout {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.confirm-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 48px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.confirm-scroll::-webkit-scrollbar { width: 8px; }
+.confirm-scroll::-webkit-scrollbar-track { background: var(--color-bg-neutral-2); }
+.confirm-scroll::-webkit-scrollbar-thumb { background: var(--color-border-neutral-3); border-radius: 4px; }
+.confirm-scroll::-webkit-scrollbar-thumb:hover { background: var(--color-text-tertiary); }
+
+.confirm-section {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.confirm-section__info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.confirm-section__title {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.confirm-prefilled-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-success);
+}
+
+.confirm-section__desc {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.confirm-form-card {
+  background: var(--color-bg-neutral-1);
+  border: 1px solid var(--color-border-neutral-2);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-field--inline {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.form-field__grow { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.form-field__unit { display: flex; flex-direction: column; gap: 6px; }
+.form-field__half { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+
+.form-field__row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.form-label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.form-optional {
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-tertiary);
+  font-size: var(--text-xs);
+}
+
+.form-info-icon {
+  font-style: normal;
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  cursor: default;
+}
+
+.form-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border-neutral-2);
+  border-radius: var(--radius-ui);
+  background: var(--color-bg-neutral-1);
+  font-size: var(--text-sm);
+  font-family: inherit;
+  color: var(--color-text-primary);
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--color-border-brand-1);
+  box-shadow: 0 0 0 3px var(--color-bg-brand-subtle);
+}
+
+.form-input:disabled {
+  background: var(--color-bg-neutral-2);
+  color: var(--color-text-tertiary);
+  cursor: not-allowed;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-input-wrap .form-input {
+  padding-right: 96px;
+}
+
+.from-file-tag {
+  position: absolute;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-success);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.form-select-unit {
+  padding: 8px 28px 8px 10px;
+  border: 1px solid var(--color-border-neutral-2);
+  border-radius: var(--radius-ui);
+  background: var(--color-bg-neutral-1);
+  font-size: var(--text-sm);
+  font-family: inherit;
+  color: var(--color-text-primary);
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+
+.form-input-prefix,
+.form-input-suffix {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-border-neutral-2);
+  border-radius: var(--radius-ui);
+  overflow: hidden;
+  background: var(--color-bg-neutral-1);
+}
+
+.form-input-prefix .form-input,
+.form-input-suffix .form-input {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  flex: 1;
+}
+
+.form-input-prefix .form-input:focus,
+.form-input-suffix .form-input:focus {
+  box-shadow: none;
+}
+
+.form-select-prefix,
+.form-select-suffix {
+  padding: 8px 24px 8px 10px;
+  border: none;
+  border-right: 1px solid var(--color-border-neutral-2);
+  background: var(--color-bg-neutral-2);
+  font-size: var(--text-sm);
+  font-family: inherit;
+  color: var(--color-text-secondary);
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  flex-shrink: 0;
+}
+
+.form-select-suffix {
+  border-right: none;
+  border-left: 1px solid var(--color-border-neutral-2);
+}
+
+.form-select-full {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 32px;
+}
+
+.form-add-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-bg-brand);
+  cursor: pointer;
+}
+
+.form-add-btn:hover { opacity: 0.8; }
+
+.confirm-footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 48px;
+  border-top: 1px solid var(--color-border-neutral-2);
+  background: var(--color-bg-neutral-1);
+}
+
+/* —— Card footer —— */
+.import-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  border-top: 1px solid var(--color-border-neutral-2);
+}
+
+.import-cancel {
+  color: var(--color-text-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--text-sm);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  line-height: var(--leading-text-sm);
+}
+
+.import-cancel:hover {
+  color: var(--color-text-secondary);
+}
+
+.import-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* --- bom_import_exploration.html (inline) --- */
+.locate-table thead th {
+        font-size: var(--text-xs);
+        font-weight: var(--font-weight-medium);
+        text-align: left;
+        vertical-align: bottom;
+        padding: 8px 8px 8px 0;
+        border-bottom: 1px solid var(--color-border-neutral-2);
+        color: var(--color-text-secondary);
+        white-space: nowrap;
+      }
+      .locate-table thead th:first-child { padding-left: 16px; }
+      .locate-table tbody td.locate-table__pick-cell--hdr,
+      .locate-table tbody td.locate-table__pick-cell--data {
+        background-clip: padding-box;
+      }
+      .locate-table tbody tr:not(.locate-table__row--above-header) td.locate-table__pick-cell--hdr {
+        background: rgba(0, 0, 0, 0.02);
+      }
+      .locate-table tbody tr:not(.locate-table__row--above-header) td.locate-table__pick-cell--data {
+        background: rgba(0, 0, 0, 0.04);
+      }
+      .locate-table tbody tr.locate-table__row--above-header td.locate-table__pick-cell--hdr,
+      .locate-table tbody tr.locate-table__row--above-header td.locate-table__pick-cell--data {
+        background: transparent;
+      }
+      .locate-table tbody tr.select-row-table__row--header td.locate-table__pick-cell--hdr,
+      .locate-table tbody tr.select-row-table__row--header td.locate-table__pick-cell--data {
+        background: transparent;
+      }
+      .locate-table tbody tr.select-row-table__row--data-start td.locate-table__pick-cell--hdr,
+      .locate-table tbody tr.select-row-table__row--data-start td.locate-table__pick-cell--data {
+        background: transparent;
+      }
+      .locate-table__pick-stack {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: nowrap;
+        min-height: 28px;
+      }
+      .locate-table__pick-stack .select-row-radio {
+        flex-shrink: 0;
+      }
+      .locate-table__data-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 7px;
+        border: 1px solid var(--color-border-neutral-2);
+        border-radius: var(--radius-pill);
+        background: var(--color-bg-neutral-1);
+        color: var(--color-text-secondary);
+        font-size: 10px;
+        font-weight: var(--font-weight-semibold);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        line-height: 1.2;
+      }
+      .locate-table tbody tr.select-row-table__row--data-start .locate-table__data-badge {
+        border-color: var(--color-border-brand-1);
+        color: var(--color-text-primary);
+        background: var(--color-bg-brand-subtle);
+      }
+      .locate-table__num-col { width: 48px; text-align: right; color: var(--color-text-tertiary); font-variant-numeric: tabular-nums; }
+      .locate-table__row-num { font-size: var(--text-xs); color: var(--color-text-tertiary); text-align: right; padding-right: 8px !important; }
+      .locate-table__data-spacer { color: var(--color-text-tertiary); font-size: var(--text-xs); text-align: center; }
+      .select-row-table__row--data-start { box-shadow: inset 0 0 0 1px var(--color-border-brand-1); }
+      /* Rows above the chosen header — de-emphasized so the header row reads clearly */
+      .locate-table tbody tr.locate-table__row--above-header {
+        background: var(--color-bg-neutral-2);
+      }
+      .locate-table tbody tr.locate-table__row--above-header:hover {
+        background: var(--color-bg-neutral-3);
+      }
+      .locate-table tbody tr.locate-table__row--above-header .select-row-table__cell-label,
+      .locate-table tbody tr.locate-table__row--above-header .locate-table__row-num {
+        color: var(--color-text-tertiary);
+      }
+      .locate-table tbody tr.locate-table__row--above-header .select-row-radio {
+        opacity: 0.65;
+      }
+
+      /* Match step: mapping on top, full sheet reference below */
+      .match-step-layout {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        border-top: 1px solid var(--color-border-neutral-2);
+      }
+      .match-step-map {
+        flex: 0 1 auto;
+        max-height: min(380px, 44vh);
+        min-height: 140px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .match-step-map .match-columns-wrap {
+        flex: 1;
+        min-height: 0;
+        border-top: none;
+      }
+      .match-sheet-panel {
+        flex: 1 1 0;
+        min-height: 180px;
+        display: flex;
+        flex-direction: column;
+        border-top: 1px solid var(--color-border-neutral-2);
+        background: var(--color-bg-neutral-2);
+        min-width: 0;
+      }
+      .match-sheet-panel__head {
+        flex-shrink: 0;
+        padding: 12px 24px 8px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 6px 12px;
+      }
+      .match-sheet-panel__title {
+        font-size: var(--text-xs);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text-primary);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .match-sheet-panel__hint {
+        font-size: var(--text-xs);
+        color: var(--color-text-secondary);
+        line-height: 1.35;
+      }
+      .match-sheet-scroll {
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+        padding: 0 24px 20px;
+      }
+      .match-sheet-scroll::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      .match-sheet-scroll::-webkit-scrollbar-track {
+        background: var(--color-bg-neutral-2);
+      }
+      .match-sheet-scroll::-webkit-scrollbar-thumb {
+        background: var(--color-border-neutral-3);
+        border-radius: 4px;
+      }
+      .match-sheet-table {
+        width: max-content;
+        min-width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+        line-height: 1.35;
+        background: var(--color-bg-neutral-1);
+        border: 1px solid var(--color-border-neutral-2);
+        border-radius: var(--radius-ui);
+        overflow: hidden;
+      }
+      .match-sheet-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        padding: 8px 10px;
+        text-align: left;
+        font-weight: var(--font-weight-semibold);
+        font-size: 10px;
+        color: var(--color-text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        background: var(--color-bg-neutral-3);
+        border-bottom: 1px solid var(--color-border-neutral-2);
+        white-space: nowrap;
+        box-shadow: 0 1px 0 var(--color-border-neutral-2);
+      }
+      .match-sheet-table thead th.match-sheet-num {
+        position: sticky;
+        left: 0;
+        width: 40px;
+        min-width: 40px;
+        text-align: right;
+        color: var(--color-text-tertiary);
+        z-index: 3;
+      }
+      .match-sheet-table tbody td {
+        padding: 6px 10px;
+        border-bottom: 1px solid var(--color-border-neutral-1);
+        border-right: 1px solid var(--color-border-neutral-1);
+        color: var(--color-text-primary);
+        white-space: nowrap;
+        max-width: 280px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .match-sheet-table tbody td:last-child {
+        border-right: none;
+      }
+      .match-sheet-table tbody td.match-sheet-num {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        color: var(--color-text-tertiary);
+        background: var(--color-bg-neutral-2);
+        position: sticky;
+        left: 0;
+        z-index: 1;
+        border-right: 1px solid var(--color-border-neutral-2);
+        font-size: 10px;
+        width: 40px;
+      }
+      .match-sheet-tr--header td {
+        font-weight: var(--font-weight-semibold);
+        background: var(--color-bg-brand-subtle);
+      }
+      .match-sheet-tr--header td.match-sheet-num {
+        background: var(--color-bg-neutral-3);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text-primary);
+      }
+      .match-sheet-tr--above td {
+        opacity: 0.55;
+        color: var(--color-text-secondary);
+      }
+      .match-sheet-tr--between td {
+        opacity: 0.72;
+        font-style: italic;
+        color: var(--color-text-secondary);
+      }
+/* Standalone demo: toggle Products vs Import */
+.standalone-main-stack {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.standalone-main-stack > .bom-main {
+  flex: 1;
+  min-height: 0;
+}
+#standalone-view-import.is-hidden {
+  display: none !important;
+}
+
+    </style>
+  </head>
+  <body class="bom-page">
+    <div class="bom-app">
+      <aside class="bom-sidebar" aria-label="Main navigation">
+        <div class="bom-sidebar__grow">
+          <button type="button" class="bom-sidebar__logo-btn" aria-label="Collapse sidebar">
+            <span class="bom-sidebar__logo-box">
+              <svg
+                class="tabler-svg tabler--16"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M0 0h24v24H0z" fill="none" stroke="none" />
+                <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
+                <path d="M15 4v16" />
+                <path d="M9 10l2 2l-2 2" />
+              </svg>
+            </span>
+          </button>
+          <nav class="bom-sidebar__nav" aria-label="Primary">
+            <button type="button" class="bom-nav-item" title="Home" aria-label="Home">
+              <svg
+                class="tabler-svg tabler--16"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M0 0h24v24H0z" fill="none" stroke="none" />
+                <path d="M5 12l-2 0l9 -9l9 9l-2 0" />
+                <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+                <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+              </svg>
+            </button>
+            <button type="button" class="bom-nav-item bom-nav-item--active" title="Import" aria-label="Import" aria-current="page">
+              <svg
+                class="tabler-svg tabler--16"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M0 0h24v24H0z" fill="none" stroke="none" />
+                <path d="M12 21l-8 -4.5v-9l8 -4.5l8 4.5v4.5" />
+                <path d="M12 12l8 -4.5" />
+                <path d="M12 12v9" />
+                <path d="M12 12l-8 -4.5" />
+                <path d="M22 18h-7" />
+                <path d="M18 15l-3 3l3 3" />
+              </svg>
+            </button>
+            <button type="button" class="bom-nav-item" title="Store" aria-label="Store">
+              <svg
+                class="tabler-svg tabler--16"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M0 0h24v24H0z" fill="none" stroke="none" />
+                <path d="M3 21l18 0" />
+                <path d="M3 7v1a3 3 0 0 0 6 0v-1m0 1a3 3 0 0 0 6 0v-1m0 1a3 3 0 0 0 6 0v-1h-18l2 -4h14l2 4" />
+                <path d="M5 21l0 -10.15" />
+                <path d="M19 21l0 -10.15" />
+                <path d="M9 21v-4a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v4" />
+              </svg>
+            </button>
+            <button type="button" class="bom-nav-item" title="Affiliate" aria-label="Affiliate">
+              <svg
+                class="tabler-svg tabler--16"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M0 0h24v24H0z" fill="none" stroke="none" />
+                <path d="M5.931 6.936l1.275 4.249m5.607 5.609l4.251 1.275" />
+                <path d="M11.683 12.317l5.759 -5.759" />
+                <path d="M5.5 5.5m-1.5 0a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0 -3 0" />
+                <path d="M18.5 5.5m-1.5 0a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0 -3 0" />
+                <path d="M18.5 18.5m-1.5 0a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0 -3 0" />
+                <path d="M8.5 15.5m-4.5 0a4.5 4.5 0 1 0 9 0a4.5 4.5 0 1 0 -9 0" />
+              </svg>
+            </button>
+          </nav>
+        </div>
+        <div class="bom-sidebar__foot">
+          <nav class="bom-sidebar__nav bom-sidebar__nav--util" aria-label="Utility">
+            <button type="button" class="bom-nav-item" title="Settings" aria-label="Settings">
+              <svg
+                class="tabler-svg tabler--16"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M0 0h24v24H0z" fill="none" stroke="none" />
+                <path
+                  d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"
+                />
+                <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
+              </svg>
+            </button>
+            <button type="button" class="bom-nav-item" title="Questions" aria-label="Questions">
+              <svg
+                class="tabler-svg tabler--16"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M0 0h24v24H0z" fill="none" stroke="none" />
+                <path
+                  d="M15.02 19.52c-2.341 .736 -5 .606 -7.32 -.52l-4.7 1l1.3 -3.9c-2.324 -3.437 -1.426 -7.872 2.1 -10.374c3.526 -2.501 8.59 -2.296 11.845 .48c1.649 1.407 2.575 3.253 2.742 5.152"
+                />
+                <path d="M19 22v.01" />
+                <path d="M19 19a2.003 2.003 0 0 0 .914 -3.782a1.98 1.98 0 0 0 -2.414 .483" />
+              </svg>
+            </button>
+            <button type="button" class="bom-nav-item" title="Help" aria-label="Help">
+              <svg
+                class="tabler-svg tabler--16"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M0 0h24v24H0z" fill="none" stroke="none" />
+                <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
+                <path d="M12 16v.01" />
+                <path d="M12 13a2 2 0 0 0 .914 -3.782a1.98 1.98 0 0 0 -2.414 .483" />
+              </svg>
+            </button>
+          </nav>
+          <div class="bom-sidebar__user" title="Spencer Li">SL</div>
+        </div>
+      </aside>
+
+      <div class="standalone-main-stack">
+        <div class="bom-main" id="standalone-view-products">
+        <header class="bom-header">
+          <h1 class="bom-header__title">Products</h1>
+          <div class="bom-header__create-wrap">
+            <button type="button" class="btn btn--sm btn--dark" id="create-menu-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="create-menu">
+              <svg
+                class="tabler-svg tabler--16"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M0 0h24v24H0z" fill="none" stroke="none" />
+                <path d="M12 5l0 14" />
+                <path d="M5 12l14 0" />
+              </svg>
+              Create
+              <svg
+                class="tabler-svg tabler--16"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M0 0h24v24H0z" fill="none" stroke="none" />
+                <path d="M6 9l6 6l6 -6" />
+              </svg>
+            </button>
+            <div id="create-menu" class="create-dropdown" role="menu" aria-labelledby="create-menu-btn" hidden>
+              <button type="button" class="create-dropdown__option" role="menuitem">
+                <span class="create-dropdown__option-icon" aria-hidden="true">
+                  <svg
+                    class="tabler-svg tabler--16"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M0 0h24v24H0z" fill="none" stroke="none" />
+                    <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+                    <path d="M13.5 6.5l4 4" />
+                  </svg>
+                </span>
+                <span class="create-dropdown__option-content">
+                  <span class="create-dropdown__option-title">Start from scratch</span>
+                  <span class="create-dropdown__option-desc">Fill in name, mass, sourcing, and build the BOM manually optionally</span>
+                </span>
+              </button>
+              <a href="#" class="create-dropdown__option" role="menuitem" id="standalone-open-import">
+                <span class="create-dropdown__option-icon" aria-hidden="true">
+                  <svg
+                    class="tabler-svg tabler--16"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M0 0h24v24H0z" fill="none" stroke="none" />
+                    <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                    <path d="M5 13v-8a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2h-5.5" />
+                    <path d="M2 16h7" />
+                    <path d="M6 19l-3 -3l3 -3" />
+                  </svg>
+                </span>
+                <span class="create-dropdown__option-content">
+                  <span class="create-dropdown__option-title">Import BOM file</span>
+                  <span class="create-dropdown__option-desc">Upload XLS or CSV, extract components, mass, and sourcing automatically</span>
+                </span>
+              </a>
+            </div>
+          </div>
+        </header>
+
+        <div class="bom-toolbar">
+          <div class="bom-toolbar__left">
+            <div class="search-input" role="search">
+              <div class="search-input__main">
+                <svg
+                  class="tabler-svg tabler--20 search-input__icon"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M0 0h24v24H0z" fill="none" stroke="none" />
+                  <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+                  <path d="M21 21l-6 -6" />
+                </svg>
+                <div class="search-input__input-wrap">
+                  <span class="search-input__hint" aria-hidden="true"
+                    >Search by Name, ID, or Supplier</span
+                  >
+                  <input
+                    id="bom-product-search"
+                    type="text"
+                    role="searchbox"
+                    autocomplete="off"
+                    aria-label="Search products"
+                  />
+                </div>
+              </div>
+              <div class="search-input__trailing">
+                <button type="button" class="search-input__clear" aria-label="Clear search" hidden>
+                  <svg
+                    class="tabler-svg tabler--20"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M0 0h24v24H0z" fill="none" stroke="none" />
+                    <path d="M18 6l-12 12" />
+                    <path d="M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="bom-toolbar__filters">
+              <button type="button" class="btn--outline-sm">
+                Tags
+                <img
+                  class="tabler tabler--16"
+                  src="https://cdn.jsdelivr.net/npm/@tabler/icons@3.26.0/icons/outline/selector.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />
+              </button>
+              <button type="button" class="btn--outline-sm">
+                <img
+                  class="tabler tabler--16"
+                  src="https://cdn.jsdelivr.net/npm/@tabler/icons@3.26.0/icons/outline/adjustments-horizontal.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />
+                All Filters
+              </button>
+            </div>
+          </div>
+          <div class="bom-toolbar__right">
+            <div class="bom-toolbar__filters">
+              <button type="button" class="btn--outline-sm">
+                <img
+                  class="tabler tabler--16"
+                  src="https://cdn.jsdelivr.net/npm/@tabler/icons@3.26.0/icons/outline/download.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />
+                Export
+              </button>
+              <button type="button" class="btn--outline-sm">
+                <img
+                  class="tabler tabler--16"
+                  src="https://cdn.jsdelivr.net/npm/@tabler/icons@3.26.0/icons/outline/layout-columns.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />
+                Columns
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="bom-table-wrap">
+          <table class="bom-table">
+            <colgroup>
+              <col class="bom-col-lead" />
+              <col class="bom-col-lead-narrow" />
+              <col class="bom-col-product" />
+              <col class="bom-col-status" />
+              <col class="bom-col-id" />
+              <col class="bom-col-tags" />
+              <col class="bom-col-mass" />
+              <col class="bom-col-em" />
+              <col class="bom-col-cost" />
+              <col class="bom-col-date" />
+              <col class="bom-col-actions" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th scope="col" class="bom-col-lead" aria-hidden="true"></th>
+                <th scope="col" class="bom-col-lead-narrow" aria-hidden="true"></th>
+                <th scope="col"><span class="th-inner">Products <img class="tabler tabler--16" src="https://cdn.jsdelivr.net/npm/@tabler/icons@3.26.0/icons/outline/selector.svg" width="16" height="16" alt="" /></span></th>
+                <th scope="col"><span class="th-inner">Status <img class="tabler tabler--16" src="https://cdn.jsdelivr.net/npm/@tabler/icons@3.26.0/icons/outline/selector.svg" width="16" height="16" alt="" /></span></th>
+                <th scope="col"><span class="th-inner">Product ID <img class="tabler tabler--16" src="https://cdn.jsdelivr.net/npm/@tabler/icons@3.26.0/icons/outline/selector.svg" width="16" height="16" alt="" /></span></th>
+                <th scope="col"><span class="th-inner">Product ID <img class="tabler tabler--16" src="https://cdn.jsdelivr.net/npm/@tabler/icons@3.26.0/icons/outline/selector.svg" width="16" height="16" alt="" /></span></th>
+                <th scope="col"><span class="th-inner">Mass <img class="tabler tabler--16" src="https://cdn.jsdelivr.net/npm/@tabler/icons@3.26.0/icons/outline/selector.svg" width="16" height="16" alt="" /></span></th>
+                <th scope="col"><span class="th-inner">Emissions <img class="tabler tabler--16" src="https://cdn.jsdelivr.net/npm/@tabler/icons@3.26.0/icons/outline/selector.svg" width="16" height="16" alt="" /></span></th>
+                <th scope="col"><span class="th-inner">Cost <img class="tabler tabler--16" src="https://cdn.jsdelivr.net/npm/@tabler/icons@3.26.0/icons/outline/selector.svg" width="16" height="16" alt="" /></span></th>
+                <th scope="col"><span class="th-inner">Date Created <img class="tabler tabler--16" src="https://cdn.jsdelivr.net/npm/@tabler/icons@3.26.0/icons/outline/selector.svg" width="16" height="16" alt="" /></span></th>
+                <th scope="col" class="bom-col-actions"><span class="th-inner" aria-hidden="true"></span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="bom-col-lead"></td>
+                <td class="bom-col-lead-narrow"></td>
+                <td>Organic cotton tee — navy</td>
+                <td><span class="chip chip--sm chip--info">In Progress</span></td>
+                <td>00001</td>
+                <td class="bom-td-tags">
+                  <div class="badge-group">
+                    <span class="badge badge--secondary">Badge</span><span class="badge badge--secondary">Badge</span>
+                  </div>
+                </td>
+                <td>0.04 <span class="unit">g</span></td>
+                <td>12.4 <span class="unit">kgCO2e</span></td>
+                <td>$2.35 <span class="unit">USD</span></td>
+                <td>03/15/2025</td>
+                <td class="bom-col-actions">
+                  <button type="button" class="btn-icon" aria-label="Row actions">
+                    <img
+                      class="tabler tabler--16"
+                      src="https://cdn.jsdelivr.net/npm/@tabler/icons@3.26.0/icons/outline/dots-vertical.svg"
+                      width="16"
+                      height="16"
+                      alt=""
+                    />
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td class="bom-col-lead"></td>
+                <td class="bom-col-lead-narrow"></td>
+                <td>Recycled PET bottle 500ml</td>
+                <td><span class="chip chip--sm chip--success">Finalized</span></td>
+                <td>00002</td>
+                <td class="bom-td-tags">
+                  <div class="badge-group">
+                    <span class="badge badge--secondary">Badge</span><span class="badge badge--secondary">Badge</span><span class="badge badge--secondary badge--more">+1</span>
+                  </div>
+                </td>
+                <td>18.6 <span class="unit">kg</span></td>
+                <td>2.1 <span class="unit">kgCO2e/kg</span></td>
+                <td>$48.00 <span class="unit">USD</span></td>
+                <td>03/12/2025</td>
+                <td class="bom-col-actions">
+                  <button type="button" class="btn-icon" aria-label="Row actions">
+                    <img
+                      class="tabler tabler--16"
+                      src="https://cdn.jsdelivr.net/npm/@tabler/icons@3.26.0/icons/outline/dots-vertical.svg"
+                      width="16"
+                      height="16"
+                      alt=""
+                    />
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td class="bom-col-lead"></td>
+                <td class="bom-col-lead-narrow"></td>
+                <td>Aluminum enclosure — type A</td>
+                <td><span class="chip chip--sm chip--info">In Progress</span></td>
+                <td>—</td>
+                <td class="bom-td-tags"><div class="badge-group"><span class="badge badge--secondary">Badge</span></div></td>
+                <td>0.52 <span class="unit">kg</span></td>
+                <td>8.02 <span class="unit">kgCO2e</span></td>
+                <td>$120.50 <span class="unit">USD</span></td>
+                <td>03/10/2025</td>
+                <td class="bom-col-actions">
+                  <button type="button" class="btn-icon" aria-label="Row actions">
+                    <img
+                      class="tabler tabler--16"
+                      src="https://cdn.jsdelivr.net/npm/@tabler/icons@3.26.0/icons/outline/dots-vertical.svg"
+                      width="16"
+                      height="16"
+                      alt=""
+                    />
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td class="bom-col-lead"></td>
+                <td class="bom-col-lead-narrow"></td>
+                <td>PCB assembly — rev 3</td>
+                <td><span class="chip chip--sm chip--success">Finalized</span></td>
+                <td>00004</td>
+                <td class="bom-td-tags">
+                  <div class="badge-group">
+                    <span class="badge badge--secondary">Badge</span><span class="badge badge--secondary">Badge</span><span class="badge badge--secondary badge--more">+2</span>
+                  </div>
+                </td>
+                <td>0.12 <span class="unit">kg</span></td>
+                <td>15.0 <span class="unit">kgCO2e/kg</span></td>
+                <td>$890.00 <span class="unit">USD</span></td>
+                <td>03/08/2025</td>
+                <td class="bom-col-actions">
+                  <button type="button" class="btn-icon" aria-label="Row actions">
+                    <img
+                      class="tabler tabler--16"
+                      src="https://cdn.jsdelivr.net/npm/@tabler/icons@3.26.0/icons/outline/dots-vertical.svg"
+                      width="16"
+                      height="16"
+                      alt=""
+                    />
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td class="bom-col-lead"></td>
+                <td class="bom-col-lead-narrow"></td>
+                <td>Steel bracket M8</td>
+                <td><span class="chip chip--sm chip--info">In Progress</span></td>
+                <td>00005</td>
+                <td class="bom-td-tags"><div class="badge-group"><span class="badge badge--secondary">Badge</span><span class="badge badge--secondary">Badge</span></div></td>
+                <td>0.08 <span class="unit">kg</span></td>
+                <td>4.2 <span class="unit">kgCO2e</span></td>
+                <td>$6.10 <span class="unit">USD</span></td>
+                <td>03/05/2025</td>
+                <td class="bom-col-actions">
+                  <button type="button" class="btn-icon" aria-label="Row actions">
+                    <img
+                      class="tabler tabler--16"
+                      src="https://cdn.jsdelivr.net/npm/@tabler/icons@3.26.0/icons/outline/dots-vertical.svg"
+                      width="16"
+                      height="16"
+                      alt=""
+                    />
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td class="bom-col-lead"></td>
+                <td class="bom-col-lead-narrow"></td>
+                <td>Glass panel 4mm tempered</td>
+                <td><span class="chip chip--sm chip--success">Finalized</span></td>
+                <td>00006</td>
+                <td class="bom-td-tags"><div class="badge-group"><span class="badge badge--secondary">Badge</span></div></td>
+                <td>2.40 <span class="unit">kg</span></td>
+                <td>1.8 <span class="unit">kgCO2e/kg</span></td>
+                <td>$34.20 <span class="unit">USD</span></td>
+                <td>03/02/2025</td>
+                <td class="bom-col-actions">
+                  <button type="button" class="btn-icon" aria-label="Row actions">
+                    <img
+                      class="tabler tabler--16"
+                      src="https://cdn.jsdelivr.net/npm/@tabler/icons@3.26.0/icons/outline/dots-vertical.svg"
+                      width="16"
+                      height="16"
+                      alt=""
+                    />
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td class="bom-col-lead"></td>
+                <td class="bom-col-lead-narrow"></td>
+                <td>Lithium cell 18650</td>
+                <td><span class="chip chip--sm chip--info">In Progress</span></td>
+                <td>—</td>
+                <td class="bom-td-tags">
+                  <div class="badge-group">
+                    <span class="badge badge--secondary">Badge</span><span class="badge badge--secondary">Badge</span>
+                  </div>
+                </td>
+                <td>0.05 <span class="unit">kg</span></td>
+                <td>22.1 <span class="unit">kgCO2e</span></td>
+                <td>$3.80 <span class="unit">USD</span></td>
+                <td>02/28/2025</td>
+                <td class="bom-col-actions">
+                  <button type="button" class="btn-icon" aria-label="Row actions">
+                    <img
+                      class="tabler tabler--16"
+                      src="https://cdn.jsdelivr.net/npm/@tabler/icons@3.26.0/icons/outline/dots-vertical.svg"
+                      width="16"
+                      height="16"
+                      alt=""
+                    />
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td class="bom-col-lead"></td>
+                <td class="bom-col-lead-narrow"></td>
+                <td>Silicone gasket kit</td>
+                <td><span class="chip chip--sm chip--success">Finalized</span></td>
+                <td>00008</td>
+                <td class="bom-td-tags"><div class="badge-group"><span class="badge badge--secondary">Badge</span><span class="badge badge--secondary badge--more">+1</span></div></td>
+                <td>0.02 <span class="unit">kg</span></td>
+                <td>6.5 <span class="unit">kgCO2e/kg</span></td>
+                <td>$1.95 <span class="unit">USD</span></td>
+                <td>02/25/2025</td>
+                <td class="bom-col-actions">
+                  <button type="button" class="btn-icon" aria-label="Row actions">
+                    <img
+                      class="tabler tabler--16"
+                      src="https://cdn.jsdelivr.net/npm/@tabler/icons@3.26.0/icons/outline/dots-vertical.svg"
+                      width="16"
+                      height="16"
+                      alt=""
+                    />
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td class="bom-col-lead"></td>
+                <td class="bom-col-lead-narrow"></td>
+                <td>Copper wire AWG18 (spool)</td>
+                <td><span class="chip chip--sm chip--info">In Progress</span></td>
+                <td>00009</td>
+                <td class="bom-td-tags"><div class="badge-group"><span class="badge badge--secondary">Badge</span></div></td>
+                <td>1.20 <span class="unit">kg</span></td>
+                <td>3.3 <span class="unit">kgCO2e</span></td>
+                <td>$18.40 <span class="unit">USD</span></td>
+                <td>02/22/2025</td>
+                <td class="bom-col-actions">
+                  <button type="button" class="btn-icon" aria-label="Row actions">
+                    <img
+                      class="tabler tabler--16"
+                      src="https://cdn.jsdelivr.net/npm/@tabler/icons@3.26.0/icons/outline/dots-vertical.svg"
+                      width="16"
+                      height="16"
+                      alt=""
+                    />
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td class="bom-col-lead"></td>
+                <td class="bom-col-lead-narrow"></td>
+                <td>Hemp fiber insulation roll</td>
+                <td><span class="chip chip--sm chip--success">Finalized</span></td>
+                <td>00010</td>
+                <td class="bom-td-tags">
+                  <div class="badge-group">
+                    <span class="badge badge--secondary">Badge</span><span class="badge badge--secondary">Badge</span>
+                  </div>
+                </td>
+                <td>4.50 <span class="unit">kg</span></td>
+                <td>0.9 <span class="unit">kgCO2e/kg</span></td>
+                <td>$62.00 <span class="unit">USD</span></td>
+                <td>02/18/2025</td>
+                <td class="bom-col-actions">
+                  <button type="button" class="btn-icon" aria-label="Row actions">
+                    <img
+                      class="tabler tabler--16"
+                      src="https://cdn.jsdelivr.net/npm/@tabler/icons@3.26.0/icons/outline/dots-vertical.svg"
+                      width="16"
+                      height="16"
+                      alt=""
+                    />
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td class="bom-col-lead"></td>
+                <td class="bom-col-lead-narrow"></td>
+                <td>Bamboo veneer sheet</td>
+                <td><span class="chip chip--sm chip--info">In Progress</span></td>
+                <td>00011</td>
+                <td class="bom-td-tags"><div class="badge-group"><span class="badge badge--secondary">Badge</span><span class="badge badge--secondary badge--more">+2</span></div></td>
+                <td>0.35 <span class="unit">kg</span></td>
+                <td>5.6 <span class="unit">kgCO2e</span></td>
+                <td>$11.20 <span class="unit">USD</span></td>
+                <td>02/14/2025</td>
+                <td class="bom-col-actions">
+                  <button type="button" class="btn-icon" aria-label="Row actions">
+                    <img
+                      class="tabler tabler--16"
+                      src="https://cdn.jsdelivr.net/npm/@tabler/icons@3.26.0/icons/outline/dots-vertical.svg"
+                      width="16"
+                      height="16"
+                      alt=""
+                    />
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td class="bom-col-lead"></td>
+                <td class="bom-col-lead-narrow"></td>
+                <td>Biodegradable packaging film</td>
+                <td><span class="chip chip--sm chip--success">Finalized</span></td>
+                <td>—</td>
+                <td class="bom-td-tags"><div class="badge-group"><span class="badge badge--secondary">Badge</span></div></td>
+                <td>0.01 <span class="unit">kg</span></td>
+                <td>2.4 <span class="unit">kgCO2e/kg</span></td>
+                <td>$0.85 <span class="unit">USD</span></td>
+                <td>02/10/2025</td>
+                <td class="bom-col-actions">
+                  <button type="button" class="btn-icon" aria-label="Row actions">
+                    <img
+                      class="tabler tabler--16"
+                      src="https://cdn.jsdelivr.net/npm/@tabler/icons@3.26.0/icons/outline/dots-vertical.svg"
+                      width="16"
+                      height="16"
+                      alt=""
+                    />
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        </div>
+        <div class="bom-main is-hidden" id="standalone-view-import" hidden>
+        <header class="bom-header">
+          <h1 class="bom-header__title">Import Bill of Materials</h1>
+          <!-- Stepper (rendered by JS) -->
+          <div class="import-steps" aria-label="Import steps">
+            <ol class="import-steps__list" id="stepper"></ol>
+          </div>
+        </header>
+
+        <!-- ── Step panels ── -->
+        <div class="import-body" id="import-body">
+
+          <!-- Step 1: Upload -->
+          <div id="panel-1" class="import-step-panel">
+            <div class="import-card">
+              <div class="import-card__content">
+                <h2 class="import-section__title">
+                  Upload Bill of Materials
+                  <span class="import-required" aria-label="required">*</span>
+                </h2>
+                <ul class="import-hints">
+                  <li>Only include one product per BOM sheet</li>
+                  <li>Your BOM should include a column that defines the level of each component in the hierarchy</li>
+                </ul>
+
+                <!-- Drop zone (hidden once file chosen) -->
+                <div class="upload-zone" id="upload-zone" role="region" aria-label="File upload area">
+                  <input type="file" id="file-input" class="upload-zone__input" accept=".xls,.xlsx,.csv" tabindex="-1" />
+                  <div class="upload-zone__idle">
+                    <svg class="tabler-svg tabler--24 upload-zone__icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M0 0h24v24H0z" fill="none" stroke="none"/>
+                      <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"/><path d="M7 9l5 -5l5 5"/><path d="M12 4l0 12"/>
+                    </svg>
+                    <button type="button" class="btn btn--sm btn--secondary upload-zone__btn" id="select-file-btn">Select File</button>
+                    <p class="upload-zone__or">or drop file here</p>
+                  </div>
+                </div>
+
+                <!-- File row (shown after file chosen, replaces drop zone) -->
+                <div class="upload-file-row" id="upload-file-row" style="display:none">
+                  <svg class="tabler-svg tabler--16 upload-file-row__check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M0 0h24v24H0z" fill="none" stroke="none"/>
+                    <path d="M5 12l5 5l10 -10"/>
+                  </svg>
+                  <span class="upload-file-row__name" id="upload-filename"></span>
+                  <button type="button" class="btn btn--sm btn--secondary upload-file-row__change" id="change-file-btn">Change File</button>
+                </div>
+
+                <!-- Last configuration — shown only after a file is selected (see showFile / clearFile) -->
+                <div
+                  id="import-config-notice"
+                  class="import-config-notice"
+                  role="region"
+                  aria-labelledby="import-config-notice-title"
+                  hidden
+                >
+                  <div class="import-config-notice__row">
+                    <div class="import-config-notice__icon" aria-hidden="true">
+                      <svg
+                        class="tabler-svg tabler--16"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M0 0h24v24H0z" fill="none" stroke="none" />
+                        <path d="M12 8v4l2 2" />
+                        <path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5" />
+                      </svg>
+                    </div>
+                    <div class="import-config-notice__main">
+                      <p id="import-config-notice-title" class="import-config-notice__title">
+                        Last import configuration applied
+                      </p>
+                      <p class="import-config-notice__meta">Last used Mar 15, 2025</p>
+                      <p id="import-config-notice-desc" class="import-config-notice__text">
+                        Header row, data start, and column mapping match your last import until you confirm.
+                      </p>
+                    </div>
+                  </div>
+                  <label class="import-config-notice__toggle">
+                    <span class="import-config-notice__toggle-text">Use last import configuration</span>
+                    <span class="import-switch">
+                      <input
+                        type="checkbox"
+                        id="import-use-last-toggle"
+                        class="import-switch__input"
+                        checked
+                      />
+                      <span class="import-switch__track" aria-hidden="true"></span>
+                    </span>
+                  </label>
+                </div>
+
+                <p class="upload-hint">
+                  Supported file types: <strong>XLS, XLSX, CSV</strong>
+                  <span class="text-secondary">(max file size 10mb)</span>
+                </p>
+              </div>
+              <div class="import-card__footer">
+                <a href="#" class="import-cancel standalone-nav-products">Cancel</a>
+                <div class="import-card__actions">
+                  <button type="button" class="btn btn--sm btn--secondary" disabled>Back</button>
+                  <button type="button" class="btn btn--sm btn--dark" id="step1-next" disabled>Next</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Header + first data row (merged) -->
+          <div id="panel-2" class="import-step-panel import-step-panel--stretch" style="display:none">
+            <div class="import-card import-card--table">
+              <div class="import-card__content">
+                <div class="import-section__header">
+                  <h2 class="import-section__title">
+                    Locate your table
+                    <span class="import-required" aria-label="required">*</span>
+                  </h2>
+                  <p class="import-section__subtitle">
+                    Choose the row that contains your column headers, then the row where part data begins (usually the next row). The first data row defaults to the row below the header—change it if you have blank or title rows in between.
+                  </p>
+                </div>
+                <div class="select-row-wrap">
+                  <table class="select-row-table locate-table">
+                    <colgroup>
+                      <col class="locate-table__num-col" style="width:72px"/>
+                      <col class="locate-table__num-col" style="width:88px"/>
+                      <col class="locate-table__num-col" style="width:48px"/>
+                      <col style="width:240px"/><col style="width:200px"/><col style="width:160px"/><col style="width:120px"/><col style="width:80px"/><col style="width:110px"/>
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th scope="col">Header</th>
+                        <th scope="col">Data starts</th>
+                        <th scope="col" class="locate-table__num-col">#</th>
+                        <th scope="colgroup" colspan="8">Preview</th>
+                      </tr>
+                    </thead>
+                    <tbody id="locate-table-body">
+                      <!-- rows injected by JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="import-card__footer">
+                <a href="#" class="import-cancel standalone-nav-products">Cancel</a>
+                <div class="import-card__actions">
+                  <button type="button" class="btn btn--sm btn--secondary" id="step2-back">Back</button>
+                  <button type="button" class="btn btn--sm btn--dark" id="step2-next" disabled>Next</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Match Columns -->
+          <div id="panel-3" class="import-step-panel import-step-panel--stretch" style="display:none">
+            <div class="import-card import-card--table">
+              <div class="import-card__content">
+                <div class="import-section__header">
+                  <h2 class="import-section__title">
+                    Match Columns
+                    <span class="import-required" aria-label="required">*</span>
+                  </h2>
+                  <p class="import-section__subtitle">Map your spreadsheet columns to the required fields. Hover over options to see data previews.</p>
+                </div>
+                <div class="match-columns-wrap">
+                  <div id="match-columns-rows"></div>
+                </div>
+              </div>
+              <div class="import-card__footer">
+                <a href="#" class="import-cancel standalone-nav-products">Cancel</a>
+                <div class="import-card__actions">
+                  <button type="button" class="btn btn--sm btn--secondary" id="step3-back">Back</button>
+                  <button type="button" class="btn btn--sm btn--dark" id="step3-next" disabled>Next</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 4: Preview Data -->
+          <div id="panel-4" class="import-step-panel import-step-panel--stretch" style="display:none">
+            <div class="import-card import-card--table import-card--preview">
+              <div class="preview-header">
+                <div class="preview-header__text">
+                  <h2 class="import-section__title">Preview Data <span class="import-required">*</span></h2>
+                  <p class="import-section__subtitle">Review and edit your data before importing. Click any cell to modify.</p>
+                </div>
+                <label class="preview-toggle">
+                  <input type="checkbox" id="issues-only-toggle" class="preview-toggle__input" />
+                  <span class="preview-toggle__track"><span class="preview-toggle__thumb"></span></span>
+                  <span class="preview-toggle__label">Only show rows with issues</span>
+                </label>
+              </div>
+              <div id="preview-summary" class="preview-statusbar"></div>
+              <div id="preview-status-details" class="preview-status-details"></div>
+              <div class="preview-scroll">
+                <table class="preview-table">
+                  <thead id="preview-thead"></thead>
+                  <tbody id="preview-tbody"></tbody>
+                </table>
+              </div>
+              <div class="import-card__footer">
+                <a href="#" class="import-cancel standalone-nav-products">Cancel</a>
+                <div class="import-card__actions">
+                  <button type="button" class="btn btn--sm btn--secondary" id="step4-back">Back</button>
+                  <button type="button" class="btn btn--sm btn--dark" id="step4-import">Import</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 5: Confirm Creation -->
+          <div id="panel-5" class="import-step-panel import-step-panel--form" style="display:none">
+            <div class="confirm-layout">
+              <div class="confirm-scroll" id="confirm-scroll">
+
+                <!-- Section: Product Definition -->
+                <div class="confirm-section">
+                  <div class="confirm-section__info">
+                    <h3 class="confirm-section__title">Product definition</h3>
+                    <div class="confirm-prefilled-badge">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5l10 -10"/></svg>
+                      Pre-filled from import
+                    </div>
+                    <p class="confirm-section__desc">Name, mass, and identifiers for this product. Values with a "from file" tag were read from your BOM — edit before creating.</p>
+                  </div>
+                  <div class="confirm-section__form">
+                    <div class="confirm-form-card">
+                      <div class="form-field">
+                        <label class="form-label">Product name <span class="import-required">*</span> <span class="form-info-icon" title="The display name for this product">ⓘ</span></label>
+                        <div class="form-input-wrap">
+                          <input type="text" class="form-input" id="conf-product-name" />
+                          <span class="from-file-tag" id="conf-name-tag" style="display:none">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5l10-10"/></svg>
+                            From file
+                          </span>
+                        </div>
+                      </div>
+                      <div class="form-field">
+                        <label class="form-label">Product description <span class="form-optional">Optional</span> <span class="form-info-icon" title="Brief description of this product">ⓘ</span></label>
+                        <textarea class="form-input form-textarea" id="conf-product-desc" placeholder="Brief description of what this product is..."></textarea>
+                      </div>
+                      <div class="form-field">
+                        <label class="form-label">Product ID <span class="form-optional">Optional</span> <span class="form-info-icon" title="Internal SKU or part number">ⓘ</span></label>
+                        <input type="text" class="form-input" placeholder="e.g. CAB-SMKR-001" />
+                      </div>
+                      <div class="form-field">
+                        <label class="form-label">Tags <span class="form-optional">Optional</span> <span class="form-info-icon" title="Comma-separated tags">ⓘ</span></label>
+                        <input type="text" class="form-input" placeholder="e.g. smoker, outdoor, cabinet" />
+                      </div>
+                      <div class="form-field form-field--inline">
+                        <div class="form-field__grow">
+                          <label class="form-label">Per item mass <span class="import-required">*</span> <span class="form-info-icon" title="Total mass of one unit of this product">ⓘ</span></label>
+                          <div class="form-input-wrap">
+                            <input type="number" class="form-input" id="conf-mass" placeholder="0.0" />
+                            <span class="from-file-tag" id="conf-mass-tag" style="display:none">
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5l10-10"/></svg>
+                              From file
+                            </span>
+                          </div>
+                        </div>
+                        <div class="form-field__unit">
+                          <label class="form-label">Mass unit <span class="form-info-icon" title="Unit of mass">ⓘ</span></label>
+                          <select class="form-select-unit"><option>kg</option><option>g</option><option>lb</option></select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section: Supply Chain Sourcing -->
+                <div class="confirm-section">
+                  <div class="confirm-section__info">
+                    <h3 class="confirm-section__title">Supply chain sourcing</h3>
+                    <div class="confirm-prefilled-badge">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5l10 -10"/></svg>
+                      Pre-filled from import
+                    </div>
+                    <p class="confirm-section__desc">Where parts are made and shipped from. Optional supplier fields help with procurement context; source and destination support transport modeling.</p>
+                  </div>
+                  <div class="confirm-section__form">
+                    <div class="confirm-form-card">
+                      <div class="form-field">
+                        <div class="form-field__row-header">
+                          <label class="form-label">Supplier <span class="form-optional">Optional</span> <span class="form-info-icon" title="Supplier for this product">ⓘ</span></label>
+                          <button type="button" class="form-add-btn">+ Add supplier</button>
+                        </div>
+                        <select class="form-input form-select-full"><option value="">Select supplier...</option></select>
+                      </div>
+                      <div class="form-field">
+                        <label class="form-label">Supplier installation <span class="form-optional">Optional</span> <span class="form-info-icon" title="Specific facility">ⓘ</span></label>
+                        <select class="form-input form-select-full" disabled><option value="">Select supplier first...</option></select>
+                      </div>
+                      <div class="form-field">
+                        <label class="form-label">Source location <span class="form-optional">Optional</span> <span class="form-info-icon" title="Where parts are sourced">ⓘ</span></label>
+                        <div class="form-input-wrap">
+                          <input type="text" class="form-input" id="conf-source" placeholder="e.g. Shenzhen, China" />
+                          <span class="from-file-tag" id="conf-source-tag" style="display:none">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5l10-10"/></svg>
+                            From file
+                          </span>
+                        </div>
+                      </div>
+                      <div class="form-field">
+                        <label class="form-label">Destination location <span class="form-optional">Optional</span> <span class="form-info-icon" title="Where product is shipped to">ⓘ</span></label>
+                        <input type="text" class="form-input" placeholder="e.g. Munich, Germany" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div><!-- /confirm-scroll -->
+              <div class="confirm-footer">
+                <a href="#" class="import-cancel standalone-nav-products">Cancel</a>
+                <div class="import-card__actions">
+                  <button type="button" class="btn btn--sm btn--secondary" id="step5-back">Back</button>
+                  <button type="button" class="btn btn--sm btn--dark" id="step5-create">Create</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /import-body -->
+
+        </div>
+      </div>
+    </div>
+
+    <script>
+(function () {
+  var viewProducts = document.getElementById('standalone-view-products');
+  var viewImport = document.getElementById('standalone-view-import');
+
+  function showRoute(name) {
+    var isImport = name === 'import';
+    if (isImport) {
+      viewProducts.style.display = 'none';
+      viewImport.style.display = 'flex';
+      viewImport.removeAttribute('hidden');
+      viewImport.classList.remove('is-hidden');
+      document.title = 'Import Bill of Materials — Exploration (standalone)';
+    } else {
+      viewProducts.style.display = 'flex';
+      viewImport.style.display = 'none';
+      viewImport.setAttribute('hidden', '');
+      viewImport.classList.add('is-hidden');
+      document.title = 'BOM Import v2 — Products & Import (standalone demo)';
+    }
+  }
+
+  window.showProductsStandalone = function () { showRoute('products'); };
+  window.showImportStandalone = function () { showRoute('import'); };
+
+  var openImport = document.getElementById('standalone-open-import');
+  if (openImport) {
+    openImport.addEventListener('click', function (e) {
+      e.preventDefault();
+      showRoute('import');
+      var menu = document.getElementById('create-menu');
+      var btn = document.getElementById('create-menu-btn');
+      if (menu) menu.hidden = true;
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  document.querySelectorAll('.standalone-nav-products').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      showRoute('products');
+    });
+  });
+})();
+    </script>
+    <script>
+    (function () {
+      /* ── Data ── */
+      var STEPS = ['Upload', 'Locate table', 'Match Columns', 'Preview Data', 'Confirm Creation'];
+      var SAMPLE_FILE = 'cabinet_smoker_bom_input.xlsx';
+      var TABLE_ROWS = [
+        ['Level', 'Part Name', 'Description', 'Material', 'Mass (kg)', 'Qty', 'Cost (USD)'],
+        ['0', 'Cabinet Smoker', 'Outdoor cabinet smoker', '', '', '1', ''],
+        ['0', 'Grill Grate', 'Cooking grate component', 'Steel', '1.2', '1', '9.50'],
+        ['1', '- Chassis Assembly', 'Main frame structure', 'Steel', '0', '1', ''],
+        ['3', 'Door Hinge', 'Piano hinge for door', 'Steel', '0.15', '2', '1.80'],
+        ['3', 'Ash tray', 'Ash collection tray', 'Steel', '0.08', '', ''],
+        ['2', 'base plate ASM', 'Base plate assembly', 'AISI 1020', '0', '1', ''],
+        ['3', 'base plate BLK', 'Base plate blank', '', '0', '1', ''],
+        ['4', 'base plate', 'Main base plate', 'AISI 1020', '4.90027615', '1', '12.40'],
+        ['4', 'POWDER', 'Powder coat finish', '', '1', '1', '3.20'],
+        ['3', 'M4 Rivnut', 'M4 rivet nut fastener', 'Steel', '0.013', '16', '0.08'],
+        ['2', 'Chassis reinforce frame weld', 'Frame reinforcement weld', 'Steel', '0', '1', ''],
+        ['2', 'Side panel left', 'Left side panel', 'AISI 1020', '2.34', '1', '8.75'],
+        ['2', 'Side panel right', 'Right side panel', 'AISI 1020', '2.34', '1', '8.75'],
+        ['1', 'Door Assembly', 'Front access door', 'Steel', '0', '1', ''],
+      ];
+
+      var currentStep = 1;
+      var selectedHeaderRowIndex = -1; // 0-based index into TABLE_ROWS; -1 = not chosen yet
+      var selectedDataStartRowIndex = -1; // 0-based; first row of BOM data
+
+      /* Saved import configuration — applied when “Use last import configuration” is on */
+      var LAST_IMPORT_CONFIG = {
+        headerRowIndex: 0,
+        dataStartRowIndex: 1,
+        columnMap: {
+          Level: 'Level',
+          'Part Name': 'Part Name',
+          Quantity: 'Qty',
+          Unit: 'Material'
+        },
+        optionalMap: {
+          'Manufacturing cost': 'Cost (USD)',
+          'Part description': 'Description',
+          Material: 'Material'
+        }
+      };
+
+      /* True after step 1 Next when using saved mapping — prefill steps 3 & 4 */
+      var prefillFromLastImport = false;
+
+      /* Step 4 — four required core fields + user-added optional rows (pick attribute, then map column) */
+      var CORE_MATCH_FIELDS = [
+        { name: 'Level',      desc: 'Hierarchy level of the component (e.g., 0, 1, 2)', required: true },
+        { name: 'Part Name',  desc: 'Name of the component or part', required: true },
+        { name: 'Quantity',   desc: 'Quantity of the component', required: true },
+        { name: 'Unit',       desc: 'Unit of measurement (e.g., kg, pieces). If not provided, kg will be assumed.', required: false }
+      ];
+      var OPTIONAL_FIELD_CATALOG = [
+        { name: 'Manufacturing cost',   desc: 'Cost or unit price from your BOM' },
+        { name: 'Part description',     desc: 'Longer description text for the part' },
+        { name: 'Material',             desc: 'Material type, grade, or specification' },
+        { name: 'Source location',      desc: 'Region or country where the part is sourced' },
+        { name: 'Emissions factor',     desc: 'Carbon intensity or similar, if listed' },
+        { name: 'Recycled content (%)', desc: 'Share of recycled content if listed' }
+      ];
+      var coreColumnMapping = { Level: '', 'Part Name': '', Quantity: '', Unit: '' };
+      var addedOptionalRows = []; // { id, fieldName, mappedColumn }
+      var optionalRowIdCounter = 0;
+
+      function optionalFieldMeta(name) {
+        for (var i = 0; i < OPTIONAL_FIELD_CATALOG.length; i++) {
+          if (OPTIONAL_FIELD_CATALOG[i].name === name) return OPTIONAL_FIELD_CATALOG[i];
+        }
+        return null;
+      }
+
+      function resetAddedOptionalRows() {
+        addedOptionalRows = [];
+        optionalRowIdCounter = 0;
+      }
+
+      function seedAddedOptionalsFromLastImport() {
+        var map = LAST_IMPORT_CONFIG.optionalMap;
+        if (!map) return;
+        Object.keys(map).forEach(function (name) {
+          var col = map[name];
+          if (!col) return;
+          if (!optionalFieldMeta(name)) return;
+          addedOptionalRows.push({ id: ++optionalRowIdCounter, fieldName: name, mappedColumn: col });
+        });
+      }
+
+      /* ── Stepper ── */
+      var STEP_CHECK_SVG =
+        '<svg class="import-step__check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        '<path d="M0 0h24v24H0z" fill="none" stroke="none"/><path d="M5 12l5 5l10 -10"/></svg>';
+
+      function renderStepper() {
+        var ol = document.getElementById('stepper');
+        ol.innerHTML = '';
+        STEPS.forEach(function (label, i) {
+          var n = i + 1;
+          var isDone = n < currentStep;
+          var isActive = n === currentStep;
+          var isUpcoming = n > currentStep;
+          var isLast = i === STEPS.length - 1;
+          var lastUpcoming = isUpcoming && isLast;
+
+          var li = document.createElement('li');
+          li.className = 'import-step' +
+            (isDone ? ' import-step--done' : '') +
+            (isActive ? ' import-step--active' : '') +
+            (isUpcoming ? ' import-step--upcoming' : '') +
+            (lastUpcoming ? ' import-step--text-only' : '');
+          if (isActive) li.setAttribute('aria-current', 'step');
+
+          var mark = document.createElement('span');
+          mark.className = 'import-step__mark';
+          mark.setAttribute('aria-hidden', 'true');
+          if (lastUpcoming) {
+            mark.classList.add('import-step__mark--hidden');
+          } else if (isDone || isActive) {
+            mark.innerHTML = STEP_CHECK_SVG;
+          } else {
+            mark.textContent = String(n);
+          }
+
+          var lbl = document.createElement('span');
+          lbl.className = 'import-step__label';
+          lbl.textContent = n + '. ' + label;
+
+          var hit = document.createElement('button');
+          hit.type = 'button';
+          hit.className = 'import-step__hit';
+          hit.setAttribute('aria-label', 'Go to step ' + n + ': ' + label);
+          hit.appendChild(mark);
+          hit.appendChild(lbl);
+          hit.addEventListener('click', function () {
+            goToStep(n);
+          });
+
+          li.appendChild(hit);
+          ol.appendChild(li);
+
+          if (!isLast) {
+            var rail = document.createElement('li');
+            rail.className = 'import-step__rail';
+            rail.setAttribute('role', 'presentation');
+            rail.setAttribute('aria-hidden', 'true');
+            ol.appendChild(rail);
+          }
+        });
+      }
+
+      /* ── Panel switching ── */
+      function goToStep(n) {
+        if (n === currentStep) return;
+        document.getElementById('panel-' + currentStep).style.display = 'none';
+        currentStep = n;
+        document.getElementById('panel-' + currentStep).style.display = '';
+        var body = document.getElementById('import-body');
+        body.classList.toggle('import-body--stretch', currentStep > 1 && currentStep < 5);
+        body.classList.toggle('import-body--form', currentStep === 5);
+        /* 5-step flow: 3 = match columns, 4 = preview, 5 = confirm (no separate data-start step; that lives on step 2). */
+        switch (n) {
+          case 3:
+            renderStep4();
+            if (prefillFromLastImport) {
+              applyLastSavedColumnMappings();
+            }
+            break;
+          case 4:
+            syncStep4FromDom();
+            renderStep5();
+            break;
+          case 5:
+            renderStep6();
+            break;
+        }
+        renderStepper();
+      }
+
+      /* ── Step 1: Upload ── */
+      var uploadZone   = document.getElementById('upload-zone');
+      var uploadFileRow = document.getElementById('upload-file-row');
+      var configNotice = document.getElementById('import-config-notice');
+      var useLastImportToggle = document.getElementById('import-use-last-toggle');
+      var filenameEl   = document.getElementById('upload-filename');
+      var step1Next    = document.getElementById('step1-next');
+      var fileInput    = document.getElementById('file-input');
+
+      function showFile(name) {
+        uploadZone.style.display = 'none';
+        filenameEl.textContent = name;
+        uploadFileRow.style.display = 'flex';
+        step1Next.disabled = false;
+        if (configNotice) configNotice.hidden = false;
+      }
+
+      function clearFile() {
+        uploadFileRow.style.display = 'none';
+        uploadZone.style.display = '';
+        filenameEl.textContent = '';
+        step1Next.disabled = true;
+        if (configNotice) configNotice.hidden = true;
+        if (useLastImportToggle) {
+          useLastImportToggle.checked = true;
+          updateImportConfigNoticeCopy();
+        }
+        prefillFromLastImport = false;
+        coreColumnMapping = { Level: '', 'Part Name': '', Quantity: '', Unit: '' };
+        resetAddedOptionalRows();
+        selectedHeaderRowIndex = -1;
+        selectedDataStartRowIndex = -1;
+        renderLocateTable();
+        updateLocateNextEnabled();
+      }
+
+      document.getElementById('select-file-btn').addEventListener('click', function () {
+        showFile(SAMPLE_FILE);
+      });
+
+      document.getElementById('change-file-btn').addEventListener('click', function () {
+        clearFile();
+      });
+
+      function updateImportConfigNoticeCopy() {
+        var title = document.getElementById('import-config-notice-title');
+        var desc = document.getElementById('import-config-notice-desc');
+        if (!title || !desc || !useLastImportToggle) return;
+        if (useLastImportToggle.checked) {
+          title.textContent = 'Last import configuration applied';
+          desc.textContent =
+            'Header row, data start, and column mapping match your last import until you confirm.';
+        } else {
+          title.textContent = 'Configure mapping from scratch';
+          desc.textContent =
+            'Nothing from your last import is pre-filled. Set header row, data start, and columns in the next steps.';
+        }
+      }
+      if (useLastImportToggle) {
+        useLastImportToggle.addEventListener('change', updateImportConfigNoticeCopy);
+      }
+
+      fileInput.addEventListener('change', function () {
+        if (fileInput.files && fileInput.files[0]) {
+          var name = fileInput.files[0].name;
+          showFile(name);
+          if (currentStep === 4) {
+            // Stay on preview — show a processing state then re-render
+            previewFilename = name;
+            var bar = document.getElementById('preview-summary');
+            var detailPanel = document.getElementById('preview-status-details');
+            detailPanel.classList.remove('preview-status-details--open');
+            bar.innerHTML =
+              '<span class="preview-status-pill" style="color:var(--color-text-tertiary);gap:6px">' +
+                '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 0.8s linear infinite"><path d="M12 3a9 9 0 1 0 9 9"/></svg>' +
+                'Processing ' + name + '…' +
+              '</span>';
+            setTimeout(function () {
+              selectedHeaderRowIndex = 0;
+              selectedDataStartRowIndex = 1;
+              renderLocateTable();
+              renderStep5();
+            }, 900);
+          }
+        }
+      });
+
+      uploadZone.addEventListener('dragover', function (e) { e.preventDefault(); uploadZone.classList.add('upload-zone--drag'); });
+      uploadZone.addEventListener('dragleave', function () { uploadZone.classList.remove('upload-zone--drag'); });
+      uploadZone.addEventListener('drop', function (e) {
+        e.preventDefault();
+        uploadZone.classList.remove('upload-zone--drag');
+        var f = e.dataTransfer.files[0];
+        if (f) showFile(f.name);
+      });
+
+      step1Next.addEventListener('click', function () {
+        if (useLastImportToggle && useLastImportToggle.checked) {
+          prefillFromLastImport = true;
+          applyLocateSelections(LAST_IMPORT_CONFIG.headerRowIndex, LAST_IMPORT_CONFIG.dataStartRowIndex);
+          goToStep(2);
+        } else {
+          prefillFromLastImport = false;
+          goToStep(2);
+        }
+      });
+
+      /* ── Step 2: Locate header + first data row (single table) ── */
+      var step2Next = document.getElementById('step2-next');
+      var locateTableBody = document.getElementById('locate-table-body');
+
+      function updateLocateNextEnabled() {
+        var ok =
+          selectedHeaderRowIndex >= 0 &&
+          selectedDataStartRowIndex >= 0 &&
+          selectedDataStartRowIndex > selectedHeaderRowIndex;
+        step2Next.disabled = !ok;
+      }
+
+      function renderLocateTable() {
+        locateTableBody.innerHTML = '';
+        TABLE_ROWS.forEach(function (row, i) {
+          var tr = document.createElement('tr');
+          var isHeaderRow = selectedHeaderRowIndex >= 0 && i === selectedHeaderRowIndex;
+          var isDataStart = selectedDataStartRowIndex >= 0 && i === selectedDataStartRowIndex;
+          var isAboveHeader = selectedHeaderRowIndex >= 0 && i < selectedHeaderRowIndex;
+          tr.className = 'select-row-table__row' +
+            (isAboveHeader ? ' locate-table__row--above-header' : '') +
+            (isHeaderRow ? ' select-row-table__row--header' : '') +
+            (isDataStart ? ' select-row-table__row--data-start' : '');
+
+          var tdH = document.createElement('td');
+          tdH.className = 'select-row-table__radio-cell locate-table__pick-cell locate-table__pick-cell--hdr';
+          var hStack = document.createElement('div');
+          hStack.className = 'locate-table__pick-stack';
+          var hRadio = document.createElement('input');
+          hRadio.type = 'radio';
+          hRadio.name = 'header-row';
+          hRadio.value = String(i + 1);
+          hRadio.id = 'loc-hdr-' + (i + 1);
+          hRadio.className = 'select-row-radio';
+          if (selectedHeaderRowIndex === i) hRadio.checked = true;
+          hStack.appendChild(hRadio);
+          if (isHeaderRow) {
+            var hdrTag = document.createElement('span');
+            hdrTag.className = 'header-row-badge';
+            hdrTag.textContent = 'Header';
+            hdrTag.setAttribute('aria-hidden', 'true');
+            hStack.appendChild(hdrTag);
+          }
+          tdH.appendChild(hStack);
+          tr.appendChild(tdH);
+
+          var tdD = document.createElement('td');
+          tdD.className = 'select-row-table__radio-cell locate-table__pick-cell locate-table__pick-cell--data';
+          var showDataDash = selectedHeaderRowIndex < 0 || i <= selectedHeaderRowIndex;
+          if (showDataDash) {
+            var sp = document.createElement('span');
+            sp.className = 'locate-table__data-spacer';
+            sp.textContent = '—';
+            tdD.appendChild(sp);
+          } else {
+            var dStack = document.createElement('div');
+            dStack.className = 'locate-table__pick-stack';
+            var dRadio = document.createElement('input');
+            dRadio.type = 'radio';
+            dRadio.name = 'data-start-row';
+            dRadio.value = String(i);
+            dRadio.id = 'loc-data-' + i;
+            dRadio.className = 'select-row-radio';
+            if (selectedDataStartRowIndex === i) dRadio.checked = true;
+            dStack.appendChild(dRadio);
+            if (isDataStart) {
+              var dataTag = document.createElement('span');
+              dataTag.className = 'locate-table__data-badge';
+              dataTag.textContent = 'Data';
+              dataTag.setAttribute('aria-hidden', 'true');
+              dStack.appendChild(dataTag);
+            }
+            tdD.appendChild(dStack);
+            dRadio.addEventListener('click', function (e) { e.stopPropagation(); });
+            dRadio.addEventListener('change', function () {
+              selectedDataStartRowIndex = i;
+              renderLocateTable();
+              updateLocateNextEnabled();
+            });
+          }
+          tr.appendChild(tdD);
+
+          var tdNum = document.createElement('td');
+          tdNum.className = 'select-row-table__radio-cell locate-table__row-num';
+          tdNum.textContent = String(i + 1);
+          tr.appendChild(tdNum);
+
+          row.forEach(function (cell) {
+            var td = document.createElement('td');
+            var lbl = document.createElement('label');
+            if (selectedHeaderRowIndex < 0 || i <= selectedHeaderRowIndex) {
+              lbl.htmlFor = 'loc-hdr-' + (i + 1);
+            } else {
+              lbl.htmlFor = 'loc-data-' + i;
+            }
+            lbl.className = isHeaderRow
+              ? 'select-row-table__cell-label select-row-table__cell-label--bold'
+              : 'select-row-table__cell-label';
+            lbl.textContent = cell;
+            td.appendChild(lbl);
+            tr.appendChild(td);
+          });
+
+          hRadio.addEventListener('click', function (e) { e.stopPropagation(); });
+          hRadio.addEventListener('change', function () {
+            selectedHeaderRowIndex = i;
+            if (selectedDataStartRowIndex <= selectedHeaderRowIndex) {
+              selectedDataStartRowIndex = Math.min(selectedHeaderRowIndex + 1, TABLE_ROWS.length - 1);
+            }
+            if (selectedHeaderRowIndex >= TABLE_ROWS.length - 1) {
+              selectedDataStartRowIndex = -1;
+            }
+            renderLocateTable();
+            updateLocateNextEnabled();
+          });
+
+          locateTableBody.appendChild(tr);
+        });
+      }
+
+      function applyLocateSelections(headerIdx0, dataIdx0) {
+        selectedHeaderRowIndex = headerIdx0;
+        selectedDataStartRowIndex = dataIdx0;
+        if (selectedDataStartRowIndex <= selectedHeaderRowIndex) {
+          selectedDataStartRowIndex = Math.min(selectedHeaderRowIndex + 1, TABLE_ROWS.length - 1);
+        }
+        renderLocateTable();
+        updateLocateNextEnabled();
+      }
+
+      document.getElementById('step2-back').addEventListener('click', function () { goToStep(1); });
+      step2Next.addEventListener('click', function () {
+        var h = locateTableBody.querySelector('input[name="header-row"]:checked');
+        var d = locateTableBody.querySelector('input[name="data-start-row"]:checked');
+        if (h) selectedHeaderRowIndex = parseInt(h.value, 10) - 1;
+        if (d) selectedDataStartRowIndex = parseInt(d.value, 10);
+        renderStep4();
+        if (prefillFromLastImport) {
+          applyLastSavedColumnMappings();
+        }
+        goToStep(3);
+      });
+
+      /* ── Step 3: Match Columns ── */
+      var step3Next = document.getElementById('step3-next');
+      var matchRowsEl = document.getElementById('match-columns-rows');
+
+      // Close all col-select menus when clicking outside
+      document.addEventListener('click', function () {
+        document.querySelectorAll('.col-select__menu').forEach(function (m) { m.hidden = true; });
+      });
+
+      function checkStep4Valid() {
+        var required = matchRowsEl.querySelectorAll('.match-row--core .col-select[data-required="true"]');
+        var allFilled = true;
+        required.forEach(function (s) { if (!s.dataset.value) allFilled = false; });
+        step3Next.disabled = !allFilled;
+      }
+
+      var PREVIEW_LINES_DEFAULT = 3;
+      var PREVIEW_LINES_HOVER = 30;
+
+      function fillColumnPreview(previewEl, columnName, headerCols, dataRows, maxLines) {
+        if (!previewEl) return;
+        maxLines = maxLines == null ? PREVIEW_LINES_DEFAULT : maxLines;
+        previewEl.innerHTML = '';
+        if (!columnName) return;
+        var idx = headerCols.indexOf(columnName);
+        if (idx < 0) return;
+        var count = 0;
+        for (var r = 0; r < dataRows.length && count < maxLines; r++) {
+          var val = dataRows[r][idx];
+          if (val === undefined || val === '') continue;
+          var line = document.createElement('div');
+          line.className = 'match-col-preview__line';
+          line.textContent = val;
+          line.title = val;
+          previewEl.appendChild(line);
+          count++;
+        }
+      }
+
+      function bindColumnPreviewHover(previewEl, wrap, headerCols, dataRows) {
+        if (!previewEl || previewEl.dataset.previewHoverBound === '1') return;
+        previewEl.dataset.previewHoverBound = '1';
+        previewEl.setAttribute('title', 'Hover to show more sample values from this column');
+        previewEl.addEventListener('mouseenter', function () {
+          if (!wrap.dataset.value) return;
+          previewEl.classList.add('match-col-preview--expanded');
+          fillColumnPreview(previewEl, wrap.dataset.value, headerCols, dataRows, PREVIEW_LINES_HOVER);
+        });
+        previewEl.addEventListener('mouseleave', function () {
+          previewEl.classList.remove('match-col-preview--expanded');
+          fillColumnPreview(previewEl, wrap.dataset.value || '', headerCols, dataRows, PREVIEW_LINES_DEFAULT);
+        });
+      }
+
+      function makeColSelect(field, headerCols, dataRows, onPick) {
+        var wrap = document.createElement('div');
+        wrap.className = 'col-select';
+        wrap.dataset.value = '';
+        wrap.dataset.required = field.required ? 'true' : 'false';
+
+        var trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'col-select__trigger';
+
+        var triggerText = document.createElement('span');
+        triggerText.className = 'col-select__placeholder';
+        triggerText.textContent = field.required ? 'Choose a column' : 'Optional';
+
+        var chevron = document.createElement('span');
+        chevron.className = 'col-select__chevron';
+        chevron.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+
+        trigger.appendChild(triggerText);
+        trigger.appendChild(chevron);
+
+        var menu = document.createElement('div');
+        menu.className = 'col-select__menu';
+        menu.hidden = true;
+
+        var previewEl = document.createElement('div');
+        previewEl.className = 'match-col-preview';
+        previewEl.setAttribute('aria-live', 'polite');
+        previewEl.setAttribute('role', 'region');
+        previewEl.setAttribute('aria-label', 'Sample values from the selected column');
+
+        var clearBtn = document.createElement('button');
+        clearBtn.type = 'button';
+        clearBtn.className = 'match-map-picker__clear';
+        clearBtn.setAttribute('aria-label', 'Clear column mapping');
+        clearBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M0 0h24v24H0z" fill="none" stroke="none"/><path d="M18 6L6 18M6 6l12 12"/></svg>';
+        clearBtn.hidden = true;
+
+        function syncPreview() {
+          previewEl.classList.remove('match-col-preview--expanded');
+          fillColumnPreview(previewEl, wrap.dataset.value || '', headerCols, dataRows, PREVIEW_LINES_DEFAULT);
+          clearBtn.hidden = !(wrap.dataset.value);
+        }
+
+        headerCols.forEach(function (col, colIdx) {
+          var opt = document.createElement('div');
+          opt.className = 'col-select__option';
+          opt.textContent = col;
+
+          var preview = document.createElement('div');
+          preview.className = 'col-preview';
+          var previewTitle = document.createElement('div');
+          previewTitle.className = 'col-preview__title';
+          previewTitle.textContent = 'Data preview';
+          preview.appendChild(previewTitle);
+          var count = 0;
+          for (var r = 0; r < dataRows.length && count < 3; r++) {
+            var val = dataRows[r][colIdx];
+            if (val !== '') {
+              var valEl = document.createElement('div');
+              valEl.className = 'col-preview__val';
+              valEl.textContent = val;
+              preview.appendChild(valEl);
+              count++;
+            }
+          }
+          opt.appendChild(preview);
+
+          opt.addEventListener('click', function (e) {
+            e.stopPropagation();
+            wrap.dataset.value = col;
+            triggerText.textContent = col;
+            triggerText.className = 'col-select__value';
+            menu.hidden = true;
+            syncPreview();
+            if (typeof onPick === 'function') onPick(col);
+            checkStep4Valid();
+          });
+
+          menu.appendChild(opt);
+        });
+
+        trigger.addEventListener('click', function (e) {
+          e.stopPropagation();
+          if (trigger.disabled) return;
+          var isOpen = !menu.hidden;
+          document.querySelectorAll('.col-select__menu').forEach(function (m) { m.hidden = true; });
+          menu.hidden = isOpen;
+        });
+
+        clearBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          wrap.dataset.value = '';
+          triggerText.textContent = field.required ? 'Choose a column' : 'Optional';
+          triggerText.className = 'col-select__placeholder';
+          syncPreview();
+          if (typeof onPick === 'function') onPick('');
+          checkStep4Valid();
+        });
+
+        wrap.appendChild(trigger);
+        wrap.appendChild(menu);
+
+        var pickWrap = document.createElement('div');
+        pickWrap.className = 'match-map-picker__controls';
+        pickWrap.appendChild(wrap);
+        pickWrap.appendChild(clearBtn);
+        pickWrap._syncPreview = syncPreview;
+
+        syncPreview();
+        bindColumnPreviewHover(previewEl, wrap, headerCols, dataRows);
+
+        return { pickWrap: pickWrap, previewEl: previewEl, colSelect: wrap };
+      }
+
+      function syncStep4FromDom() {
+        if (!matchRowsEl || !matchRowsEl.children.length) return;
+        matchRowsEl.querySelectorAll('.match-row--core').forEach(function (row) {
+          var k = row.getAttribute('data-core-field');
+          var w = row.querySelector('.col-select');
+          if (k && w) coreColumnMapping[k] = w.dataset.value || '';
+        });
+        var nextAdded = [];
+        matchRowsEl.querySelectorAll('.match-row--picked-optional').forEach(function (row) {
+          var id = parseInt(row.dataset.optionalRowId, 10);
+          var fieldSel = row.querySelector('.match-optional-catalog-select');
+          var w = row.querySelector('.col-select');
+          var fn = fieldSel && fieldSel.value ? fieldSel.value : '';
+          if (!fn) {
+            var dfn = row.getAttribute('data-field-name');
+            if (dfn) fn = dfn;
+          }
+          var mc = w && w.dataset.value ? w.dataset.value : '';
+          if (!isNaN(id)) {
+            nextAdded.push({ id: id, fieldName: fn, mappedColumn: mc });
+          }
+        });
+        addedOptionalRows = nextAdded;
+      }
+
+      function applyColSelectValue(wrap, col) {
+        if (!wrap) return;
+        wrap.dataset.value = col;
+        var triggerText = wrap.querySelector('.col-select__trigger span');
+        if (triggerText) {
+          triggerText.textContent = col;
+          triggerText.className = 'col-select__value';
+        }
+        var ctrl = wrap.closest('.match-map-picker__controls');
+        if (ctrl && typeof ctrl._syncPreview === 'function') ctrl._syncPreview();
+      }
+
+      function buildOptionalCatalogSelect(rowId, currentFieldName) {
+        var usedElsewhere = {};
+        addedOptionalRows.forEach(function (r) {
+          if (r.id !== rowId && r.fieldName) usedElsewhere[r.fieldName] = true;
+        });
+        var sel = document.createElement('select');
+        sel.className = 'match-optional-catalog-select';
+        sel.setAttribute('aria-label', 'Optional attribute to map');
+        var opt0 = document.createElement('option');
+        opt0.value = '';
+        opt0.textContent = 'Select field…';
+        sel.appendChild(opt0);
+        OPTIONAL_FIELD_CATALOG.forEach(function (f) {
+          if (usedElsewhere[f.name] && f.name !== currentFieldName) return;
+          var o = document.createElement('option');
+          o.value = f.name;
+          o.textContent = f.name;
+          sel.appendChild(o);
+        });
+        if (currentFieldName) sel.value = currentFieldName;
+        return sel;
+      }
+
+      function createMatchMapArrow() {
+        var el = document.createElement('span');
+        el.className = 'match-row__arrow';
+        el.setAttribute('aria-hidden', 'true');
+        el.textContent = '←';
+        return el;
+      }
+
+      function appendMatchColumnHeader(grid) {
+        var h = document.createElement('div');
+        h.className = 'match-map-header';
+        var d = document.createElement('span');
+        d.className = 'match-map-header__cell match-map-header__cell--dest';
+        d.textContent = 'Destination column';
+        var a = document.createElement('span');
+        a.className = 'match-map-header__cell match-map-header__cell--arrow';
+        a.setAttribute('aria-hidden', 'true');
+        var y = document.createElement('span');
+        y.className = 'match-map-header__cell match-map-header__cell--your';
+        y.textContent = 'Your column';
+        var p = document.createElement('span');
+        p.className = 'match-map-header__cell match-map-header__cell--preview';
+        p.textContent = 'Data preview';
+        h.appendChild(d);
+        h.appendChild(a);
+        h.appendChild(y);
+        h.appendChild(p);
+        grid.appendChild(h);
+      }
+
+      function buildStep4Rows() {
+        var headerCols = TABLE_ROWS[selectedHeaderRowIndex];
+        var dataRows = TABLE_ROWS.slice(selectedDataStartRowIndex);
+        matchRowsEl.innerHTML = '';
+
+        var fieldsGrid = document.createElement('div');
+        fieldsGrid.className = 'match-fields-grid';
+        appendMatchColumnHeader(fieldsGrid);
+
+        CORE_MATCH_FIELDS.forEach(function (field) {
+          var row = document.createElement('div');
+          row.className = 'match-map-row match-row--core';
+          row.setAttribute('data-core-field', field.name);
+
+          var dest = document.createElement('div');
+          dest.className = 'match-row__dest';
+          var nameEl = document.createElement('span');
+          nameEl.className = 'match-row__field-name';
+          nameEl.appendChild(document.createTextNode(field.name));
+          nameEl.title = field.desc;
+          if (field.required) {
+            var req = document.createElement('span');
+            req.className = 'import-required';
+            req.textContent = ' *';
+            nameEl.appendChild(req);
+          }
+          var descEl = document.createElement('span');
+          descEl.className = 'match-row__field-desc';
+          descEl.textContent = field.desc;
+          dest.appendChild(nameEl);
+          dest.appendChild(descEl);
+
+          var selectWrap = document.createElement('div');
+          selectWrap.className = 'match-row__select-wrap';
+          var mp = makeColSelect(field, headerCols, dataRows, function (col) {
+            coreColumnMapping[field.name] = col;
+          });
+          var saved = coreColumnMapping[field.name];
+          if (saved) applyColSelectValue(mp.colSelect, saved);
+          selectWrap.appendChild(mp.pickWrap);
+
+          var previewShell = document.createElement('div');
+          previewShell.className = 'match-row__preview-wrap';
+          previewShell.appendChild(mp.previewEl);
+
+          var mapPick = document.createElement('div');
+          mapPick.className = 'match-row__map match-row__map--pick';
+          mapPick.appendChild(selectWrap);
+
+          var mapPrev = document.createElement('div');
+          mapPrev.className = 'match-row__map match-row__map--preview';
+          mapPrev.appendChild(previewShell);
+
+          row.appendChild(dest);
+          row.appendChild(createMatchMapArrow());
+          row.appendChild(mapPick);
+          row.appendChild(mapPrev);
+          fieldsGrid.appendChild(row);
+        });
+
+        addedOptionalRows.forEach(function (item) {
+          var row = document.createElement('div');
+          row.className = 'match-map-row match-row--picked-optional';
+          row.dataset.optionalRowId = String(item.id);
+          if (item.fieldName) row.setAttribute('data-field-name', item.fieldName);
+
+          var dest = document.createElement('div');
+          dest.className = 'match-row__dest';
+
+          var rm = document.createElement('button');
+          rm.type = 'button';
+          rm.className = 'match-row__remove-optional';
+          rm.setAttribute('aria-label', 'Remove this mapping');
+          rm.innerHTML = '<svg class="tabler-svg tabler--16" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M0 0h24v24H0z" fill="none" stroke="none"/><path d="M4 7l16 0"/><path d="M10 11l0 6"/><path d="M14 11l0 6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/></svg>';
+          rm.addEventListener('click', function () {
+            syncStep4FromDom();
+            addedOptionalRows = addedOptionalRows.filter(function (x) { return x.id !== item.id; });
+            buildStep4Rows();
+          });
+
+          if (item.fieldName) {
+            var titleRow = document.createElement('div');
+            titleRow.className = 'match-row__optional-title-row';
+            var nameEl = document.createElement('span');
+            nameEl.className = 'match-row__field-name';
+            var meta = optionalFieldMeta(item.fieldName);
+            nameEl.textContent = item.fieldName;
+            nameEl.title = meta ? meta.desc : '';
+            titleRow.appendChild(nameEl);
+            titleRow.appendChild(rm);
+            dest.appendChild(titleRow);
+            var descEl = document.createElement('span');
+            descEl.className = 'match-row__field-desc match-row__field-desc--optional-pick';
+            descEl.textContent = meta ? meta.desc : '';
+            dest.appendChild(descEl);
+          } else {
+            var catalogSel = buildOptionalCatalogSelect(item.id, '');
+            catalogSel.addEventListener('change', function () {
+              syncStep4FromDom();
+              var it = addedOptionalRows.find(function (x) { return x.id === item.id; });
+              if (it) {
+                it.fieldName = catalogSel.value;
+                it.mappedColumn = '';
+              }
+              buildStep4Rows();
+            });
+            catalogSel.title = 'Choose which attribute to map, then pick your column below.';
+            var draftRow = document.createElement('div');
+            draftRow.className = 'match-row__optional-title-row';
+            draftRow.appendChild(catalogSel);
+            draftRow.appendChild(rm);
+            dest.appendChild(draftRow);
+            var descEl = document.createElement('span');
+            descEl.className = 'match-row__field-desc match-row__field-desc--optional-pick';
+            descEl.textContent = 'Select an attribute, then choose your column below.';
+            dest.appendChild(descEl);
+          }
+
+          var selectWrap = document.createElement('div');
+          selectWrap.className = 'match-row__select-wrap' + (item.fieldName ? '' : ' match-row__select-wrap--disabled');
+          var fld = { name: '', required: false, desc: '' };
+          var mp = makeColSelect(fld, headerCols, dataRows, function (col) {
+            var it = addedOptionalRows.find(function (x) { return x.id === item.id; });
+            if (it) it.mappedColumn = col;
+          });
+          if (item.mappedColumn && item.fieldName) applyColSelectValue(mp.colSelect, item.mappedColumn);
+          if (!item.fieldName) {
+            mp.colSelect.dataset.value = '';
+            var trg = mp.colSelect.querySelector('.col-select__trigger');
+            if (trg) trg.disabled = true;
+            if (mp.pickWrap._syncPreview) mp.pickWrap._syncPreview();
+          }
+          selectWrap.appendChild(mp.pickWrap);
+
+          var previewShell = document.createElement('div');
+          previewShell.className = 'match-row__preview-wrap';
+          previewShell.appendChild(mp.previewEl);
+
+          var mapPick = document.createElement('div');
+          mapPick.className = 'match-row__map match-row__map--pick';
+          mapPick.appendChild(selectWrap);
+
+          var mapPrev = document.createElement('div');
+          mapPrev.className = 'match-row__map match-row__map--preview';
+          mapPrev.appendChild(previewShell);
+
+          row.appendChild(dest);
+          row.appendChild(createMatchMapArrow());
+          row.appendChild(mapPick);
+          row.appendChild(mapPrev);
+          fieldsGrid.appendChild(row);
+        });
+
+        var addRow = document.createElement('div');
+        addRow.className = 'match-fields-grid__add';
+        var addBtn = document.createElement('button');
+        addBtn.type = 'button';
+        addBtn.className = 'btn btn--sm btn--secondary';
+        addBtn.textContent = '+ Add column';
+        var addHint = document.createElement('span');
+        addHint.className = 'match-row__add-optional-hint';
+        addHint.textContent = 'Add another attribute and map it to a column.';
+        addBtn.addEventListener('click', function () {
+          syncStep4FromDom();
+          addedOptionalRows.push({ id: ++optionalRowIdCounter, fieldName: '', mappedColumn: '' });
+          buildStep4Rows();
+        });
+        addRow.appendChild(addBtn);
+        addRow.appendChild(addHint);
+        fieldsGrid.appendChild(addRow);
+
+        matchRowsEl.appendChild(fieldsGrid);
+
+        checkStep4Valid();
+        renderMatchSheetPreview();
+      }
+
+      function renderMatchSheetPreview() {
+        var thead = document.getElementById('match-sheet-thead');
+        var tbody = document.getElementById('match-sheet-tbody');
+        if (!thead || !tbody) return;
+        thead.innerHTML = '';
+        tbody.innerHTML = '';
+        if (selectedHeaderRowIndex < 0 || selectedHeaderRowIndex >= TABLE_ROWS.length) return;
+        var headerCols = TABLE_ROWS[selectedHeaderRowIndex];
+
+        var hr = document.createElement('tr');
+        var thCorner = document.createElement('th');
+        thCorner.className = 'match-sheet-num';
+        thCorner.setAttribute('scope', 'col');
+        thCorner.textContent = '#';
+        hr.appendChild(thCorner);
+        headerCols.forEach(function (title, j) {
+          var th = document.createElement('th');
+          th.setAttribute('scope', 'col');
+          th.textContent = title;
+          th.title = title;
+          hr.appendChild(th);
+        });
+        thead.appendChild(hr);
+
+        TABLE_ROWS.forEach(function (row, i) {
+          var tr = document.createElement('tr');
+          if (i === selectedHeaderRowIndex) tr.className = 'match-sheet-tr match-sheet-tr--header';
+          else if (i < selectedHeaderRowIndex) tr.className = 'match-sheet-tr match-sheet-tr--above';
+          else if (selectedDataStartRowIndex >= 0 && i < selectedDataStartRowIndex) {
+            tr.className = 'match-sheet-tr match-sheet-tr--between';
+          } else tr.className = 'match-sheet-tr match-sheet-tr--data';
+
+          var tdNum = document.createElement('td');
+          tdNum.className = 'match-sheet-num';
+          tdNum.textContent = String(i + 1);
+          tr.appendChild(tdNum);
+          row.forEach(function (cell) {
+            var td = document.createElement('td');
+            td.textContent = cell;
+            td.title = cell;
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+      }
+
+      function renderStep4() {
+        syncStep4FromDom();
+        if (prefillFromLastImport && addedOptionalRows.length === 0) {
+          seedAddedOptionalsFromLastImport();
+        }
+        buildStep4Rows();
+      }
+
+      document.getElementById('step3-back').addEventListener('click', function () { goToStep(2); });
+      step3Next.addEventListener('click', function () {
+        syncStep4FromDom();
+        renderStep5();
+        goToStep(4);
+      });
+
+      function applyLastSavedColumnMappings() {
+        var matchEl = document.getElementById('match-columns-rows');
+        if (!matchEl) return;
+        var coreRows = matchEl.querySelectorAll('.match-row--core');
+        CORE_MATCH_FIELDS.forEach(function (field, i) {
+          var mapped = LAST_IMPORT_CONFIG.columnMap[field.name];
+          if (!mapped) return;
+          coreColumnMapping[field.name] = mapped;
+          var wrap = coreRows[i] && coreRows[i].querySelector('.col-select');
+          applyColSelectValue(wrap, mapped);
+        });
+        checkStep4Valid();
+      }
+
+      /* ── Step 5: Preview Data ── */
+      var PREVIEW_COLS = ['Row', 'Level', 'Part Name', 'Quantity', 'Unit'];
+      var liveRows = []; // live mirror of dataRows, updated on cell edit
+      var previewFilename = SAMPLE_FILE; // tracks the currently loaded filename
+
+      // Returns { rowIndex: [{col, severity, text}] } for the given rows array
+      function buildScan(rows) {
+        var levelZeroCount = 0;
+        rows.forEach(function (r) { if (r[0].trim() === '0') levelZeroCount++; });
+        var multipleZeros = levelZeroCount > 1;
+        var result = {};
+        var prevLevel = -1;
+        rows.forEach(function (row, i) {
+          var issues = [];
+          var lvl = parseInt(row[0], 10);
+          if (!row[5] || row[5].trim() === '') {
+            issues.push({ col: 'qty',  severity: 'warning', text: 'Quantity defaulted to 1',   from: 'empty', to: '1' });
+            issues.push({ col: 'unit', severity: 'warning', text: 'Unit changed to piece',      from: 'kg',    to: 'piece' });
+          }
+          if (!isNaN(lvl) && prevLevel >= 0 && lvl > prevLevel + 1) {
+            issues.push({ col: 'level', severity: 'error', text: 'Skipped level — jumps from ' + prevLevel + ' to ' + lvl });
+          }
+          if (!isNaN(lvl) && lvl === 0 && multipleZeros) {
+            issues.push({ col: 'level', severity: 'error', text: 'Multiple level 0 rows identified — only one top-level product is allowed' });
+          }
+          if (issues.length) result[i] = issues;
+          if (!isNaN(lvl)) prevLevel = lvl;
+        });
+        return result;
+      }
+
+      function updateStep5Summary(rowIssues) {
+        var startRowNum = selectedDataStartRowIndex + 1;
+        var errorItems = [], warnItems = [];
+        Object.keys(rowIssues).forEach(function (idx) {
+          var i = parseInt(idx, 10);
+          var rowNum = startRowNum + i;
+          rowIssues[i].forEach(function (issue) {
+            if (issue.severity === 'error') errorItems.push({ rowNum: rowNum, text: issue.text });
+            else                            warnItems.push({ rowNum: rowNum, text: issue.text });
+          });
+        });
+
+        var bar         = document.getElementById('preview-summary');
+        var detailPanel = document.getElementById('preview-status-details');
+        bar.innerHTML = '';
+        detailPanel.innerHTML = '';
+        detailPanel.classList.remove('preview-status-details--open');
+
+        // Left: counts + pills
+        var pillsGroup = document.createElement('span');
+        pillsGroup.className = 'preview-statusbar__pills';
+
+        // Rows formatted pill
+        var rowsPill = document.createElement('span');
+        rowsPill.className = 'preview-status-pill';
+        rowsPill.innerHTML = '<span class="preview-stat preview-stat--success">' + liveRows.length + '</span> rows formatted';
+        pillsGroup.appendChild(rowsPill);
+
+        var activeSection = null;
+
+        function makePill(items, severity) {
+          var isError = severity === 'error';
+          var count   = items.length;
+          var color   = isError ? '#dc2626' : '#d97706';
+
+          var sep = document.createElement('span');
+          sep.className   = 'preview-status-sep';
+          sep.textContent = '·';
+          pillsGroup.appendChild(sep);
+
+          var pill = document.createElement('span');
+          pill.className = 'preview-status-pill preview-status-pill--clickable';
+          pill.innerHTML =
+            '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:' + color + ';transition:transform 0.15s ease"><path d="M6 9l6 6 6-6"/></svg>' +
+            '<span class="preview-stat preview-stat--' + severity + '">' + count + '</span> ' +
+            severity + (count !== 1 ? 's' : '');
+          pillsGroup.appendChild(pill);
+
+          pill.addEventListener('click', function () {
+            var svg = pill.querySelector('svg');
+            if (activeSection === severity) {
+              activeSection = null;
+              detailPanel.classList.remove('preview-status-details--open');
+              svg.style.transform = '';
+            } else {
+              activeSection = severity;
+              // Rotate this chevron, reset others
+              pillsGroup.querySelectorAll('.preview-status-pill--clickable svg').forEach(function (s) {
+                s.style.transform = s === svg ? 'rotate(180deg)' : '';
+              });
+              // Populate detail panel
+              detailPanel.innerHTML = '';
+              items.forEach(function (item) {
+                var row = document.createElement('div');
+                row.className = 'preview-summary__detail-item';
+                var rowLabel = document.createElement('span');
+                rowLabel.className = 'preview-summary__detail-row preview-summary__detail-row--' + severity;
+                rowLabel.textContent = 'Row ' + item.rowNum;
+                var text = document.createElement('span');
+                text.textContent = item.text;
+                row.appendChild(rowLabel);
+                row.appendChild(text);
+                detailPanel.appendChild(row);
+              });
+              detailPanel.classList.add('preview-status-details--open');
+            }
+          });
+        }
+
+        if (errorItems.length > 0) makePill(errorItems, 'error');
+        if (warnItems.length > 0)  makePill(warnItems,  'warning');
+        bar.appendChild(pillsGroup);
+
+        // Right: mini file row (check + name + button)
+        var fileRow = document.createElement('span');
+        fileRow.className = 'preview-file-row';
+
+        var checkIcon = document.createElement('span');
+        checkIcon.className = 'preview-file-row__check';
+        checkIcon.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>';
+        fileRow.appendChild(checkIcon);
+
+        var filenameLabel = document.createElement('span');
+        filenameLabel.className = 'preview-file-row__name';
+        filenameLabel.textContent = previewFilename;
+        fileRow.appendChild(filenameLabel);
+
+        var reuploadBtn = document.createElement('button');
+        reuploadBtn.type = 'button';
+        reuploadBtn.className = 'btn btn--xs btn--secondary';
+        reuploadBtn.textContent = 'Change File';
+        reuploadBtn.addEventListener('click', function () { fileInput.click(); });
+        fileRow.appendChild(reuploadBtn);
+
+        bar.appendChild(fileRow);
+      }
+
+      // Re-runs scan on liveRows and patches row classes + annotations in place
+      function revalidateStep5() {
+        var rowIssues = buildScan(liveRows);
+        updateStep5Summary(rowIssues);
+        var tbody = document.getElementById('preview-tbody');
+        tbody.querySelectorAll('.preview-row').forEach(function (tr) {
+          var i = parseInt(tr.dataset.rowIndex, 10);
+          var issues = rowIssues[i] || [];
+          var hasError   = issues.some(function (x) { return x.severity === 'error'; });
+          var hasWarning = !hasError && issues.length > 0;
+          tr.className = 'preview-row' +
+            (hasError   ? ' preview-row--error'   : '') +
+            (hasWarning ? ' preview-row--warning'  : '');
+          tr.dataset.hasIssue = issues.length ? '1' : '0';
+          ['level', 'qty', 'unit'].forEach(function (col) {
+            var td = tr.querySelector('[data-col="' + col + '"]');
+            if (!td) return;
+            var ann = td.querySelector('.preview-annotation');
+            if (!ann) return;
+            var colIssue = issues.find(function (x) { return x.col === col; });
+            if (colIssue) {
+              ann.className = 'preview-annotation preview-annotation--' + colIssue.severity;
+              buildAnnotationContent(ann, colIssue);
+              ann.style.display = '';
+            } else {
+              ann.className = 'preview-annotation';
+              ann.style.display = 'none';
+            }
+          });
+        });
+      }
+
+      function makeEditable(td, value) {
+        td.contentEditable = 'true';
+        td.textContent = value;
+        td.className += ' preview-td--editable';
+        td.addEventListener('focus', function () { td.classList.add('preview-td--editing'); });
+        td.addEventListener('blur',  function () { td.classList.remove('preview-td--editing'); });
+      }
+
+      function buildAnnotationContent(ann, issue) {
+        if (issue.from !== undefined) {
+          ann.innerHTML =
+            '<span class="preview-change-flow">' +
+              '<span class="preview-change-flow__chip preview-change-flow__chip--from">' + issue.from + '</span>' +
+              '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>' +
+              '<span class="preview-change-flow__chip">' + issue.to + '</span>' +
+            '</span>';
+        } else {
+          ann.textContent = issue.text;
+        }
+      }
+
+      // Annotatable cell: TD itself is editable + a non-editable annotation div below
+      function makeAnnotatableCell(td, rowIdx, colName, value, issue, liveColIdx) {
+        td.dataset.col = colName;
+        td.contentEditable = 'true';
+        td.className += ' preview-td--editable preview-td--stacked';
+        td.appendChild(document.createTextNode(value));
+        td.addEventListener('focus', function () { td.classList.add('preview-td--editing'); });
+        td.addEventListener('blur',  function () {
+          td.classList.remove('preview-td--editing');
+          if (liveColIdx >= 0) {
+            // Read text nodes only — excludes the annotation div text
+            var val = '';
+            for (var n = 0; n < td.childNodes.length; n++) {
+              if (td.childNodes[n].nodeType === 3) val += td.childNodes[n].textContent;
+            }
+            liveRows[rowIdx][liveColIdx] = val.trim();
+          }
+          revalidateStep5();
+        });
+        var ann = document.createElement('div');
+        ann.contentEditable = 'false';
+        if (issue) {
+          ann.className = 'preview-annotation preview-annotation--' + issue.severity;
+          buildAnnotationContent(ann, issue);
+        } else {
+          ann.className = 'preview-annotation';
+          ann.style.display = 'none';
+        }
+        td.appendChild(ann);
+      }
+
+      function renderStep5() {
+        var dataRows = TABLE_ROWS.slice(selectedHeaderRowIndex + 1);
+        var startRowNum = selectedDataStartRowIndex + 1;
+
+        // Initialise live mirror so revalidateStep5 can read edits
+        liveRows = dataRows.map(function (r) { return r.slice(); });
+
+        var rowIssues = buildScan(liveRows);
+        updateStep5Summary(rowIssues);
+
+        // ── Table header ──
+        var thead = document.getElementById('preview-thead');
+        thead.innerHTML = '';
+        var hr = document.createElement('tr');
+        PREVIEW_COLS.forEach(function (col) {
+          var th = document.createElement('th');
+          th.className = 'preview-th';
+          th.textContent = col;
+          hr.appendChild(th);
+        });
+        thead.appendChild(hr);
+
+        // ── Table rows ──
+        var tbody = document.getElementById('preview-tbody');
+        tbody.innerHTML = '';
+
+        dataRows.forEach(function (row, i) {
+          var rowNum = startRowNum + i;
+          var issues = rowIssues[i] || [];
+          var hasError   = issues.some(function (x) { return x.severity === 'error'; });
+          var hasWarning = !hasError && issues.length > 0;
+
+          var tr = document.createElement('tr');
+          tr.className = 'preview-row' +
+            (hasError   ? ' preview-row--error'   : '') +
+            (hasWarning ? ' preview-row--warning'  : '');
+          tr.dataset.rowIndex = i;
+          tr.dataset.hasIssue = issues.length ? '1' : '0';
+
+          // Row number (not editable)
+          var rowNumTd = document.createElement('td');
+          rowNumTd.className = 'preview-td preview-td--row-num';
+          rowNumTd.textContent = rowNum;
+          tr.appendChild(rowNumTd);
+
+          // Level — annotatable, writes back to liveRows[i][0]
+          var levelTd = document.createElement('td');
+          levelTd.className = 'preview-td';
+          makeAnnotatableCell(levelTd, i, 'level', row[0],
+            issues.find(function (x) { return x.col === 'level'; }) || null, 0);
+          tr.appendChild(levelTd);
+
+          // Part Name — plain editable, no validation
+          var nameTd = document.createElement('td');
+          nameTd.className = 'preview-td';
+          makeEditable(nameTd, row[1]);
+          tr.appendChild(nameTd);
+
+          // Quantity — annotatable, writes back to liveRows[i][5]
+          var qtyIssue = issues.find(function (x) { return x.col === 'qty'; });
+          var qtyTd = document.createElement('td');
+          qtyTd.className = 'preview-td';
+          makeAnnotatableCell(qtyTd, i, 'qty', qtyIssue ? '1' : (row[5] || '1'),
+            qtyIssue || null, 5);
+          tr.appendChild(qtyTd);
+
+          // Unit — annotatable, no liveRows column (derived from qty state)
+          var unitIssue = issues.find(function (x) { return x.col === 'unit'; });
+          var unitTd = document.createElement('td');
+          unitTd.className = 'preview-td';
+          makeAnnotatableCell(unitTd, i, 'unit', unitIssue ? 'piece' : 'kg',
+            unitIssue || null, -1);
+          tr.appendChild(unitTd);
+
+          tbody.appendChild(tr);
+        });
+
+        // ── Toggle ──
+        document.getElementById('issues-only-toggle').onchange = function () {
+          var onlyIssues = this.checked;
+          tbody.querySelectorAll('.preview-row').forEach(function (r) {
+            r.style.display = (onlyIssues && r.dataset.hasIssue !== '1') ? 'none' : '';
+          });
+        };
+      }
+
+      document.getElementById('step4-back').addEventListener('click', function () { goToStep(3); });
+      document.getElementById('step4-import').addEventListener('click', function () {
+        renderStep6();
+        goToStep(5);
+      });
+
+      /* ── Step 6: Confirm Creation ── */
+      function renderStep6() {
+        // Find level-0 row (the top-level product)
+        var headerCols = TABLE_ROWS[selectedHeaderRowIndex];
+        var levelIdx = headerCols.indexOf('Level');
+        var nameIdx  = headerCols.indexOf('Part Name');
+        var descIdx  = headerCols.indexOf('Description');
+        var massIdx  = headerCols.indexOf('Mass (kg)');
+        var costIdx  = headerCols.indexOf('Cost (USD)');
+        var srcIdx   = headerCols.indexOf('Source Location');
+
+        var topRow = null;
+        for (var i = selectedDataStartRowIndex; i < TABLE_ROWS.length; i++) {
+          if (TABLE_ROWS[i][levelIdx] === '0') { topRow = TABLE_ROWS[i]; break; }
+        }
+        if (!topRow) topRow = TABLE_ROWS[selectedDataStartRowIndex] || [];
+
+        function prefill(inputId, tagId, value) {
+          var el = document.getElementById(inputId);
+          var tag = document.getElementById(tagId);
+          if (el && value) { el.value = value; if (tag) tag.style.display = 'inline-flex'; }
+        }
+
+        prefill('conf-product-name', 'conf-name-tag', nameIdx >= 0 ? topRow[nameIdx] : '');
+        var descVal = descIdx >= 0 ? topRow[descIdx] : '';
+        var descEl = document.getElementById('conf-product-desc');
+        if (descEl && descVal) descEl.value = descVal;
+
+        prefill('conf-mass', 'conf-mass-tag', massIdx >= 0 ? topRow[massIdx] : '');
+        prefill('conf-cost', null, costIdx >= 0 ? topRow[costIdx] : '');
+        prefill('conf-source', 'conf-source-tag', srcIdx >= 0 ? topRow[srcIdx] : '');
+      }
+
+      document.getElementById('step5-back').addEventListener('click', function () { goToStep(4); });
+      document.getElementById('step5-create').addEventListener('click', function () {
+        if (typeof window.showProductsStandalone === 'function') window.showProductsStandalone();
+      });
+
+      /* ── Keyboard navigation (prototype mode) ── */
+      function advanceStep() {
+        if (currentStep >= STEPS.length) return;
+        switch (currentStep) {
+          case 1:
+            showFile(SAMPLE_FILE);
+            if (useLastImportToggle && useLastImportToggle.checked) {
+              prefillFromLastImport = true;
+              applyLocateSelections(LAST_IMPORT_CONFIG.headerRowIndex, LAST_IMPORT_CONFIG.dataStartRowIndex);
+              goToStep(2);
+            } else {
+              prefillFromLastImport = false;
+              goToStep(2);
+            }
+            break;
+          case 2: {
+            var h = locateTableBody.querySelector('input[name="header-row"]:checked');
+            var d = locateTableBody.querySelector('input[name="data-start-row"]:checked');
+            if (h) selectedHeaderRowIndex = parseInt(h.value, 10) - 1;
+            if (d) selectedDataStartRowIndex = parseInt(d.value, 10);
+            renderStep4();
+            if (prefillFromLastImport) {
+              applyLastSavedColumnMappings();
+            }
+            goToStep(3);
+            break;
+          }
+          case 3:
+            syncStep4FromDom();
+            renderStep5();
+            goToStep(4);
+            break;
+          case 4:
+            renderStep6();
+            goToStep(5);
+            break;
+          case 5:
+            break;
+        }
+      }
+
+      function retreatStep() {
+        if (currentStep <= 1) return;
+        goToStep(currentStep - 1);
+      }
+
+      document.addEventListener('keydown', function (e) {
+        var tag = document.activeElement ? document.activeElement.tagName : '';
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        if (e.key === 'ArrowRight') advanceStep();
+        else if (e.key === 'ArrowLeft') retreatStep();
+      });
+
+      /* ── Init ── */
+      renderStepper();
+      renderLocateTable();
+      updateLocateNextEnabled();
+    })();
+    
+    </script>
+    <script>
+(function () {
+  var root = document.querySelector('#standalone-view-products .search-input');
+  if (!root) return;
+  var input = root.querySelector('input');
+  var clearBtn = root.querySelector('.search-input__clear');
+  if (!input || !clearBtn) return;
+  function sync() {
+    var has = input.value.length > 0;
+    clearBtn.hidden = !has;
+    root.classList.toggle('has-value', has);
+  }
+  input.addEventListener('input', sync);
+  input.addEventListener('focus', function () {
+    root.classList.add('is-focused');
+  });
+  input.addEventListener('blur', function () {
+    root.classList.remove('is-focused');
+  });
+  clearBtn.addEventListener('click', function () {
+    input.value = '';
+    sync();
+    input.focus();
+  });
+  sync();
+})();
+
+(function () {
+  var wrap = document.querySelector('#standalone-view-products .bom-header__create-wrap');
+  if (!wrap) return;
+  var btn = document.getElementById('create-menu-btn');
+  var menu = document.getElementById('create-menu');
+  if (!btn || !menu) return;
+
+  function openMenu() {
+    menu.hidden = false;
+    btn.setAttribute('aria-expanded', 'true');
+    var first = menu.querySelector('[role="menuitem"]');
+    if (first) first.focus();
+  }
+  function closeMenu() {
+    menu.hidden = true;
+    btn.setAttribute('aria-expanded', 'false');
+  }
+
+  btn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    menu.hidden ? openMenu() : closeMenu();
+  });
+
+  document.addEventListener('click', function (e) {
+    if (!wrap.contains(e.target)) closeMenu();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !menu.hidden) {
+      closeMenu();
+      btn.focus();
+    }
+  });
+})();
+    </script>
+  </body>
+</html>

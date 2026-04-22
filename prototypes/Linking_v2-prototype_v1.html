@@ -1,0 +1,2480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bill of Materials</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+      font-size: 13px;
+      background: #fafafa;
+      color: #09090b;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .bom {
+      background: #fff;
+      border: 1px solid #e4e4e7;
+      border-radius: 8px;
+      overflow: hidden;
+      width: 100%;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    /* Scrollable content without visible scrollbar */
+    .bom-scroll {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+      scrollbar-width: none; /* Firefox */
+    }
+    .bom-scroll::-webkit-scrollbar { display: none; /* Chrome/Safari */ }
+
+    /* Header row */
+    .bom-header {
+      display: grid;
+      grid-template-columns: 1fr 140px 140px 140px;
+      column-gap: 20px;
+      align-items: center;
+      padding: 0 12px;
+      height: 34px;
+      border-bottom: 1px solid #e4e4e7;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #71717a;
+    }
+
+    .bom-header .col { text-align: left; }
+
+    .bom-list { list-style: none; }
+
+    /* Each data row */
+    .bom-row {
+      display: grid;
+      grid-template-columns: 1fr 140px 140px 140px;
+      column-gap: 20px;
+      align-items: center;
+      padding: 0 12px;
+      min-height: 38px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .bom-row:hover {
+      background: #f4f4f5;
+      /* Extend hover bg to cover the 1px separator below */
+      box-shadow: 0 1px 0 #f4f4f5;
+    }
+
+    /* Row separator lives on the add-zone so it centers in the gap */
+
+    /* Name cell: indent + chevron + text */
+    .name-cell {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    /* Tree connector guides */
+    .guide {
+      display: block;
+      width: 20px;
+      height: 38px;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    /* Continuing vertical line for ancestor levels that still have siblings below */
+    .guide-vert::before {
+      content: '';
+      position: absolute;
+      left: 8px;
+      top: -8px;
+      bottom: -14px; /* extend through the add-zone gap */
+      width: 1px;
+      background: #e4e4e7;
+    }
+
+    /* ├─ non-last child: full vertical + horizontal arm */
+    .guide-tee::before {
+      content: '';
+      position: absolute;
+      left: 8px;
+      top: -8px;
+      bottom: -14px; /* extend through the add-zone gap */
+      width: 1px;
+      background: #e4e4e7;
+    }
+    .guide-tee::after {
+      content: '';
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      width: 12px;
+      height: 1px;
+      background: #e4e4e7;
+    }
+
+    /* Linked child: amber guide lines */
+    .bom-row--linked-child          { --linked-guide: #f5c4a0; }
+    .bom-row--linked-outdated       { --linked-guide: #fde68a; }
+    .bom-row--linked-broken         { --linked-guide: #fca5a5; }
+
+    .guide-linked.guide-vert::before,
+    .guide-linked.guide-tee::before,
+    .guide-linked.guide-tee::after,
+    .guide-linked.guide-elbow::before,
+    .guide-linked.guide-elbow::after { background: var(--linked-guide); }
+
+    /* └─ last child: half vertical + horizontal arm */
+    .guide-elbow::before {
+      content: '';
+      position: absolute;
+      left: 8px;
+      top: -8px;
+      bottom: 50%;
+      width: 1px;
+      background: #e4e4e7;
+    }
+    .guide-elbow::after {
+      content: '';
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      width: 12px;
+      height: 1px;
+      background: #e4e4e7;
+    }
+
+    .chevron {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      color: #a1a1aa;
+      transition: transform 0.15s ease;
+    }
+
+    .chevron svg { display: block; }
+    .chevron.open { transform: rotate(90deg); }
+    .chevron.hidden { visibility: hidden; pointer-events: none; }
+    .chevron:not(.hidden) { cursor: pointer; }
+    .chevron svg { pointer-events: none; }
+
+    .name-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      background: #f4f4f5;
+      color: #a1a1aa;
+    }
+
+    .name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Row action buttons (expand, unlink, delete) */
+    .row-actions {
+      display: none;
+      align-items: center;
+      gap: 2px;
+      margin-left: 6px;
+      flex-shrink: 0;
+    }
+
+    .bom.editing .bom-row:hover .row-actions {
+      display: flex;
+    }
+
+    .row-action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: #fff;
+      border: 1px solid #e4e4e7;
+      border-radius: 5px;
+      cursor: pointer;
+      color: #18181b;
+      transition: all 0.15s ease;
+    }
+
+    .row-action-btn:hover {
+      color: #18181b;
+      border-color: #a1a1aa;
+      background: #f4f4f5;
+    }
+
+    .row-action-btn.danger:hover {
+      color: #dc2626;
+      border-color: #fca5a5;
+      background: #fef2f2;
+    }
+
+    /* Value cells */
+    .val {
+      text-align: left;
+      color: #3f3f46;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .val .unit {
+      font-size: 11px;
+      color: #a1a1aa;
+      margin-left: 2px;
+    }
+
+    /* Proportional color bars below values */
+    .val-bar-track {
+      height: 4px;
+      background: #f5f5f5;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 2px;
+    }
+    .val-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      min-width: 2px;
+    }
+    .val-bar-fill.bar-mass     { background: #a855f7; }
+    .val-bar-fill.bar-emission { background: #14b8a6; }
+    .val-bar-fill.bar-cost     { background: #eab308; }
+
+    /* Hide bars in edit mode */
+    .bom.editing .val-bar-track { display: none; }
+
+
+    /* Edit-mode: input + unit form a connected group */
+    .input-wrap--with-unit .cell-input {
+      border-radius: 4px 0 0 4px;
+      border-right: none;
+      padding-right: 10px;
+      width: 100%;
+    }
+
+    .input-unit-select {
+      height: 28px;
+      padding: 0 20px 0 8px;
+      font-size: 12px;
+      font-family: inherit;
+      color: #3f3f46;
+      background: #fff;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2371717a' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 6px center;
+      border: 1px solid #d4d4d8;
+      border-radius: 0 4px 4px 0;
+      outline: none;
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+      flex-shrink: 0;
+      transition: background-color 0.12s, border-color 0.12s;
+    }
+    .input-unit-select:hover { background-color: #f4f4f5; border-color: #a1a1aa; color: #18181b; }
+
+    .collapsed { display: none; }
+
+    /* Toolbar */
+    .bom-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      border-bottom: 1px solid #e4e4e7;
+    }
+
+    .bom-toolbar .title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #18181b;
+    }
+
+    .btn-edit {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #3f3f46;
+      background: #fff;
+      border: 1px solid #e4e4e7;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-edit:hover { background: #f4f4f5; }
+
+    .btn-edit.active {
+      color: #fff;
+      background: #18181b;
+      border-color: #18181b;
+    }
+
+    /* Editable cells */
+    .bom.editing .bom-row {
+      cursor: default;
+      height: 44px;
+      isolation: isolate;
+    }
+    .bom.editing .guide { height: 44px; }
+
+    /* Wider columns, tighter gaps when editing */
+    .bom.editing .bom-row,
+    .bom.editing .bom-header {
+      grid-template-columns: 1fr 180px 180px 180px;
+      column-gap: 8px;
+    }
+
+    /* Value columns paint above name-cell overflow so hover actions never cover inputs */
+    .bom.editing .val {
+      position: relative;
+      z-index: 2;
+    }
+    .bom.editing .name-cell {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Input wrapper — holds the <input> and a unit suffix label */
+    .input-wrap {
+      display: none;
+      position: relative;
+      width: 100%;
+    }
+
+    .bom.editing .input-wrap { display: flex; align-items: center; }
+    /* Input first, then link badge, then row actions — matches non-edit reading order */
+    .bom.editing .name-cell .input-wrap {
+      flex: 1;
+      min-width: 0;
+      max-width: 480px;
+      order: 1;
+    }
+    .bom.editing .name-cell .link-status-badge {
+      order: 2;
+      align-self: center;
+      opacity: 0.7;
+    }
+    .bom.editing .name-cell .row-actions { order: 3; }
+
+    .cell-input {
+      width: 100%;
+      height: 28px;
+      padding: 0 10px;
+      font-size: 12px;
+      font-family: inherit;
+      color: #18181b;
+      background: #fff;
+      border: 1px solid #d4d4d8;
+      border-radius: 4px;
+      outline: none;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .cell-input:focus { border-color: #a1a1aa; box-shadow: 0 0 0 2px rgba(161,161,170,0.2); }
+
+    .cell-input.input-val {
+      text-align: left;
+      padding-right: 10px;
+    }
+
+    .input-unit {
+      position: absolute;
+      right: 8px;
+      font-size: 11px;
+      color: #a1a1aa;
+      pointer-events: none;
+    }
+
+    /* Hide number input spinners just in case */
+    .cell-input::-webkit-outer-spin-button,
+    .cell-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .cell-input[type=number] { -moz-appearance: textfield; }
+
+    .bom.editing .cell-text { display: none; }
+
+    /* Add-zone: button floats on the row separator line, gap opens on hover */
+    .add-zone {
+      height: 1px;
+      overflow: visible;
+      position: relative;
+      z-index: 2;
+      transition: height 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Thin 1px separator line, always centered in the zone, behind button */
+    .add-zone::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 1px;
+      background: #f4f4f5;
+      z-index: -1;
+      transition: background 0.15s ease;
+    }
+
+    /* Insertion indicator: polyline on left + full-width horizontal line */
+    .add-zone-indicator {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease;
+    }
+    .bom.editing .add-zone:hover .add-zone-indicator {
+      opacity: 1;
+    }
+    /* Root always-show: buttons visible but no brown lines */
+    .bom.editing .add-zone.always-show .add-zone-indicator {
+      opacity: 0;
+    }
+    /* Polyline: vertical drop from parent row to the elbow */
+    .add-zone-indicator::before {
+      content: '';
+      position: absolute;
+      left: var(--ix, 12px);
+      top: -10px;
+      height: calc(50% + 10px);
+      width: 1px;
+      background: #CEA371;
+    }
+    /* Horizontal line from elbow to right edge */
+    .add-zone-indicator::after {
+      content: '';
+      position: absolute;
+      left: var(--ix, 12px);
+      right: 0;
+      top: 50%;
+      height: 1px;
+      background: #CEA371;
+    }
+
+    .add-zone-inner {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 0 12px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease, top 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .bom.editing .add-zone:hover {
+      height: 14px;
+    }
+
+    .bom.editing .add-zone:hover .add-zone-inner,
+    .bom.editing .add-zone.always-show .add-zone-inner {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .bom.editing .add-zone.always-show {
+      height: 14px;
+    }
+
+    /* Expand hover target so the button stays reachable */
+    .add-zone::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: -8px;
+      height: 16px;
+    }
+
+    .add-btn {
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      background: #fff;
+      border: 1px solid #d4d4d8;
+      border-radius: 5px;
+      cursor: pointer;
+      color: #18181b;
+      font-family: inherit;
+      transition: all 0.15s ease;
+    }
+
+    .add-btn:hover {
+      color: #18181b;
+      border-color: #a1a1aa;
+      background: #f4f4f5;
+    }
+
+    /* Linked / locked rows */
+    .bom.editing .bom-row--locked .input-wrap { display: none !important; }
+    .bom.editing .bom-row--locked .cell-text { display: inline; opacity: 0.7; }
+    /* Name is read-only until unlink — stronger fade than metrics */
+    .bom.editing .bom-row--locked .name.cell-text {
+      opacity: 0.7;
+      color: #71717a;
+    }
+    .bom.editing .bom-row--locked .name.linked,
+    .bom.editing .bom-row--locked .name.linked:hover {
+      cursor: default;
+      text-decoration: none;
+    }
+    .bom.editing .li--linked-root .add-zone:hover::after { background: #f4f4f5; }
+    .bom.editing .li--linked-root .add-zone:hover { height: 1px; }
+    .bom.editing .li--linked-root .add-zone:hover .add-zone-inner { opacity: 0; pointer-events: none; }
+    .bom.editing .linked-icon,
+    .bom.editing .external-link-icon { display: none; }
+    .bom.editing .bom-row--linked-root .row-actions { display: flex; }
+    .bom.editing .bom-row--linked-root .row-action-btn:not(.unlink-btn) { display: none; }
+    .bom.editing .bom-row--linked-child .row-actions { display: none !important; }
+
+    .edit-open-icon {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 24px; height: 24px; background: #fff; border: 1px solid #e4e4e7;
+      border-radius: 5px; cursor: pointer; color: #52525b; opacity: 0;
+      transition: opacity 0.12s ease, color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+      flex-shrink: 0;
+    }
+    .edit-open-icon:hover { color: #18181b; border-color: #a1a1aa; background: #f4f4f5; }
+    .bom.editing .bom-row:hover .edit-open-icon { opacity: 1; }
+
+    .name.linked { cursor: default; }
+
+    /* User-input indicator — small indigo pill with dot */
+    .user-input-dot {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 12px;
+      height: 12px;
+      background: #eef2ff;
+      border-radius: 32px;
+      flex-shrink: 0;
+      margin-left: 2px;
+      vertical-align: middle;
+    }
+    .user-input-dot::after {
+      content: '';
+      display: block;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #6366f1;
+    }
+
+    /* Inside input-wrap: position the dot absolutely */
+    .input-wrap .user-input-dot {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      margin-left: 0;
+      z-index: 1;
+    }
+    /* Name inputs (no unit): dot at right edge */
+    .input-wrap .user-input-dot.dot-name {
+      right: 8px;
+    }
+    /* Value inputs (has unit): dot just before unit label */
+    .input-wrap .user-input-dot.dot-val {
+      right: 30px;
+    }
+    .input-field-outer .user-input-dot.dot-val {
+      right: 8px;
+    }
+    /* Extra right padding on inputs when dot present */
+    .cell-input.has-user-input { padding-right: 26px; }
+    .cell-input.input-val.has-user-input { padding-right: 46px; }
+
+    /* In edit mode: hide the inline dot next to text */
+    .bom.editing .name-cell > .user-input-dot,
+    .bom.editing .val > .user-input-dot {
+      display: none;
+    }
+    /* But for locked (linked) rows, show the name dot in edit mode too */
+    .bom.editing .bom-row--locked .name-cell > .user-input-dot {
+      display: inline-flex;
+    }
+    /* Linked rows: show the val dots in edit mode too (no input-wrap shown) */
+    .bom.editing .bom-row--locked .val > .user-input-dot {
+      display: inline-flex;
+    }
+
+    /* Push status badge after user-input in edit mode */
+    .bom.editing .name-cell .link-status-badge { order: 3 !important; }
+
+    .linked-icon { display: inline-flex; align-items: center; color: #B37343; margin-left: 2px; flex-shrink: 0; }
+    .linked-icon.outdated { color: #EAB308; }
+    .external-link-icon {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 24px; height: 24px; background: #fff; border: 1px solid #e4e4e7;
+      border-radius: 5px; cursor: pointer; color: #52525b; margin-left: 4px;
+      flex-shrink: 0; opacity: 0;
+      transition: opacity 0.12s ease, color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+    .bom-row:hover .external-link-icon { opacity: 1; }
+    .external-link-icon:hover { color: #18181b; border-color: #a1a1aa; background: #f4f4f5; }
+    .external-link-icon.outdated { color: #52525b; }
+
+    .link-status-badge {
+      display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+      padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 500; line-height: 1;
+      flex-shrink: 0; margin-left: 6px; cursor: default;
+      background: #fff;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .link-status-badge svg { display: block; flex-shrink: 0; }
+    .link-status-badge.badge-linked { color: #955C39; }
+    .link-status-badge.badge-outdated { color: #EAB308; }
+    .link-status-badge.badge-broken { color: #DC2626; }
+    .linked-icon.broken { color: #DC2626; }
+
+    /* Link preview tooltip */
+    .link-preview {
+      position: fixed; top: -9999px; left: -9999px;
+      background: #fff; border: 1px solid #e4e4e7; border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
+      width: 232px; z-index: 200; opacity: 0; pointer-events: none;
+      transform: translateY(4px); transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+    .link-preview.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    .lp-header { padding: 10px 12px 8px; border-bottom: 1px solid #f4f4f5; display: flex; align-items: flex-start; gap: 8px; }
+    .lp-header-icon { color: #B37343; flex-shrink: 0; margin-top: 1px; }
+    .lp-title { font-size: 12px; font-weight: 600; color: #18181b; line-height: 1.3; }
+    .lp-metrics { padding: 8px 12px; display: flex; flex-direction: column; gap: 5px; border-bottom: 1px solid #f4f4f5; }
+    .lp-metric { display: flex; justify-content: space-between; align-items: center; }
+    .lp-metric-label { font-size: 11px; color: #71717a; }
+    .lp-metric-value { font-size: 11px; font-weight: 500; color: #18181b; font-variant-numeric: tabular-nums; }
+    .lp-metric-value .lp-unit { font-weight: 400; color: #a1a1aa; }
+    .lp-tags { padding: 8px 12px; display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid #f4f4f5; }
+    .lp-tag { padding: 2px 7px; background: #f4f4f5; color: #52525b; border-radius: 4px; font-size: 10px; font-weight: 500; }
+    .lp-footer { padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #71717a; }
+    .lp-open-btn {
+      display: inline-flex; align-items: center; gap: 4px; padding: 4px 9px;
+      font-size: 11px; font-weight: 500; font-family: inherit; color: #18181b;
+      background: #fff; border: 1px solid #e4e4e7; border-radius: 5px; cursor: pointer; transition: background 0.12s;
+    }
+    .lp-open-btn:hover { background: #f4f4f5; }
+    .lp-outdated-banner {
+      display: none; align-items: center; gap: 6px; padding: 7px 12px;
+      background: #FEFCE8; border-bottom: 1px solid #FEF08A; font-size: 11px; color: #713F12;
+    }
+    .lp-outdated-banner.visible { display: flex; }
+    .lp-outdated-banner.broken { background: #fef2f2; border-bottom-color: #fecaca; }
+    .lp-outdated-icon { flex-shrink: 0; color: #CA8A04; }
+    .lp-outdated-banner.broken .lp-outdated-icon { color: #dc2626; }
+    .lp-outdated-text { flex: 1; }
+    .lp-outdated-banner.broken .lp-outdated-text { color: #991b1b; }
+    .lp-update-btn {
+      display: inline-flex; align-items: center; gap: 4px; padding: 4px 9px;
+      background: #CA8A04; color: #fff; border: none; border-radius: 5px;
+      font-size: 11px; font-weight: 500; font-family: inherit; cursor: pointer; transition: background 0.12s; white-space: nowrap;
+    }
+    .lp-update-btn:hover { background: #A16207; }
+
+    /* Modal overlay + modal */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4); z-index: 1000; align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #fff; border-radius: 10px; box-shadow: 0 16px 48px rgba(0,0,0,0.16); width: 420px; max-width: 90vw; overflow: hidden; }
+    .modal-header { padding: 16px 20px; font-size: 15px; font-weight: 600; color: #18181b; border-bottom: 1px solid #f4f4f5; }
+    .modal-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; }
+    .modal-field { display: flex; flex-direction: column; gap: 4px; }
+    .modal-field > label { font-size: 12px; font-weight: 500; color: #71717a; }
+    .modal-field .field-input-wrap { position: relative; display: flex; align-items: center; }
+    .modal-field input { width: 100%; height: 34px; padding: 0 10px; font-size: 13px; font-family: inherit; color: #18181b; background: #fff; border: 1px solid #d4d4d8; border-radius: 6px; outline: none; }
+    .modal-field input:focus { border-color: #a1a1aa; box-shadow: 0 0 0 2px rgba(161,161,170,0.18); }
+    .modal-field input.has-unit { padding-right: 46px; }
+    .modal-field .field-unit { position: absolute; right: 10px; font-size: 11px; color: #a1a1aa; pointer-events: none; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 20px; border-top: 1px solid #f4f4f5; }
+    .modal-btn { padding: 6px 16px; font-size: 13px; font-weight: 500; font-family: inherit; border-radius: 6px; cursor: pointer; border: 1px solid #d4d4d8; background: #fff; color: #3f3f46; transition: all 0.15s ease; }
+    .modal-btn:hover { background: #f4f4f5; }
+    .modal-btn.confirm { background: #18181b; color: #fff; border-color: #18181b; }
+    .modal-btn.confirm:hover { background: #27272a; }
+
+    /* Link product modal */
+    .link-modal { width: 680px; max-width: 94vw; max-height: 86vh; display: flex; flex-direction: column; }
+    .link-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #f4f4f5; flex-shrink: 0; }
+    .link-modal-title { font-size: 14px; font-weight: 600; color: #18181b; }
+    .link-modal-close { background: none; border: none; cursor: pointer; color: #18181b; padding: 2px; display: flex; align-items: center; border-radius: 4px; }
+    .link-modal-close:hover { color: #18181b; }
+    .link-search-wrap { padding: 10px 16px; border-bottom: 1px solid #f4f4f5; flex-shrink: 0; position: relative; }
+    .link-search-icon { position: absolute; left: 26px; top: 50%; transform: translateY(-50%); color: #a1a1aa; pointer-events: none; }
+    .link-search-input { width: 100%; height: 32px; padding: 0 10px 0 32px; border: 1px solid #d4d4d8; border-radius: 6px; font-size: 13px; font-family: inherit; color: #18181b; background: #fff; outline: none; box-sizing: border-box; }
+    .link-search-input:focus { border-color: #a1a1aa; box-shadow: 0 0 0 2px rgba(161,161,170,0.18); }
+    .link-product-list { flex: 1; overflow-y: auto; min-height: 0; }
+    .link-product-item { padding: 10px 16px; cursor: pointer; border-bottom: 1px solid #f4f4f5; display: flex; flex-direction: column; gap: 4px; }
+    .link-product-item:last-child { border-bottom: none; }
+    .link-product-item:hover { background: #fafafa; }
+    .link-product-item.selected { background: #ede9fe; }
+    .link-product-row1 { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+    .link-product-name { font-size: 13px; font-weight: 500; color: #18181b; }
+    .link-product-item.selected .link-product-name { color: #4f46e5; }
+    .link-product-version { font-size: 11px; color: #a1a1aa; flex-shrink: 0; }
+    .link-product-meta { font-size: 11px; color: #71717a; }
+    .link-product-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 1px; }
+    .link-product-tag { padding: 1px 6px; background: #f4f4f5; color: #52525b; border-radius: 3px; font-size: 10px; }
+    .link-product-item.selected .link-product-tag { background: #ddd6fe; color: #4f46e5; }
+    .link-empty { padding: 32px 16px; text-align: center; font-size: 13px; color: #a1a1aa; }
+    .link-scaling { border-top: 1px solid #f4f4f5; padding: 14px 16px 4px; flex-shrink: 0; }
+    .link-scaling-title { font-size: 12px; font-weight: 500; color: #71717a; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .link-scaling-equation { display: flex; align-items: flex-end; gap: 12px; }
+    .link-scaling-field { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .link-scaling-field > label { font-size: 12px; font-weight: 500; color: #18181b; }
+    .link-scaling-field .field-input-wrap { position: relative; display: flex; align-items: center; }
+    .link-scaling-field input { width: 100%; height: 36px; padding: 0 12px; font-size: 13px; font-family: inherit; color: #18181b; background: #fff; border: 1px solid #d4d4d8; border-radius: 8px; outline: none; box-sizing: border-box; }
+    .link-scaling-field input:focus { border-color: #a1a1aa; box-shadow: 0 0 0 2px rgba(161,161,170,0.18); }
+    .link-scaling-field input::placeholder { color: #a1a1aa; }
+    .link-eq-sep { font-size: 14px; color: #a1a1aa; padding-bottom: 8px; flex-shrink: 0; }
+    .link-original-mass { margin-top: 8px; font-size: 12px; color: #a1a1aa; }
+    .link-original-mass span { font-weight: 500; }
+
+    /* Inline new-row editor — same grid/height as a normal editing row */
+    .new-row-editor {
+      display: grid;
+      grid-template-columns: 1fr 140px 140px 140px;
+      column-gap: 20px;
+      align-items: center;
+      padding: 0 12px;
+      height: 44px;
+      background: #fff;
+    }
+
+    .bom.editing .new-row-editor {
+      grid-template-columns: 1fr 180px 180px 180px;
+      column-gap: 8px;
+    }
+
+    /* Input wrapper: relative so the floating actions can anchor to it */
+    .new-row-input-container {
+      position: relative;
+      flex: 1;
+      min-width: 0;
+      max-width: 480px;
+    }
+
+    .new-row-input-container .cell-input {
+      width: 100%;
+    }
+
+    /* Floating ✓/× panel — anchored below the right edge of the input */
+    .new-row-floating-actions {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      display: flex;
+      gap: 6px;
+      z-index: 20;
+    }
+
+    .new-row-confirm-btn,
+    .new-row-cancel-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #fff;
+      border: 1px solid #d4d4d8;
+      border-radius: 8px;
+      cursor: pointer;
+      color: #18181b;
+      flex-shrink: 0;
+      transition: all 0.12s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .new-row-confirm-btn:hover {
+      color: #16a34a;
+      border-color: #86efac;
+      background: #f0fdf4;
+    }
+
+    .new-row-cancel-btn:hover {
+      color: #dc2626;
+      border-color: #fca5a5;
+      background: #fef2f2;
+    }
+
+    /* Disabled value columns while naming */
+    .new-row-disabled-cell {
+      color: #d4d4d8;
+      font-size: 12px;
+    }
+
+    /* Empty/placeholder display for null values */
+    .cell-text--empty .unit {
+      color: #d4d4d8;
+    }
+
+    .cell-input::placeholder {
+      color: #d4d4d8;
+    }
+
+    /* Dim all rows while a new-row editor is open */
+    .bom.new-row-active .bom-row {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    /* ── Detail view (full-page) ─────────────────────────────────── */
+    .bom-table-view { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+    .bom.detail-open .bom-table-view { display: none; }
+
+    .bom-detail-view { display: none; flex: 1; min-height: 0; }
+    .bom.detail-open .bom-detail-view { display: flex; }
+
+    /* -- Structure sidebar -- */
+    .dv-sidebar {
+      width: 304px; flex-shrink: 0; display: flex; flex-direction: column;
+      border-right: 1px solid #e4e4e7; background: #fff;
+    }
+    .dv-sidebar-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 12px; border-bottom: 1px solid #f4f4f5; flex-shrink: 0;
+    }
+    .dv-sidebar-title { font-size: 13px; font-weight: 600; color: #18181b; }
+    .dv-sidebar-scroll {
+      flex: 1; overflow-y: auto; padding: 6px 0; min-height: 0;
+      scrollbar-width: none;
+    }
+    .dv-sidebar-scroll::-webkit-scrollbar { display: none; }
+    /* Sidebar tree rows reuse BOM classes at compact scale */
+    .dv-tree-row {
+      display: flex; align-items: center; gap: 3px;
+      padding: 0 8px; min-height: 30px; cursor: pointer;
+      transition: background 0.1s;
+    }
+    .dv-tree-row:hover { background: #f4f4f5; }
+    .dv-tree-row.active { background: #f4f4f5; }
+    .dv-tree-row.active .dv-tree-name { font-weight: 600; }
+
+    /* Compact guide overrides inside sidebar */
+    .dv-sidebar .guide { width: 16px; height: 30px; }
+    .dv-sidebar .guide-vert::before { left: 7px; top: -6px; bottom: -6px; }
+    .dv-sidebar .guide-tee::before  { left: 7px; top: -6px; bottom: -6px; }
+    .dv-sidebar .guide-tee::after   { left: 7px; top: 50%; width: 9px; }
+    .dv-sidebar .guide-elbow::before { left: 7px; top: -6px; }
+    .dv-sidebar .guide-elbow::after  { left: 7px; top: 50%; width: 9px; }
+
+    /* Compact chevron — expand/collapse hit target (row click opens detail only) */
+    .dv-sidebar .chevron { width: 14px; height: 14px; flex-shrink: 0; }
+    .dv-sidebar .chevron.hidden { cursor: default; }
+    .dv-sidebar .chevron svg { width: 8px; height: 8px; }
+
+    /* Compact icon */
+    .dv-sidebar .name-icon { width: 18px; height: 18px; border-radius: 3px; }
+    .dv-sidebar .name-icon svg { width: 11px; height: 11px; }
+
+    /* Name + dot: dot hugs the label; bars stay on the right */
+    .dv-tree-name-wrap {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+      min-width: 0;
+    }
+    .dv-tree-name {
+      font-size: 12px;
+      color: #18181b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 0 1 auto;
+      min-width: 0;
+    }
+    .dv-tree-name-wrap .user-input-dot { flex-shrink: 0; }
+    .dv-sidebar .user-input-dot { width: 10px; height: 10px; }
+    .dv-sidebar .user-input-dot::after { width: 3px; height: 3px; }
+
+    /* Compact status badge */
+    .dv-sidebar .link-status-badge { display: none; }
+
+    /* Stacked horizontal metric bars — right of label (purple / teal / amber) */
+    .dv-tree-bars {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 2px;
+      flex-shrink: 0;
+      width: 36px;
+      margin-left: 3px;
+    }
+    .dv-hbar {
+      height: 3px;
+      border-radius: 999px;
+      background: #ececf0;
+      position: relative;
+      overflow: hidden;
+    }
+    .dv-hbar-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      border-radius: 999px;
+      min-width: 2px;
+      max-width: 100%;
+    }
+    .dv-hbar-fill.mass     { background: #a855f7; }
+    .dv-hbar-fill.emission { background: #14b8a6; }
+    .dv-hbar-fill.cost     { background: #eab308; }
+
+    /* Sidebar collapsed children */
+    .dv-tree-children.collapsed { display: none; }
+
+    /* -- Main detail area -- */
+    .dv-main {
+      flex: 1; display: flex; flex-direction: column; min-width: 0;
+      background: #fafafa; overflow: hidden;
+    }
+
+    /* Product header */
+    .dv-product-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 24px; border-bottom: 1px solid #e4e4e7; flex-shrink: 0;
+      background: #fff;
+    }
+    .dv-product-name-block { display: flex; flex-direction: column; }
+    .dv-product-name {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 16px; font-weight: 600; color: #18181b; line-height: 1.4;
+    }
+    .dv-product-subtitle { font-size: 12px; color: #71717a; }
+    .dv-icon-btn {
+      width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+      background: none; border: 1px solid #e4e4e7; border-radius: 6px;
+      cursor: pointer; color: #52525b; transition: all 0.12s;
+    }
+    .dv-icon-btn:hover { background: #f4f4f5; border-color: #a1a1aa; color: #18181b; }
+
+    /* Tabs bar */
+    .dv-tabs-bar {
+      display: flex; align-items: flex-end; padding: 0 24px;
+      border-bottom: 1px solid #e4e4e7; flex-shrink: 0;
+      background: #fff; height: 38px;
+    }
+    .dv-tab {
+      padding: 8px 12px 7px; font-size: 13px; font-weight: 500; color: #71717a;
+      cursor: pointer; border-bottom: 2px solid transparent;
+      transition: color 0.12s, border-color 0.12s;
+    }
+    .dv-tab:hover { color: #18181b; }
+    .dv-tab.active { color: #18181b; border-bottom-color: #18181b; }
+
+    /* Summary layout */
+    .dv-summary {
+      flex: 1; display: flex; gap: 16px; padding: 16px 24px;
+      overflow: hidden; min-height: 0; align-items: flex-start;
+    }
+    .dv-sum-left {
+      flex: 1; display: flex; flex-direction: column; gap: 10px;
+      min-width: 0; overflow-y: auto; scrollbar-width: none;
+    }
+    .dv-sum-left::-webkit-scrollbar { display: none; }
+    .dv-sum-right {
+      width: 340px; flex-shrink: 0; display: flex; flex-direction: column; gap: 12px;
+      overflow-y: auto; scrollbar-width: none;
+    }
+    .dv-sum-right::-webkit-scrollbar { display: none; }
+
+    /* Detail cards (left column) */
+    .dv-card {
+      background: #fff; border: 1px solid #e4e4e7; border-radius: 8px;
+      padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .dv-card-title { font-size: 14px; font-weight: 600; color: #18181b; }
+    .dv-field { display: flex; flex-direction: column; gap: 3px; }
+    .dv-field-label {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 12px; font-weight: 500; color: #71717a;
+    }
+    .dv-field-val {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 500; color: #18181b; line-height: 1.4;
+    }
+    .dv-field-text { font-size: 13px; color: #18181b; line-height: 1.5; }
+    .dv-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
+    .dv-info-icon { color: #a1a1aa; cursor: help; font-size: 12px; }
+    .dv-copy-icon { color: #a1a1aa; cursor: pointer; transition: color 0.12s; }
+    .dv-copy-icon:hover { color: #52525b; }
+
+    /* Metric cards (right column) */
+    .dv-metric-card {
+      background: #fff; border: 1px solid #e4e4e7; border-radius: 8px;
+      padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .dv-metric-header {
+      display: flex; align-items: center; cursor: pointer; user-select: none;
+    }
+    .dv-metric-label-grp {
+      display: flex; align-items: center; gap: 4px; flex: 1;
+    }
+    .dv-metric-title { font-size: 14px; font-weight: 600; color: #18181b; }
+    .dv-metric-chevron { color: #a1a1aa; font-size: 12px; margin-left: 2px; transition: transform 0.15s; }
+    .dv-metric-chevron.open { transform: rotate(90deg); }
+    .dv-metric-val-grp { display: flex; align-items: baseline; gap: 3px; }
+    .dv-metric-num { font-size: 18px; font-weight: 600; color: #18181b; font-variant-numeric: tabular-nums; }
+    .dv-metric-unit { font-size: 13px; font-weight: 400; color: #71717a; }
+    .dv-metric-bar-track {
+      width: 100%; height: 6px; background: #f5f5f5; border-radius: 4px; overflow: hidden;
+    }
+    .dv-metric-bar-fill { height: 100%; border-radius: 4px; min-width: 2px; }
+    .dv-metric-bar-fill.mass     { background: #a855f7; }
+    .dv-metric-bar-fill.emission { background: #14b8a6; }
+    .dv-metric-bar-fill.cost     { background: #eab308; }
+
+    /* Active row highlight when detail is open */
+    .bom-row--active { background: #f4f4f5 !important; }
+
+  </style>
+</head>
+<body>
+
+<!-- Link preview tooltip -->
+<div class="link-preview" id="linkPreview">
+  <div class="lp-outdated-banner" id="lpOutdatedBanner">
+    <span class="lp-outdated-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2a6 6 0 100 12A6 6 0 008 2zm0 3.5v3M8 10.5v1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+    <span class="lp-outdated-text" id="lpOutdatedText"></span>
+    <button class="lp-update-btn" onclick="alert('Update link to latest version')">Update</button>
+  </div>
+  <div class="lp-header">
+    <span class="lp-header-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 15.0003L15 9.00031M11 6.00031L11.463 5.46431C12.4008 4.52663 13.6727 3.99991 14.9989 4C16.325 4.00009 17.5968 4.527 18.5345 5.46481C19.4722 6.40261 19.9989 7.6745 19.9988 9.00066C19.9987 10.3268 19.4718 11.5986 18.534 12.5363L18 13.0003M13 18.0003L12.603 18.5343C11.6543 19.4725 10.3738 19.9987 9.03952 19.9987C7.70523 19.9987 6.42477 19.4725 5.47602 18.5343C5.00838 18.0719 4.63711 17.5213 4.38373 16.9144C4.13035 16.3076 3.99988 15.6565 3.99988 14.9988C3.99988 14.3412 4.13035 13.69 4.38373 13.0832C4.63711 12.4763 5.00838 11.9257 5.47602 11.4633L6.00002 11.0003" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    <div class="lp-title" id="lpTitle"></div>
+  </div>
+  <div class="lp-tags" id="lpTags"></div>
+  <div class="lp-metrics">
+    <div class="lp-metric"><span class="lp-metric-label">Version</span><span class="lp-metric-value" id="lpVersion"></span></div>
+    <div class="lp-metric"><span class="lp-metric-label">Date created</span><span class="lp-metric-value" id="lpDate"></span></div>
+    <div class="lp-metric"><span class="lp-metric-label">Sourcing location</span><span class="lp-metric-value" id="lpSourcing"></span></div>
+    <div class="lp-metric"><span class="lp-metric-label">Supplier</span><span class="lp-metric-value" id="lpSupplier"></span></div>
+  </div>
+  <div class="lp-metrics">
+    <div class="lp-metric"><span class="lp-metric-label">Mass</span><span class="lp-metric-value" id="lpMass"></span></div>
+    <div class="lp-metric"><span class="lp-metric-label">Emissions</span><span class="lp-metric-value" id="lpEmissions"></span></div>
+    <div class="lp-metric"><span class="lp-metric-label">Cost</span><span class="lp-metric-value" id="lpCost"></span></div>
+  </div>
+  <div class="lp-footer">
+    <span id="lpFooter"></span>
+    <button class="lp-open-btn" onclick="alert('Navigate to product')">Open product <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M11 7H6C5.47 7 4.96 7.21 4.59 7.59C4.21 7.96 4 8.47 4 9V18C4 18.53 4.21 19.04 4.59 19.41C4.96 19.79 5.47 20 6 20H15C15.53 20 16.04 19.79 16.41 19.41C16.79 19.04 17 18.53 17 18V13M10 14L20 4M20 4H15M20 4V9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </div>
+</div>
+
+<div class="bom" id="bomContainer">
+  <!-- BOM table view -->
+  <div class="bom-table-view" id="bomTableView">
+    <div class="bom-toolbar">
+      <span class="title">Bill of Materials</span>
+      <button class="btn-edit" id="editBtn" onclick="toggleEdit()">Edit</button>
+    </div>
+    <div class="bom-header">
+      <div class="col">Component Name</div>
+      <div class="col">Mass</div>
+      <div class="col">Emissions</div>
+      <div class="col">Cost</div>
+    </div>
+    <div class="bom-scroll">
+      <ul class="bom-list" id="bom"></ul>
+    </div>
+  </div>
+
+  <!-- Detail view -->
+  <div class="bom-detail-view" id="bomDetailView">
+    <!-- Structure sidebar -->
+    <div class="dv-sidebar">
+      <div class="dv-sidebar-header">
+        <span class="dv-sidebar-title">Structure</span>
+      </div>
+      <div class="dv-sidebar-scroll" id="dvSidebarTree"></div>
+    </div>
+    <!-- Main content -->
+    <div class="dv-main">
+      <div class="dv-product-header">
+        <div class="dv-product-name-block">
+          <div class="dv-product-name" id="dvProductName"></div>
+          <div class="dv-product-subtitle" id="dvProductSubtitle"></div>
+        </div>
+        <button class="dv-icon-btn" onclick="closeDetailPanel()" title="Back to BOM">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="dv-tabs-bar">
+        <div class="dv-tab active" onclick="switchDvTab('summary',this)">Summary</div>
+        <div class="dv-tab" onclick="switchDvTab('manufacturing',this)">Manufacturing</div>
+        <div class="dv-tab" onclick="switchDvTab('transportation',this)">Transportation</div>
+      </div>
+      <div class="dv-summary" id="dvSummary">
+        <div class="dv-sum-left" id="dvSumLeft"></div>
+        <div class="dv-sum-right" id="dvSumRight"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Extract as Product Modal -->
+<div class="modal-overlay" id="extractModal">
+  <div class="modal">
+    <div class="modal-header" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>Extract as product</span>
+      <button class="link-modal-close" onclick="closeExtractModal()"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:#71717a;margin:0;">Save this node as a new product in the product library. The current row stays as-is.</p>
+      <div class="modal-field">
+        <label>Product name</label>
+        <div class="field-input-wrap">
+          <input type="text" id="extractName" placeholder="e.g. Anode coated foil" />
+        </div>
+      </div>
+      <div class="modal-field">
+        <label>Product ID</label>
+        <div class="field-input-wrap">
+          <input type="text" id="extractProductId" placeholder="e.g. PROD-0042" />
+        </div>
+      </div>
+      <div class="modal-field">
+        <label>Description</label>
+        <div class="field-input-wrap">
+          <input type="text" id="extractDescription" placeholder="Optional description" />
+        </div>
+      </div>
+      <div class="modal-field">
+        <label>Tags</label>
+        <div class="field-input-wrap">
+          <input type="text" id="extractTags" placeholder="e.g. Battery, Anode (comma separated)" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn" onclick="closeExtractModal()">Cancel</button>
+      <button class="modal-btn" onclick="confirmExtract(false)" style="color:#52525b;">Extract only</button>
+      <button class="modal-btn confirm" onclick="confirmExtract(true)">Extract &amp; Link</button>
+    </div>
+  </div>
+</div>
+
+<!-- Link Product Modal -->
+<div class="modal-overlay" id="linkModal">
+  <div class="modal link-modal">
+    <div class="link-modal-header">
+      <span class="link-modal-title">Link a product</span>
+      <button class="link-modal-close" onclick="closeLinkModal()"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="link-search-wrap">
+      <span class="link-search-icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+      <input class="link-search-input" id="linkSearch" type="text" placeholder="Search products…" oninput="filterLinkProducts()">
+    </div>
+    <div class="link-product-list" id="linkProductList"></div>
+    <div class="link-scaling">
+      <div class="link-scaling-title">Quantity &amp; scaling</div>
+      <div class="link-scaling-equation">
+        <div class="link-scaling-field">
+          <label>Scaling factor</label>
+          <div class="field-input-wrap"><input type="text" id="linkScale" inputmode="decimal" placeholder="1" oninput="onLinkScaleInput()"></div>
+        </div>
+        <span class="link-eq-sep">=</span>
+        <div class="link-scaling-field">
+          <label>Mass (kg)</label>
+          <div class="field-input-wrap"><input type="text" id="linkMass" inputmode="decimal" placeholder="—" oninput="onLinkMassInput()"></div>
+        </div>
+      </div>
+      <div class="link-original-mass">Original mass: <span id="linkDefaultMass">—</span></div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn" onclick="closeLinkModal()">Cancel</button>
+      <button class="modal-btn confirm" id="linkConfirmBtn" onclick="confirmLink()" disabled style="opacity:0.45;cursor:default">Link product</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const data = [
+    {
+      name: "NMC Battery Cell", mass: 1.36, emission: 19.7705, cost: 33.6351, userInputName: true, userInputMass: true,
+      children: [
+        {
+          name: "Cathode coated foil", mass: 0.3991, emission: 14.7272, cost: 9.7394,
+          children: [
+            {
+              name: "lithium nickel manganese cobalt oxide (NMC cathode active material)", mass: 0.3305, emission: 13.3553, cost: 2.1865,
+              children: [
+                { name: "Cobalt sulfate heptahydrate (CoSO₄·7H₂O)",          mass: 0.3211,  emission: 9.6074, cost: 0.543  },
+                { name: "Nickel sulfate hexahydrate (NiSO₄·6H₂O)",            mass: 0.2999,  emission: 1.5862, cost: 0.2476 },
+                { name: "Sodium hydroxide (NaOH)",                             mass: 0.2742,  emission: 0.4206, cost: 0.0132 },
+                { name: "Manganese sulfate monohydrate (MnSO₄·H₂O)",          mass: 0.1931,  emission: 0.1854, cost: 0.0333 },
+                { name: "Lithium carbonate (Li₂CO₃, 99.5% purity)",           mass: 0.1266,  emission: 0.9609, cost: 0.4937 },
+                { name: "Ammonia (NH₃)",                                       mass: 0.0146,  emission: 0.0602, cost: 0.0012 },
+              ]
+            },
+            { name: "aluminum wrought alloy foil",    mass: 0.0399,  emission: 0.5657, cost: 0.0145 },
+            { name: "carbon black",                   mass: 0.0144,  emission: 0.0321, cost: 0.0031 },
+            {
+              name: "polyvinylidene fluoride (PVDF)", mass: 0.0144, emission: 0.1537, cost: 0.0117,
+              children: [
+                { name: "Vinylidene fluoride monomer (≥99.0% purity)",         mass: 0.0144,  emission: 0.1438, cost: 0.0087 },
+                { name: "Ammonium perfluorooctanoate (PFOA, ≥96% purity)",     mass: 0.00014, emission: 0.0024, cost: 0.0002 },
+                { name: "Ammonium persulfate (APS, ≥98% purity)",              mass: 0.000029,emission: 0.0,    cost: 0.0    },
+              ]
+            },
+          ]
+        },
+        {
+          name: "Steel can (low-alloyed steel)", mass: 0.2809, emission: 0.7523, cost: 0.7335,
+          children: [
+            { name: "low-alloyed steel", mass: 0.2879, emission: 0.5774, cost: 0.3498 },
+          ]
+        },
+        {
+          name: "Anode coated foil", linked: true, version: "v2.1", dateCreated: "Mar 12, 2025", sourcingLocation: "South Korea", supplier: "SKI Innovation", tags: ["Battery", "Anode", "Coated"], mass: 0.2513, emission: 1.9576, cost: 5.585,
+          children: [
+            {
+              name: "Graphite (active material)", mass: 0.1458, emission: 0.8984, cost: 0.3256,
+              children: [
+                { name: "Calcined petroleum coke (≥98 wt% fixed carbon)", mass: 0.1385, emission: 0.2408, cost: 0.0994 },
+                { name: "Coal tar pitch binder",                           mass: 0.0153, emission: 0.0204, cost: 0.0087 },
+              ]
+            },
+            {
+              name: "Copper (copper foil)", mass: 0.098, emission: 0.7173, cost: 1.6876,
+              children: [
+                { name: "copper", mass: 0.0999, emission: 0.6747, cost: 0.9394 },
+              ]
+            },
+            {
+              name: "Styrene-butadiene rubber (SBR) binder", mass: 0.005, emission: 0.0543, cost: 0.0169,
+              children: [
+                { name: "1,3-Butadiene",          mass: 0.00377,   emission: 0.011,  cost: 0.0063 },
+                { name: "Styrene",                mass: 0.001257,  emission: 0.0045, cost: 0.0028 },
+                { name: "Ammonium persulfate",    mass: 0.0000754, emission: 0.0001, cost: 0.0001 },
+                { name: "Sodium bicarbonate",     mass: 0.0000251, emission: 0.0,    cost: 0.0    },
+                { name: "Sodium lauryl sulfate",  mass: 0.0000251, emission: 0.0001, cost: 0.0002 },
+                { name: "tert-Dodecyl mercaptan", mass: 0.00001,   emission: 0.0,    cost: 0.0001 },
+              ]
+            },
+            { name: "Carbon black (conductive grade)", mass: 0.00251, emission: 0.0057, cost: 0.0048 },
+          ]
+        },
+        {
+          name: "Lithium-ion battery electrolyte solution (organic carbonate-based)", mass: 0.207, emission: 0.7636, cost: 1.3087,
+          children: [
+            { name: "ethylene carbonate",          mass: 0.0993, emission: 0.0864, cost: 0.131  },
+            { name: "dimethyl carbonate",          mass: 0.0802, emission: 0.0371, cost: 0.0405 },
+            { name: "lithium hexafluorophosphate", mass: 0.0233, emission: 0.1673, cost: 0.1958 },
+            { name: "vinyl carbonate",             mass: 0.00414,emission: 0.0376, cost: 0.9415 },
+          ]
+        },
+        {
+          name: "Separator film (polyolefin plastic)", linked: true, broken: true, version: "v1.0", mass: 0.0887, emission: 0.251, cost: 1.1785,
+          children: [
+            { name: "polyethylene", mass: 0.0905, emission: 0.2375, cost: 0.3691 },
+          ]
+        },
+        {
+          name: "Top cap and vent", linked: true, outdated: true, version: "v1.2", latestVersion: "v2.0", dateCreated: "Jan 5, 2025", sourcingLocation: "Germany", supplier: "Schott AG", tags: ["Enclosure", "Vent"], mass: 0.0739, emission: 0.2171, cost: 0.982,
+          children: [
+            { name: "Cap body (polypropylene)", mass: 0.0591, emission: 0.1497, cost: 0.4021 },
+            { name: "Vent insert (silicone)",   mass: 0.0148, emission: 0.0435, cost: 0.0623 },
+          ]
+        },
+        {
+          name: "Metal current tabs", mass: 0.0237, emission: 0.1729, cost: 0.031,
+          children: [
+            { name: "copper", mass: 0.0241, emission: 0.1593, cost: 0.0079 },
+          ]
+        },
+        {
+          name: "Insulators (polypropylene)", mass: 0.0207, emission: 0.0654, cost: 0.0736,
+          children: [
+            { name: "polypropylene", mass: 0.0211, emission: 0.0606, cost: 0.0187 },
+          ]
+        },
+        {
+          name: "Label sleeve (polyethylene terephthalate (PET))", mass: 0.0148, emission: 0.0612, cost: 0.0303,
+          children: [
+            { name: "polyethylene terephthalate (PET)",                         mass: 0.01463,  emission: 0.0533, cost: 0.0084 },
+            { name: "printing ink (pigmented, solvent-based, for PET film)",    mass: 0.000148, emission: 0.0008, cost: 0.0005 },
+          ]
+        },
+      ]
+    }
+  ];
+
+  const chevronSVG = `<svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3.5 2L6.5 5L3.5 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+
+  // — Mass unit conversion (base: kg) —
+  const MASS_UNITS   = ['kg', 'g', 'mg', 'lb', 'oz', 'pcs'];
+  const MASS_FACTORS = { kg: 1, g: 1e3, mg: 1e6, lb: 2.20462, oz: 35.274, pcs: null };
+  const MASS_DEC     = { kg: 4, g:   2, mg:   0, lb:      4,  oz:     3,  pcs: 0    };
+
+  function fmt(n, decimals) {
+    if (n === 0) return (0).toFixed(decimals);
+    if (n > 0 && n < 0.01) return "<0.01";
+    return n.toFixed(decimals);
+  }
+
+  function roundToDecimals(n, d) {
+    const f = Math.pow(10, d);
+    return Math.round(n * f) / f;
+  }
+
+  function collectMaxValues(nodes) {
+    let maxMass = 0, maxEmission = 0, maxCost = 0;
+    function walk(list) {
+      for (const n of list) {
+        if (n.mass != null) maxMass = Math.max(maxMass, n.mass);
+        if (n.emission != null) maxEmission = Math.max(maxEmission, n.emission);
+        if (n.cost != null) maxCost = Math.max(maxCost, n.cost);
+        if (n.children) walk(n.children);
+      }
+    }
+    walk(nodes);
+    return { maxMass, maxEmission, maxCost };
+  }
+
+  // guides: bool[] — true means that ancestor level still has siblings below (draw vert line)
+  function buildList(nodes, depth, ul, guides = [], linkedAncestor = false, linkedStartDepth = -1) {
+    nodes.forEach((node, idx) => {
+      const isLast = idx === nodes.length - 1;
+      const li = document.createElement("li");
+      if (node.linked && !linkedAncestor) li.classList.add("li--linked-root");
+      const hasChildren = node.children && node.children.length > 0;
+      const isExpanded = depth === 0 || node._expanded === true;
+
+      const row = document.createElement("div");
+      row.className = "bom-row"
+        + (node.linked && !linkedAncestor ? " bom-row--locked bom-row--linked-root" : "")
+        + (linkedAncestor ? " bom-row--locked bom-row--linked-child" + (linkedAncestor.broken ? " bom-row--linked-broken" : linkedAncestor.outdated ? " bom-row--linked-outdated" : "") : "");
+
+      // — Name cell —
+      const nameCell = document.createElement("div");
+      nameCell.className = "name-cell";
+
+      for (let i = 0; i < depth; i++) {
+        const sp = document.createElement("span");
+        const isLinkedGuide = linkedAncestor && i >= linkedStartDepth;
+        if (i < depth - 1) {
+          sp.className = "guide " + (guides[i] ? "guide-vert" : "") + (isLinkedGuide && guides[i] ? " guide-linked" : "");
+        } else {
+          sp.className = "guide " + (isLast ? "guide-elbow" : "guide-tee") + (isLinkedGuide ? " guide-linked" : "");
+        }
+        nameCell.appendChild(sp);
+      }
+
+      const chev = document.createElement("span");
+      chev.className = "chevron" + (hasChildren ? (isExpanded ? " open" : "") : " hidden");
+      chev.innerHTML = chevronSVG;
+      nameCell.appendChild(chev);
+
+      const nameIcon = document.createElement("span");
+      nameIcon.className = "name-icon";
+      const linkedRoot = node.linked ? node : linkedAncestor || null;
+      if (linkedRoot) {
+        nameIcon.style.color = linkedRoot.broken ? "#DC2626" : linkedRoot.outdated ? "#EAB308" : "#B37343";
+        nameIcon.style.background = linkedRoot.broken ? "#fef2f2" : linkedRoot.outdated ? "#fefce8" : "#fff7ed";
+      }
+      if (node.linked && !linkedAncestor) {
+        nameIcon.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 15.0003L15 9.00031M11 6.00031L11.463 5.46431C12.4008 4.52663 13.6727 3.99991 14.9989 4C16.325 4.00009 17.5968 4.527 18.5345 5.46481C19.4722 6.40261 19.9989 7.6745 19.9988 9.00066C19.9987 10.3268 19.4718 11.5986 18.534 12.5363L18 13.0003M13 18.0003L12.603 18.5343C11.6543 19.4725 10.3738 19.9987 9.03952 19.9987C7.70523 19.9987 6.42477 19.4725 5.47602 18.5343C5.00838 18.0719 4.63711 17.5213 4.38373 16.9144C4.13035 16.3076 3.99988 15.6565 3.99988 14.9988C3.99988 14.3412 4.13035 13.69 4.38373 13.0832C4.63711 12.4763 5.00838 11.9257 5.47602 11.4633L6.00002 11.0003"/></svg>`;
+      } else {
+        nameIcon.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M21 16.008v-8.018a1.98 1.98 0 0 0 -1 -1.717l-7 -4.008a2.016 2.016 0 0 0 -2 0l-7 4.008c-.619 .355 -1 1.01 -1 1.718v8.018c0 .709 .381 1.363 1 1.717l7 4.008a2.016 2.016 0 0 0 2 0l7 -4.008c.619 -.355 1 -1.01 1 -1.718"/><path d="M12 22v-10"/><path d="M12 12l8.73 -5.04"/><path d="M3.27 6.96l8.73 5.04"/></svg>`;
+      }
+      nameCell.appendChild(nameIcon);
+
+      const nameText = document.createElement("span");
+      const isOutdated = (node.linked && node.outdated) || (linkedAncestor?.outdated);
+      nameText.className = "name cell-text" + (node.linked && !linkedAncestor ? " linked" : "");
+      nameText.textContent = node.name;
+      nameCell.appendChild(nameText);
+
+      const isNameUserInput = node.userInputName || (node.linked && !linkedAncestor);
+      if (isNameUserInput) {
+        const dot = document.createElement("span");
+        dot.className = "user-input-dot";
+        dot.title = "User input";
+        nameCell.appendChild(dot);
+      }
+
+      if (node.linked && !linkedAncestor) {
+        nameIcon.addEventListener("mouseenter", () => showLinkPreview(node, nameIcon));
+        nameIcon.addEventListener("mouseleave", hideLinkPreview);
+
+        {
+          const statusBadge = document.createElement("span");
+          if (node.broken) {
+            statusBadge.className = "link-status-badge badge-broken";
+            statusBadge.title = "Source product was deleted";
+            statusBadge.textContent = `Source removed`;
+          } else if (node.outdated) {
+            statusBadge.className = "link-status-badge badge-outdated";
+            statusBadge.title = `Source updated to ${node.latestVersion}`;
+            statusBadge.textContent = `Update available`;
+          }
+          if (node.broken || node.outdated) nameCell.appendChild(statusBadge);
+        }
+
+      }
+
+      const nameWrap = document.createElement("div");
+      nameWrap.className = "input-wrap";
+      const nameInput = document.createElement("input");
+      nameInput.className = "cell-input" + (isNameUserInput ? " has-user-input" : "");
+      nameInput.type = "text";
+      nameInput.value = node.name;
+      nameInput.addEventListener("click", e => e.stopPropagation());
+      nameInput.addEventListener("change", () => { node.name = nameInput.value; nameText.textContent = nameInput.value; });
+      nameWrap.appendChild(nameInput);
+      if (isNameUserInput) {
+        const dotEdit = document.createElement("span");
+        dotEdit.className = "user-input-dot dot-name";
+        dotEdit.title = "User input";
+        nameWrap.appendChild(dotEdit);
+      }
+      nameCell.appendChild(nameWrap);
+
+      // — Row action buttons (expand, unlink, delete) —
+      const actions = document.createElement("div");
+      actions.className = "row-actions";
+
+      // Expand
+      const expandBtn = document.createElement("button");
+      expandBtn.className = "row-action-btn";
+      expandBtn.title = "Expand";
+      expandBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10.667 2.666H13.334M13.334 2.666V5.333M13.334 2.666L9.334 6.666M5.334 13.333H2.667M2.667 13.333V10.666M2.667 13.333L6.667 9.333" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      expandBtn.addEventListener("click", e => e.stopPropagation());
+      actions.appendChild(expandBtn);
+
+      // Link / Unlink
+      const linkActionBtn = document.createElement("button");
+      if (node.linked && !linkedAncestor) {
+        // Linked root: show unlink button
+        linkActionBtn.className = "row-action-btn unlink-btn";
+        linkActionBtn.title = "Unlink";
+        linkActionBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M17 22V20M9 15L15 9M11 6L11.463 5.464C12.4008 4.52633 13.6727 3.9996 14.9989 3.99969C16.325 3.99979 17.5968 4.52669 18.5345 5.4645C19.4722 6.40231 19.9989 7.67419 19.9988 9.00035C19.9987 10.3265 19.4718 11.5983 18.534 12.536L18 13M13 18L12.603 18.534C11.6543 19.4722 10.3738 19.9984 9.03952 19.9984C7.70523 19.9984 6.42477 19.4722 5.47602 18.534C5.00838 18.0716 4.63711 17.521 4.38373 16.9141C4.13035 16.3073 3.99988 15.6561 3.99988 14.9985C3.99988 14.3408 4.13035 13.6897 4.38373 13.0829C4.63711 12.476 5.00838 11.9254 5.47602 11.463L6.00002 11M20 17H22M2 7H4M7 2V4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        linkActionBtn.addEventListener("click", e => { e.stopPropagation(); node.linked = false; renderBom(); });
+      } else if (!linkedAncestor) {
+        // Regular row: show link button
+        linkActionBtn.className = "row-action-btn link-btn";
+        linkActionBtn.title = "Link product";
+        linkActionBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 15.0003L15 9.00031M11 6.00031L11.463 5.46431C12.4008 4.52663 13.6727 3.99991 14.9989 4C16.325 4.00009 17.5968 4.527 18.5345 5.46481C19.4722 6.40261 19.9989 7.6745 19.9988 9.00066C19.9987 10.3268 19.4718 11.5986 18.534 12.5363L18 13.0003M13 18.0003L12.603 18.5343C11.6543 19.4725 10.3738 19.9987 9.03952 19.9987C7.70523 19.9987 6.42477 19.4725 5.47602 18.5343C5.00838 18.0719 4.63711 17.5213 4.38373 16.9144C4.13035 16.3076 3.99988 15.6565 3.99988 14.9988C3.99988 14.3412 4.13035 13.69 4.38373 13.0832C4.63711 12.4763 5.00838 11.9257 5.47602 11.4633L6.00002 11.0003" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        linkActionBtn.addEventListener("click", e => { e.stopPropagation(); openLinkModal(node, nodes, idx); });
+      }
+      if (!linkedAncestor) actions.appendChild(linkActionBtn);
+
+      if (node.linked && !linkedAncestor) {
+      }
+
+      // Extract as product (only for non-linked, non-child rows)
+      if (!node.linked && !linkedAncestor) {
+        const extractBtn = document.createElement("button");
+        extractBtn.className = "row-action-btn";
+        extractBtn.title = "Extract as product";
+        extractBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 3h5v5"/><path d="M20 3l-7.536 7.536a5 5 0 0 0 -1.464 3.534v6.93"/><path d="M4 5l4.5 4.5"/></svg>`;
+        extractBtn.addEventListener("click", e => { e.stopPropagation(); openExtractModal(node); });
+        actions.appendChild(extractBtn);
+      }
+
+      // Delete
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "row-action-btn danger";
+      deleteBtn.title = "Delete";
+      deleteBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2.667 4.667H13.334M6.667 7.333V11.333M9.334 7.333V11.333M3.334 4.667L4 12.667C4 13.02 4.141 13.359 4.391 13.61C4.641 13.86 4.98 14 5.334 14H10.667C11.021 14 11.36 13.86 11.61 13.61C11.86 13.359 12 13.02 12 12.667L12.667 4.667M6 4.667V2.667C6 2.49 6.071 2.32 6.196 2.195C6.321 2.07 6.49 2 6.667 2H9.334C9.51 2 9.68 2.07 9.805 2.195C9.93 2.32 10 2.49 10 2.667V4.667" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      deleteBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        nodes.splice(idx, 1);
+        renderBom();
+      });
+      actions.appendChild(deleteBtn);
+
+      nameCell.appendChild(actions);
+
+      row.appendChild(nameCell);
+
+      // — Value cells —
+      // unitConfig = { units, factors, decimals, current, onChange }
+      function makeValCell(value, decimals, prefix, unit, onUpdate, isUserInput, unitConfig = null, barClass = null, maxVal = 0) {
+        const cell = document.createElement("div");
+        cell.className = "val";
+
+        // mutable unit state
+        const us = unitConfig ? { u: unitConfig.current } : null;
+        const getFactor  = () => { const f = us ? unitConfig.factors[us.u] : 1; return f ?? 1; };
+        const getDec     = () => us ? unitConfig.decimals[us.u] : decimals;
+        const getUnit    = () => us ? us.u : unit;
+        const isPcs      = () => us && unitConfig.factors[us.u] === null;
+        const toDisplay  = v  => (v === null || v === undefined) ? v : isPcs() ? v : v * getFactor();
+        const toBase     = v  => (v === null || v === undefined) ? v : isPcs() ? v : v / getFactor();
+
+        const isEmpty = value === null || value === undefined;
+
+        // — Text (view mode) — static, no interactive unit
+        const text = document.createElement("span");
+        let viewUnitSpan = null, editSel = null;
+
+        function refreshText() {
+          const dv = toDisplay(value);
+          text.className = "cell-text" + ((value === null || value === undefined) ? " cell-text--empty" : "");
+          if (value === null || value === undefined) {
+            text.innerHTML = `<span class="unit">—</span>`;
+          } else {
+            text.innerHTML = `${prefix}${fmt(dv, 2)}`;
+            if (isUserInput) {
+              const dot = document.createElement("span");
+              dot.className = "user-input-dot";
+              dot.title = "User input";
+              text.appendChild(dot);
+            }
+            viewUnitSpan = document.createElement("span");
+            viewUnitSpan.className = "unit";
+            viewUnitSpan.textContent = getUnit();
+            text.appendChild(viewUnitSpan);
+          }
+        }
+        refreshText();
+        cell.appendChild(text);
+
+        // — Color bar (view mode) —
+        if (barClass && maxVal > 0) {
+          const track = document.createElement("div");
+          track.className = "val-bar-track";
+          const fill = document.createElement("div");
+          fill.className = "val-bar-fill " + barClass;
+          const pct = (value != null && maxVal > 0) ? Math.min(100, (value / maxVal) * 100) : 0;
+          fill.style.width = pct + "%";
+          track.appendChild(fill);
+          cell.appendChild(track);
+          cell._barFill = fill;
+          cell._barMaxVal = maxVal;
+          cell._barClass = barClass;
+        }
+
+        // — Input (edit mode) —
+        const wrap = document.createElement("div");
+        wrap.className = "input-wrap" + (unitConfig ? " input-wrap--with-unit" : "");
+
+        const input = document.createElement("input");
+        input.className = "cell-input input-val" + (isUserInput ? " has-user-input" : "");
+        input.type = "text";
+        input.inputMode = "decimal";
+
+        function refreshInput() {
+          const dv = toDisplay(value);
+          const dec = getDec();
+          input.value = isEmpty ? "" : roundToDecimals(Number(dv), dec).toFixed(dec);
+        }
+        refreshInput();
+
+        input.placeholder = "Enter value";
+        input.addEventListener("click", e => e.stopPropagation());
+
+        function commitVal() {
+          const raw = input.value.trim();
+          if (raw === "") {
+            onUpdate(null); value = null;
+            input.value = "";
+            refreshText();
+            return;
+          }
+          const parsed = parseFloat(raw.replace(/[^0-9.\-e]/g, ""));
+          if (isNaN(parsed)) return;
+          const dec = getDec();
+          const displayVal = roundToDecimals(parsed, dec);
+          const baseVal = unitConfig ? roundToDecimals(toBase(displayVal), 6) : displayVal;
+          onUpdate(baseVal); value = baseVal;
+          input.value = displayVal.toFixed(dec);
+          refreshText();
+        }
+        input.addEventListener("change", commitVal);
+
+        // Wrap input in a relative container so the dot anchors to the input edge
+        if (unitConfig && isUserInput) {
+          const inputOuter = document.createElement("div");
+          inputOuter.className = "input-field-outer";
+          inputOuter.style.cssText = "position:relative;flex:1;min-width:0;";
+          inputOuter.appendChild(input);
+          const dotEdit = document.createElement("span");
+          dotEdit.className = "user-input-dot dot-val";
+          dotEdit.title = "User input";
+          inputOuter.appendChild(dotEdit);
+          wrap.appendChild(inputOuter);
+        } else {
+          wrap.appendChild(input);
+          if (isUserInput) {
+            const dotEdit = document.createElement("span");
+            dotEdit.className = "user-input-dot dot-val";
+            dotEdit.title = "User input";
+            wrap.appendChild(dotEdit);
+          }
+        }
+
+        if (unitConfig) {
+          editSel = document.createElement("select");
+          editSel.className = "input-unit-select";
+          unitConfig.units.forEach(u => {
+            const opt = document.createElement("option");
+            opt.value = opt.textContent = u;
+            if (u === us.u) opt.selected = true;
+            editSel.appendChild(opt);
+          });
+          editSel.addEventListener("mousedown", e => e.stopPropagation());
+          editSel.addEventListener("click",     e => e.stopPropagation());
+          editSel.addEventListener("change", () => {
+            us.u = editSel.value;
+            unitConfig.onChange(editSel.value);
+            if (viewUnitSpan) viewUnitSpan.textContent = editSel.value;
+            refreshText();
+            refreshInput();
+          });
+          wrap.appendChild(editSel);
+        } else {
+          const unitLabel = document.createElement("span");
+          unitLabel.className = "input-unit";
+          unitLabel.textContent = unit;
+          wrap.appendChild(unitLabel);
+        }
+
+        cell.appendChild(wrap);
+        return cell;
+      }
+
+      const massUnitCfg = {
+        units: MASS_UNITS, factors: MASS_FACTORS, decimals: MASS_DEC,
+        current: node.massUnit || 'kg',
+        onChange: u => { node.massUnit = u; }
+      };
+      const massCell = makeValCell(node.mass, 4, "", "kg", v => { node.mass = v; }, node.userInputMass, massUnitCfg, "bar-mass", _maxVals.maxMass);
+      const emCell = makeValCell(node.emission, 2, "", "kgCO₂e", v => { node.emission = v; }, node.userInputEmission, null, "bar-emission", _maxVals.maxEmission);
+      const costCell = makeValCell(node.cost, 2, "$", "USD", v => { node.cost = v; }, node.userInputCost, null, "bar-cost", _maxVals.maxCost);
+
+      row.appendChild(massCell);
+      row.appendChild(emCell);
+      row.appendChild(costCell);
+
+      li.appendChild(row);
+
+      // — Add-zone: horizontal line + "+" button between rows —
+      const addZone = document.createElement("div");
+      addZone.className = "add-zone";
+      const indicator = document.createElement("div");
+      indicator.className = "add-zone-indicator";
+      {
+        const ix = depth === 0 ? 20 : 12 + depth * 24 + 8;
+        indicator.style.setProperty('--ix', ix + 'px');
+      }
+      addZone.appendChild(indicator);
+      const addInner = document.createElement("div");
+      addInner.className = "add-zone-inner";
+      // Align +/link with the name input (not the cube icon):
+      // 12 (row padding) + depth×(20 guide + 4 gap) + 16 (chevron) + 4 + 20 (icon) + 4
+      addInner.style.paddingLeft = (56 + depth * 24) + "px";
+
+      const addBtn = document.createElement("button");
+      addBtn.className = "add-btn";
+      addBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      addBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+
+        // Remove any existing inline editors
+        document.querySelectorAll(".new-row-editor").forEach(el => el.remove());
+
+        // Build the editor element
+        const editorEl = document.createElement("div");
+        editorEl.className = "new-row-editor";
+
+        const newNameCell = document.createElement("div");
+        newNameCell.className = "name-cell";
+
+        // Guides at child depth (depth + 1)
+        const childGuides = depth === 0 ? [] : [...guides, !isLast];
+        for (let i = 0; i <= depth; i++) {
+          const sp = document.createElement("span");
+          if (i < depth) {
+            sp.className = "guide " + (childGuides[i] ? "guide-vert" : "");
+          } else {
+            const hasExistingChildren = node.children && node.children.length > 0;
+            sp.className = "guide " + (hasExistingChildren ? "guide-tee" : "guide-elbow");
+          }
+          newNameCell.appendChild(sp);
+        }
+
+        // Hidden chevron placeholder
+        const newChev = document.createElement("span");
+        newChev.className = "chevron hidden";
+        newChev.innerHTML = chevronSVG;
+        newNameCell.appendChild(newChev);
+
+        // Input container (position: relative so floating actions anchor to it)
+        const inputContainer = document.createElement("div");
+        inputContainer.className = "new-row-input-container";
+
+        const nameInput = document.createElement("input");
+        nameInput.className = "cell-input";
+        nameInput.type = "text";
+        nameInput.placeholder = "Component name";
+        nameInput.addEventListener("click", e => e.stopPropagation());
+        inputContainer.appendChild(nameInput);
+
+        // Floating ✓/× panel below right edge of input
+        const floatingActions = document.createElement("div");
+        floatingActions.className = "new-row-floating-actions";
+
+        const confirmBtn = document.createElement("button");
+        confirmBtn.className = "new-row-confirm-btn";
+        confirmBtn.title = "Confirm (Enter)";
+        confirmBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 12L9 17L20 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        floatingActions.appendChild(confirmBtn);
+
+        const cancelBtn = document.createElement("button");
+        cancelBtn.className = "new-row-cancel-btn";
+        cancelBtn.title = "Cancel (Esc)";
+        cancelBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 5L19 19M19 5L5 19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+        floatingActions.appendChild(cancelBtn);
+
+        inputContainer.appendChild(floatingActions);
+        newNameCell.appendChild(inputContainer);
+        editorEl.appendChild(newNameCell);
+
+        // Disabled value columns
+        for (let i = 0; i < 3; i++) {
+          const cell = document.createElement("div");
+          cell.className = "new-row-disabled-cell";
+          cell.textContent = "—";
+          editorEl.appendChild(cell);
+        }
+
+        // Insert right after the parent row; expand parent if needed
+        row.insertAdjacentElement("afterend", editorEl);
+        if (hasChildren) {
+          const childUl = li.querySelector("ul.bom-list");
+          if (childUl) childUl.classList.remove("collapsed");
+          chev.classList.add("open");
+          node._expanded = true;
+        }
+
+        // Dim all other rows
+        document.getElementById("bomContainer").classList.add("new-row-active");
+
+        nameInput.focus();
+
+        function confirm() {
+          const name = nameInput.value.trim();
+          editorEl.remove();
+          document.getElementById("bomContainer").classList.remove("new-row-active");
+          if (name) {
+            if (!node.children) node.children = [];
+            node.children.unshift({ name, mass: null, emission: null, cost: null });
+            node._expanded = true;
+          }
+          renderBom();
+        }
+
+        function cancel() {
+          editorEl.remove();
+          document.getElementById("bomContainer").classList.remove("new-row-active");
+        }
+
+        confirmBtn.addEventListener("click", e => { e.stopPropagation(); confirm(); });
+        cancelBtn.addEventListener("click", e => { e.stopPropagation(); cancel(); });
+        nameInput.addEventListener("keydown", e => {
+          if (e.key === "Enter") { e.preventDefault(); confirm(); }
+          if (e.key === "Escape") { e.preventDefault(); cancel(); }
+        });
+      });
+
+      const linkBtn = document.createElement("button");
+      linkBtn.className = "add-btn";
+      linkBtn.title = "Link product";
+      linkBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 15.0003L15 9.00031M11 6.00031L11.463 5.46431C12.4008 4.52663 13.6727 3.99991 14.9989 4C16.325 4.00009 17.5968 4.527 18.5345 5.46481C19.4722 6.40261 19.9989 7.6745 19.9988 9.00066C19.9987 10.3268 19.4718 11.5986 18.534 12.5363L18 13.0003M13 18.0003L12.603 18.5343C11.6543 19.4725 10.3738 19.9987 9.03952 19.9987C7.70523 19.9987 6.42477 19.4725 5.47602 18.5343C5.00838 18.0719 4.63711 17.5213 4.38373 16.9144C4.13035 16.3076 3.99988 15.6565 3.99988 14.9988C3.99988 14.3412 4.13035 13.69 4.38373 13.0832C4.63711 12.4763 5.00838 11.9257 5.47602 11.4633L6.00002 11.0003" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      linkBtn.addEventListener("click", e => { e.stopPropagation(); openLinkModal(node, nodes, idx); });
+
+      addInner.appendChild(addBtn);
+      addInner.appendChild(linkBtn);
+      addZone.appendChild(addInner);
+      if (depth === 0 && !hasChildren) addZone.classList.add("always-show");
+      if (node.linked || linkedAncestor) {
+        addBtn.style.display = "none";
+        linkBtn.style.display = "none";
+      }
+      li.appendChild(addZone);
+
+      if (hasChildren) {
+        const childUl = document.createElement("ul");
+        childUl.className = "bom-list" + (isExpanded ? "" : " collapsed");
+        const childGuides = depth === 0 ? guides : [...guides, !isLast];
+        buildList(node.children, depth + 1, childUl, childGuides, linkedAncestor || (node.linked ? node : false), node.linked && !linkedAncestor ? depth : linkedStartDepth);
+        li.appendChild(childUl);
+
+        node._bomChildUl = childUl;
+        node._bomChevEl = chev;
+
+        chev.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const isOpen = !childUl.classList.contains("collapsed");
+          childUl.classList.toggle("collapsed", isOpen);
+          chev.classList.toggle("open", !isOpen);
+          node._expanded = !isOpen;
+          if (node._dvChildContainer) {
+            node._dvChildContainer.classList.toggle("collapsed", isOpen);
+          }
+          if (node._dvChevEl) {
+            node._dvChevEl.classList.toggle("open", !isOpen);
+          }
+        });
+      } else {
+        node._bomChildUl = null;
+        node._bomChevEl = null;
+      }
+
+      row.addEventListener("click", () => openDetailPanel(node, row, nodes, idx));
+      ul.appendChild(li);
+    });
+  }
+
+  // — Extract as product —
+  let _extractTargetNode = null;
+
+  function openExtractModal(node) {
+    _extractTargetNode = node;
+    const nextId = Math.max(...PRODUCT_CATALOG.map(p => p.id), 0) + 1;
+    document.getElementById("extractName").value = node.name || "";
+    document.getElementById("extractProductId").value = `PROD-${String(nextId).padStart(4, "0")}`;
+    document.getElementById("extractDescription").value = "";
+    document.getElementById("extractTags").value = "";
+    document.getElementById("extractModal").classList.add("open");
+    setTimeout(() => document.getElementById("extractName").select(), 50);
+  }
+
+  function closeExtractModal() {
+    document.getElementById("extractModal").classList.remove("open");
+    _extractTargetNode = null;
+  }
+
+  function confirmExtract(andLink = false) {
+    if (!_extractTargetNode) return;
+    const name        = document.getElementById("extractName").value.trim() || _extractTargetNode.name;
+    const productId   = document.getElementById("extractProductId").value.trim();
+    const description = document.getElementById("extractDescription").value.trim();
+    const tagsRaw     = document.getElementById("extractTags").value.trim();
+    const tags        = tagsRaw ? tagsRaw.split(",").map(t => t.trim()).filter(Boolean) : [];
+    const now         = new Date();
+    const dateStr     = now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    const newId       = Math.max(...PRODUCT_CATALOG.map(p => p.id), 0) + 1;
+    PRODUCT_CATALOG.push({
+      id: newId, productId, name, description, tags,
+      version: "v1.0", dateCreated: dateStr,
+      mass: _extractTargetNode.mass ?? null,
+      emission: _extractTargetNode.emission ?? null,
+      cost: _extractTargetNode.cost ?? null,
+    });
+    if (andLink) {
+      _extractTargetNode.linked      = true;
+      _extractTargetNode.version     = "v1.0";
+      _extractTargetNode.dateCreated = dateStr;
+    }
+    closeExtractModal();
+    showToast(andLink ? `"${name}" saved and linked` : `"${name}" saved to product library`);
+    if (andLink) renderBom();
+  }
+
+  function showToast(msg) {
+    let toast = document.getElementById("bomToast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "bomToast";
+      toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);background:#18181b;color:#fff;font-size:13px;padding:8px 16px;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.18);opacity:0;transition:opacity 0.2s,transform 0.2s;pointer-events:none;z-index:2000;white-space:nowrap;";
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.style.opacity = "1";
+    toast.style.transform = "translateX(-50%) translateY(0)";
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => {
+      toast.style.opacity = "0";
+      toast.style.transform = "translateX(-50%) translateY(8px)";
+    }, 2800);
+  }
+
+  let _maxVals = { maxMass: 0, maxEmission: 0, maxCost: 0 };
+
+  function renderBom() {
+    closeDetailPanel();
+    _maxVals = collectMaxValues(data);
+    const ul = document.getElementById("bom");
+    ul.innerHTML = "";
+    buildList(data, 0, ul);
+  }
+
+  renderBom();
+
+  /* ---- Link preview ---- */
+  const preview = document.getElementById("linkPreview");
+  let hideTimer = null;
+  preview.addEventListener("mouseenter", () => clearTimeout(hideTimer));
+  preview.addEventListener("mouseleave", hideLinkPreview);
+
+  function countComponents(node) {
+    if (!node.children || node.children.length === 0) return 0;
+    return node.children.reduce((sum, c) => sum + 1 + countComponents(c), 0);
+  }
+
+  function showLinkPreview(node, anchor) {
+    clearTimeout(hideTimer);
+    const banner = document.getElementById("lpOutdatedBanner");
+    if (node.broken) {
+      document.getElementById("lpOutdatedText").textContent = "Source product was deleted";
+      banner.classList.add("visible", "broken");
+    } else if (node.outdated && node.latestVersion) {
+      document.getElementById("lpOutdatedText").textContent = `Source updated ${node.version} → ${node.latestVersion}`;
+      banner.classList.add("visible");
+      banner.classList.remove("broken");
+    } else {
+      banner.classList.remove("visible", "broken");
+    }
+    document.getElementById("lpTitle").textContent = node.name;
+    const tagsEl = document.getElementById("lpTags");
+    tagsEl.innerHTML = "";
+    (node.tags || []).forEach(tag => {
+      const t = document.createElement("span");
+      t.className = "lp-tag";
+      t.textContent = tag;
+      tagsEl.appendChild(t);
+    });
+    document.getElementById("lpVersion").textContent  = node.broken ? "—" : (node.version || "—");
+    document.getElementById("lpDate").textContent     = node.dateCreated || "—";
+    document.getElementById("lpSourcing").textContent = node.sourcingLocation || "—";
+    document.getElementById("lpSupplier").textContent = node.supplier || "—";
+    document.getElementById("lpMass").innerHTML       = `${fmt(node.mass, 2)} <span class="lp-unit">kg</span>`;
+    document.getElementById("lpEmissions").innerHTML  = `${fmt(node.emission, 2)} <span class="lp-unit">kgCO₂e</span>`;
+    document.getElementById("lpCost").innerHTML       = `$${fmt(node.cost, 2)} <span class="lp-unit">USD</span>`;
+    const count = countComponents(node);
+    document.getElementById("lpFooter").textContent = count > 0 ? `${count} component${count !== 1 ? "s" : ""}` : "No sub-components";
+    const rect = anchor.getBoundingClientRect();
+    let top = rect.bottom + 8;
+    let left = rect.left;
+    if (left + 232 > window.innerWidth - 8) left = window.innerWidth - 232 - 8;
+    preview.style.top  = top + "px";
+    preview.style.left = left + "px";
+    preview.classList.add("visible");
+  }
+
+  function hideLinkPreview() {
+    hideTimer = setTimeout(() => {
+      preview.classList.remove("visible");
+      preview.style.top  = "-9999px";
+      preview.style.left = "-9999px";
+    }, 80);
+  }
+
+  /* ---- Link product modal ---- */
+  const PRODUCT_CATALOG = [
+    { id: 1,  name: "LFP cathode active material",        version: "v1.4", supplier: "CATL",              sourcingLocation: "China",       tags: ["Battery","Cathode"],              mass: 0.45, emission: 3.21, cost: 8.50  },
+    { id: 2,  name: "NMC811 cathode active material",     version: "v2.0", supplier: "Umicore",            sourcingLocation: "Belgium",     tags: ["Battery","Cathode","NMC"],        mass: 0.38, emission: 4.10, cost: 12.30 },
+    { id: 3,  name: "Silicon-graphite anode blend",       version: "v1.1", supplier: "BTR New Material",   sourcingLocation: "China",       tags: ["Battery","Anode"],               mass: 0.22, emission: 1.84, cost: 6.70  },
+    { id: 4,  name: "Copper current collector foil",      version: "v3.0", supplier: "Hitachi Metals",     sourcingLocation: "Japan",       tags: ["Battery","Foil","Copper"],        mass: 0.08, emission: 0.62, cost: 2.10  },
+    { id: 5,  name: "Aluminum current collector foil",    version: "v2.2", supplier: "Novelis",            sourcingLocation: "USA",         tags: ["Battery","Foil","Aluminum"],      mass: 0.05, emission: 0.41, cost: 1.20  },
+    { id: 6,  name: "Polyolefin separator film",          version: "v1.8", supplier: "Asahi Kasei",        sourcingLocation: "Japan",       tags: ["Battery","Separator"],            mass: 0.04, emission: 0.29, cost: 1.80  },
+    { id: 7,  name: "LiPF₆ electrolyte solution",        version: "v2.5", supplier: "Solvay",             sourcingLocation: "Belgium",     tags: ["Battery","Electrolyte"],          mass: 0.19, emission: 0.93, cost: 4.50  },
+    { id: 8,  name: "Battery management system (BMS)",   version: "v4.1", supplier: "Texas Instruments",  sourcingLocation: "USA",         tags: ["Electronics","BMS"],             mass: 0.12, emission: 0.71, cost: 18.90 },
+    { id: 9,  name: "Aluminum battery casing",           version: "v1.0", supplier: "Novelis",            sourcingLocation: "USA",         tags: ["Enclosure","Aluminum"],           mass: 0.35, emission: 2.10, cost: 5.40  },
+    { id: 10, name: "Steel battery housing",             version: "v2.3", supplier: "ArcelorMittal",      sourcingLocation: "Luxembourg",  tags: ["Enclosure","Steel"],             mass: 0.52, emission: 2.83, cost: 4.20  },
+    { id: 11, name: "Thermal interface material (TIM)",  version: "v1.2", supplier: "Henkel",             sourcingLocation: "Germany",     tags: ["Thermal","Assembly"],            mass: 0.03, emission: 0.18, cost: 3.10  },
+    { id: 12, name: "Nickel tab connector",              version: "v1.6", supplier: "Targray",            sourcingLocation: "Canada",      tags: ["Battery","Connector","Nickel"],  mass: 0.02, emission: 0.14, cost: 0.85  },
+  ];
+
+  let _linkCtx = null;
+  let _linkSelected = null;
+
+  function openLinkModal(node, siblings, idx) {
+    _linkCtx = { node, siblings, idx };
+    _linkSelected = null;
+    document.getElementById("linkSearch").value = "";
+    document.getElementById("linkMass").value = "";
+    document.getElementById("linkScale").value = "";
+    document.getElementById("linkDefaultMass").textContent = "—";
+    updateLinkConfirmBtn();
+    renderLinkProducts(PRODUCT_CATALOG);
+    document.getElementById("linkModal").classList.add("open");
+    setTimeout(() => document.getElementById("linkSearch").focus(), 50);
+  }
+
+  function closeLinkModal() {
+    document.getElementById("linkModal").classList.remove("open");
+    _linkCtx = null;
+    _linkSelected = null;
+  }
+
+  function filterLinkProducts() {
+    const q = document.getElementById("linkSearch").value.trim().toLowerCase();
+    const filtered = q
+      ? PRODUCT_CATALOG.filter(p => p.name.toLowerCase().includes(q) || p.supplier.toLowerCase().includes(q) || p.tags.some(t => t.toLowerCase().includes(q)))
+      : PRODUCT_CATALOG;
+    renderLinkProducts(filtered);
+  }
+
+  function renderLinkProducts(list) {
+    const el = document.getElementById("linkProductList");
+    el.innerHTML = "";
+    if (!list.length) { el.innerHTML = `<div class="link-empty">No products found</div>`; return; }
+    list.forEach(p => {
+      const item = document.createElement("div");
+      item.className = "link-product-item" + (_linkSelected?.id === p.id ? " selected" : "");
+      item.innerHTML = `
+        <div class="link-product-row1"><span class="link-product-name">${p.name}</span><span class="link-product-version">${p.version}</span></div>
+        <div class="link-product-meta">${p.supplier} · ${p.sourcingLocation}</div>
+        <div class="link-product-tags">${p.tags.map(t => `<span class="link-product-tag">${t}</span>`).join("")}</div>`;
+      item.addEventListener("click", () => {
+        _linkSelected = p;
+        document.getElementById("linkMass").value = "";
+        document.getElementById("linkScale").value = "";
+        document.getElementById("linkDefaultMass").textContent = p.mass + " kg";
+        renderLinkProducts(list);
+        updateLinkConfirmBtn();
+      });
+      el.appendChild(item);
+    });
+  }
+
+  function updateLinkConfirmBtn() {
+    const btn = document.getElementById("linkConfirmBtn");
+    btn.disabled = !_linkSelected;
+    btn.style.opacity = _linkSelected ? "" : "0.45";
+    btn.style.cursor  = _linkSelected ? "" : "default";
+  }
+
+  function onLinkMassInput() {
+    if (!_linkSelected) return;
+    const mass = parseFloat(document.getElementById("linkMass").value);
+    document.getElementById("linkScale").value = (!isNaN(mass) && mass > 0) ? (mass / _linkSelected.mass).toFixed(3) : "";
+  }
+
+  function onLinkScaleInput() {
+    if (!_linkSelected) return;
+    const scale = parseFloat(document.getElementById("linkScale").value);
+    document.getElementById("linkMass").value = (!isNaN(scale) && scale > 0) ? (scale * _linkSelected.mass).toFixed(4) : "";
+  }
+
+  function confirmLink() {
+    if (!_linkCtx || !_linkSelected) return;
+    const { node } = _linkCtx;
+    const massInput = parseFloat(document.getElementById("linkMass").value);
+    const p = _linkSelected;
+    const scale = (!isNaN(massInput) && massInput > 0) ? massInput / p.mass : 1;
+    const newNode = {
+      name: p.name, linked: true, version: p.version, supplier: p.supplier,
+      sourcingLocation: p.sourcingLocation,
+      dateCreated: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      tags: p.tags,
+      mass: scale !== 1 ? massInput : p.mass,
+      emission: p.emission * scale,
+      cost: p.cost * scale,
+    };
+    if (!node.children) node.children = [];
+    node.children.push(newNode);
+    node._expanded = true;
+    closeLinkModal();
+    renderBom();
+  }
+
+  document.getElementById("linkModal").addEventListener("click", e => { if (e.target === e.currentTarget) closeLinkModal(); });
+
+  /* ---- Detail View (full page) ---- */
+  var _dpNode = null;
+  var _dpRow  = null;
+
+  function openDetailPanel(node, rowEl, nodes, idx) {
+    _dpNode = node;
+    _dpRow = rowEl;
+
+    // Switch to detail view
+    document.getElementById("bomContainer").classList.add("detail-open");
+
+    // Product header
+    const nameEl = document.getElementById("dvProductName");
+    nameEl.textContent = node.name;
+    if (node.userInputName || node.linked) {
+      const dot = document.createElement("span");
+      dot.className = "user-input-dot";
+      nameEl.appendChild(dot);
+    }
+    document.getElementById("dvProductSubtitle").textContent =
+      node.linked ? "Linked product" : (node.children?.length ? "Assembly" : "Component");
+
+    // Reset tabs
+    document.querySelectorAll(".dv-tab").forEach((t, i) => t.classList.toggle("active", i === 0));
+
+    // Build sidebar tree
+    buildSidebarTree(data, node);
+
+    // Build summary content
+    buildSummaryContent(node);
+  }
+
+  function closeDetailPanel() {
+    document.getElementById("bomContainer").classList.remove("detail-open");
+    _dpNode = null;
+    _dpRow = null;
+  }
+
+  function switchDvTab(tabName, el) {
+    document.querySelectorAll(".dv-tab").forEach(t => t.classList.remove("active"));
+    el.classList.add("active");
+  }
+
+  function clearDetailViewTreeRefs(nodeList) {
+    if (!nodeList) return;
+    nodeList.forEach(n => {
+      n._dvChildContainer = null;
+      n._dvChevEl = null;
+      if (n.children) clearDetailViewTreeRefs(n.children);
+    });
+  }
+
+  /* Sidebar tree — expansion matches main BOM (`node._expanded`); only chevron toggles */
+  function buildSidebarTree(allData, activeNode) {
+    const container = document.getElementById("dvSidebarTree");
+    clearDetailViewTreeRefs(allData);
+    container.innerHTML = "";
+    const linkSVG = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 15.0003L15 9.00031M11 6.00031L11.463 5.46431C12.4008 4.52663 13.6727 3.99991 14.9989 4C16.325 4.00009 17.5968 4.527 18.5345 5.46481C19.4722 6.40261 19.9989 7.6745 19.9988 9.00066C19.9987 10.3268 19.4718 11.5986 18.534 12.5363L18 13.0003M13 18.0003L12.603 18.5343C11.6543 19.4725 10.3738 19.9987 9.03952 19.9987C7.70523 19.9987 6.42477 19.4725 5.47602 18.5343C5.00838 18.0719 4.63711 17.5213 4.38373 16.9144C4.13035 16.3076 3.99988 15.6565 3.99988 14.9988C3.99988 14.3412 4.13035 13.69 4.38373 13.0832C4.63711 12.4763 5.00838 11.9257 5.47602 11.4633L6.00002 11.0003"/></svg>`;
+    const cubeSVG = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M21 16.008v-8.018a1.98 1.98 0 0 0 -1 -1.717l-7 -4.008a2.016 2.016 0 0 0 -2 0l-7 4.008c-.619 .355 -1 1.01 -1 1.718v8.018c0 .709 .381 1.363 1 1.717l7 4.008a2.016 2.016 0 0 0 2 0l7 -4.008c.619 -.355 1 -1.01 1 -1.718"/><path d="M12 22v-10"/><path d="M12 12l8.73 -5.04"/><path d="M3.27 6.96l8.73 5.04"/></svg>`;
+
+    function walk(nodes, parentEl, depth, guides, linkedAncestor, linkedStartDepth) {
+      nodes.forEach((n, idx) => {
+        const isLast = idx === nodes.length - 1;
+        const hasKids = n.children && n.children.length > 0;
+        const isActive = n === activeNode;
+
+        // Row
+        const row = document.createElement("div");
+        row.className = "dv-tree-row" + (isActive ? " active" : "");
+
+        // Guide spans (same logic as buildList)
+        for (let i = 0; i < depth; i++) {
+          const sp = document.createElement("span");
+          const isLinkedGuide = linkedAncestor && i >= linkedStartDepth;
+          if (i < depth - 1) {
+            sp.className = "guide " + (guides[i] ? "guide-vert" : "") + (isLinkedGuide && guides[i] ? " guide-linked" : "");
+          } else {
+            sp.className = "guide " + (isLast ? "guide-elbow" : "guide-tee") + (isLinkedGuide ? " guide-linked" : "");
+          }
+          row.appendChild(sp);
+        }
+
+        const isExpanded = depth === 0 || n._expanded === true;
+
+        // Chevron (open state follows main BOM, not always expanded)
+        const chev = document.createElement("span");
+        chev.className = "chevron" + (hasKids ? (isExpanded ? " open" : "") : " hidden");
+        chev.innerHTML = chevronSVG;
+        row.appendChild(chev);
+
+        // Name icon (cube or link)
+        const nameIcon = document.createElement("span");
+        nameIcon.className = "name-icon";
+        const linkedRoot = n.linked ? n : linkedAncestor || null;
+        if (linkedRoot) {
+          nameIcon.style.color = linkedRoot.broken ? "#DC2626" : linkedRoot.outdated ? "#EAB308" : "#B37343";
+          nameIcon.style.background = linkedRoot.broken ? "#fef2f2" : linkedRoot.outdated ? "#fefce8" : "#fff7ed";
+        }
+        nameIcon.innerHTML = (n.linked && !linkedAncestor) ? linkSVG : cubeSVG;
+        row.appendChild(nameIcon);
+
+        const nameWrap = document.createElement("div");
+        nameWrap.className = "dv-tree-name-wrap";
+
+        const nameText = document.createElement("span");
+        nameText.className = "dv-tree-name";
+        nameText.textContent = n.name;
+        nameWrap.appendChild(nameText);
+
+        if (n.userInputName || (n.linked && !linkedAncestor)) {
+          const dot = document.createElement("span");
+          dot.className = "user-input-dot";
+          nameWrap.appendChild(dot);
+        }
+
+        row.appendChild(nameWrap);
+
+        // Stacked horizontal bars (mass / emission / cost) — right of name
+        const bars = document.createElement("span");
+        bars.className = "dv-tree-bars";
+        const maxM = _maxVals.maxMass || 1, maxE = _maxVals.maxEmission || 1, maxC = _maxVals.maxCost || 1;
+        [
+          { val: n.mass, max: maxM, cls: "mass" },
+          { val: n.emission, max: maxE, cls: "emission" },
+          { val: n.cost, max: maxC, cls: "cost" },
+        ].forEach(({ val, max, cls }) => {
+          const track = document.createElement("span");
+          track.className = "dv-hbar";
+          if (val != null) {
+            const fill = document.createElement("span");
+            fill.className = "dv-hbar-fill " + cls;
+            fill.style.width = Math.max(5, (val / max) * 100) + "%";
+            track.appendChild(fill);
+          }
+          bars.appendChild(track);
+        });
+        row.appendChild(bars);
+
+        // Click row = navigate detail
+        row.addEventListener("click", () => openDetailPanel(n, null, nodes, idx));
+
+        parentEl.appendChild(row);
+
+        // Children
+        if (hasKids) {
+          const childContainer = document.createElement("div");
+          childContainer.className = "dv-tree-children" + (isExpanded ? "" : " collapsed");
+          n._dvChildContainer = childContainer;
+          n._dvChevEl = chev;
+          const childGuides = depth === 0 ? guides : [...guides, !isLast];
+          walk(n.children, childContainer, depth + 1, childGuides,
+            linkedAncestor || (n.linked ? n : false),
+            n.linked && !linkedAncestor ? depth : linkedStartDepth);
+          parentEl.appendChild(childContainer);
+
+          chev.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const isOpen = !childContainer.classList.contains("collapsed");
+            childContainer.classList.toggle("collapsed", isOpen);
+            chev.classList.toggle("open", !isOpen);
+            n._expanded = !isOpen;
+            if (n._bomChildUl) {
+              n._bomChildUl.classList.toggle("collapsed", isOpen);
+            }
+            if (n._bomChevEl) {
+              n._bomChevEl.classList.toggle("open", !isOpen);
+            }
+          });
+        } else {
+          n._dvChildContainer = null;
+          n._dvChevEl = null;
+        }
+      });
+    }
+
+    walk(allData, container, 0, [], false, -1);
+  }
+
+  /* Summary content: left cards + right metric cards */
+  function buildSummaryContent(node) {
+    const left = document.getElementById("dvSumLeft");
+    const right = document.getElementById("dvSumRight");
+    left.innerHTML = "";
+    right.innerHTML = "";
+
+    // === LEFT COLUMN ===
+
+    // Definition card
+    const defCard = makeCard("Definition");
+    const descField = makeField("Description");
+    const descText = document.createElement("div");
+    descText.style.cssText = "display:flex;align-items:flex-start;gap:8px;";
+    const descSpan = document.createElement("span");
+    descSpan.className = "dv-field-text";
+    descSpan.textContent = node.linked
+      ? `Linked product from ${node.supplier || "external source"}. Version ${node.version || "—"}.`
+      : (node.children?.length
+          ? `Assembly with ${node.children.length} sub-component${node.children.length !== 1 ? "s" : ""}.`
+          : "Leaf component.");
+    descText.appendChild(descSpan);
+    if (node.userInputName) {
+      const dot = document.createElement("span");
+      dot.className = "user-input-dot";
+      dot.style.cssText = "flex-shrink:0;margin-top:4px;";
+      descText.appendChild(dot);
+    }
+    descField.appendChild(descText);
+    defCard.appendChild(descField);
+    left.appendChild(defCard);
+
+    // Sourcing card (for linked products)
+    if (node.linked) {
+      const srcCard = makeCard("Sourcing");
+      const srcRow = document.createElement("div");
+      srcRow.className = "dv-field-row";
+      [
+        { label: "Supplier", val: node.supplier || "—" },
+        { label: "Sourcing Location", val: node.sourcingLocation || "—" },
+      ].forEach(({ label, val }) => {
+        const f = makeField(label);
+        const v = document.createElement("div");
+        v.className = "dv-field-val";
+        v.innerHTML = `${val} <span class="user-input-dot"></span>`;
+        f.appendChild(v);
+        srcRow.appendChild(f);
+      });
+      srcCard.appendChild(srcRow);
+
+      const srcRow2 = document.createElement("div");
+      srcRow2.className = "dv-field-row";
+      [
+        { label: "Version", val: node.version || "—" },
+        { label: "Date Created", val: node.dateCreated || "—" },
+      ].forEach(({ label, val }) => {
+        const f = makeField(label);
+        const v = document.createElement("div");
+        v.className = "dv-field-val";
+        v.textContent = val;
+        f.appendChild(v);
+        srcRow2.appendChild(f);
+      });
+      srcCard.appendChild(srcRow2);
+
+      if (node.tags && node.tags.length) {
+        const tagField = makeField("Tags");
+        const tagWrap = document.createElement("div");
+        tagWrap.style.cssText = "display:flex;flex-wrap:wrap;gap:4px;";
+        node.tags.forEach(tag => {
+          const t = document.createElement("span");
+          t.style.cssText = "padding:2px 7px;background:#f4f4f5;color:#52525b;border-radius:4px;font-size:11px;font-weight:500;";
+          t.textContent = tag;
+          tagWrap.appendChild(t);
+        });
+        tagField.appendChild(tagWrap);
+        srcCard.appendChild(tagField);
+      }
+
+      left.appendChild(srcCard);
+    }
+
+    // Sub-components card
+    if (node.children && node.children.length) {
+      const childCard = makeCard(`Components (${node.children.length})`);
+      node.children.forEach(child => {
+        const row = document.createElement("div");
+        row.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f4f4f5;";
+        row.innerHTML = `<span style="font-size:13px;color:#18181b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;margin-right:8px;">${child.name}</span>
+          <span style="font-size:12px;color:#71717a;font-variant-numeric:tabular-nums;white-space:nowrap;">${child.mass != null ? fmt(child.mass, 4) + ' kg' : '—'}</span>`;
+        childCard.appendChild(row);
+      });
+      left.appendChild(childCard);
+    }
+
+    // === RIGHT COLUMN (Metric cards) ===
+
+    // Mass
+    right.appendChild(makeMetricCard("Mass", node.mass, "kg", "mass",
+      _maxVals.maxMass, node.userInputMass));
+
+    // Emissions
+    right.appendChild(makeMetricCard("Emissions", node.emission, "kgCO₂e", "emission",
+      _maxVals.maxEmission, false));
+
+    // Cost
+    right.appendChild(makeMetricCard("Cost", node.cost, "USD", "cost",
+      _maxVals.maxCost, false, "$"));
+
+    // Tariff placeholder
+    const tariffCard = document.createElement("div");
+    tariffCard.className = "dv-metric-card";
+    tariffCard.innerHTML = `
+      <div class="dv-metric-header">
+        <div class="dv-metric-label-grp">
+          <span class="dv-metric-title">Tariff</span>
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" class="dv-info-icon"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M8 7v4M8 5.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="dv-metric-chevron"><path d="M3.5 2L6.5 5L3.5 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="dv-metric-val-grp">
+          <span class="dv-metric-num" style="font-size:16px;">N/A</span>
+        </div>
+      </div>`;
+    right.appendChild(tariffCard);
+  }
+
+  /* Helpers */
+  function makeCard(title) {
+    const card = document.createElement("div");
+    card.className = "dv-card";
+    if (title) {
+      const h = document.createElement("div");
+      h.className = "dv-card-title";
+      h.textContent = title;
+      card.appendChild(h);
+    }
+    return card;
+  }
+
+  function makeField(label) {
+    const f = document.createElement("div");
+    f.className = "dv-field";
+    const l = document.createElement("div");
+    l.className = "dv-field-label";
+    l.textContent = label;
+    f.appendChild(l);
+    return f;
+  }
+
+  function makeMetricCard(title, value, unit, barCls, maxVal, isUserInput, prefix) {
+    const card = document.createElement("div");
+    card.className = "dv-metric-card";
+    prefix = prefix || "";
+
+    const displayVal = value != null ? `${prefix}${fmt(value, 2)}` : "—";
+
+    card.innerHTML = `
+      <div class="dv-metric-header">
+        <div class="dv-metric-label-grp">
+          <span class="dv-metric-title">${title}</span>
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" class="dv-info-icon"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M8 7v4M8 5.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="dv-metric-chevron"><path d="M3.5 2L6.5 5L3.5 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="dv-metric-val-grp">
+          <span class="dv-metric-num">${displayVal}</span>
+          ${value != null ? `<span class="dv-metric-unit">${unit}</span>` : ""}
+          ${isUserInput ? `<span class="user-input-dot" style="margin-left:2px;"></span>` : ""}
+        </div>
+      </div>
+      <div class="dv-metric-bar-track">
+        <div class="dv-metric-bar-fill ${barCls}" style="width:${value != null && maxVal > 0 ? Math.max(2, (value / maxVal) * 100) : 0}%"></div>
+      </div>`;
+
+    return card;
+  }
+
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && _dpNode) closeDetailPanel(); });
+
+  let editing = false;
+  function toggleEdit() {
+    editing = !editing;
+    document.getElementById("bomContainer").classList.toggle("editing", editing);
+    const btn = document.getElementById("editBtn");
+    btn.classList.toggle("active", editing);
+    btn.textContent = editing ? "Done" : "Edit";
+  }
+
+</script>
+
+</body>
+</html>
