@@ -969,6 +969,17 @@ body.bom-page {
   position: relative;
 }
 
+.create-dropdown--compact {
+  width: 100% !important;
+  min-width: max-content;
+}
+.create-dropdown__option--compact {
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 8px 12px !important;
+  white-space: nowrap;
+}
+
 .create-dropdown {
   position: absolute;
   top: calc(100% + 6px);
@@ -2430,6 +2441,98 @@ html, body.bom-page {
   background: #fef2f2;
 }
 
+/* —— Hover-to-insert row affordance —— */
+.preview-row-add { height: 0; }
+.preview-row-add__cell {
+  padding: 0 !important;
+  border: 0 !important;
+  height: 0;
+  position: relative;
+  overflow: visible;
+}
+.preview-row-add__cell::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: var(--color-bg-brand);
+  transform: translateY(-50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+.preview-row-add__btn {
+  position: absolute;
+  left: 24px;
+  top: 0;
+  transform: translate(-50%, -50%);
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--color-bg-brand);
+  color: var(--color-text-on-brand);
+  border: 2px solid var(--color-bg-neutral-1);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+  box-shadow: var(--shadow-sm);
+}
+.preview-row-add__btn:hover {
+  background: var(--color-bg-brand-hover);
+}
+.preview-row-add__cell::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -6px;
+  height: 12px;
+  z-index: 4;
+}
+.preview-row-add:hover .preview-row-add__btn {
+  display: inline-flex;
+}
+.preview-row-add:hover .preview-row-add__cell::before {
+  opacity: 1;
+}
+
+/* —— Hover row to reveal delete button —— */
+.preview-row__delete {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-neutral-2);
+  background: var(--color-bg-neutral-1);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  z-index: 3;
+  box-shadow: var(--shadow-sm);
+}
+.preview-row__delete:hover {
+  color: var(--color-text-danger);
+  border-color: var(--color-text-danger);
+}
+.preview-row:hover .preview-row__delete {
+  display: inline-flex;
+}
+.preview-td--actions {
+  position: relative;
+  overflow: visible;
+}
+
 .preview-td--editable {
   cursor: text;
   border-radius: 4px;
@@ -2510,7 +2613,7 @@ html, body.bom-page {
 
 .confirm-section {
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: 380px 1fr;
   gap: 32px;
   align-items: start;
 }
@@ -2594,9 +2697,11 @@ html, body.bom-page {
 }
 
 .form-info-icon {
-  font-style: normal;
-  font-size: 12px;
-  color: var(--color-text-tertiary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  color: var(--color-text-secondary);
   cursor: default;
 }
 
@@ -2736,14 +2841,170 @@ html, body.bom-page {
 
 .form-add-btn:hover { opacity: 0.8; }
 
-.confirm-footer {
+/* —— Bill of Material Specification (collapsible) —— */
+.bom-spec { }
+.bom-spec__summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-sm);
+  border-top: 1px solid var(--color-border-neutral-2);
+  user-select: none;
+}
+.bom-spec__summary::-webkit-details-marker { display: none; }
+.bom-spec__chevron {
+  transition: transform 150ms ease;
   flex-shrink: 0;
+}
+.bom-spec[open] > .bom-spec__summary .bom-spec__chevron {
+  transform: rotate(180deg);
+}
+.bom-spec__body {
+  padding-top: 8px;
+}
+.bom-spec-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.bom-spec-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.bom-spec-stat {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 48px;
-  border-top: 1px solid var(--color-border-neutral-2);
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--color-bg-neutral-2);
+  border-radius: var(--radius-ui);
+}
+.bom-spec-stat__label {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--text-sm);
+}
+.bom-spec-stat__value {
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+}
+.bom-spec-stat__unit {
+  color: var(--color-text-secondary);
+  margin-left: 2px;
+}
+.bom-spec-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.bom-spec-radio-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: var(--text-sm);
+}
+.bom-spec-radio-group > span:first-child {
+  font-weight: var(--font-weight-semibold);
+}
+.bom-spec-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.bom-spec-radio input[type="radio"] {
+  accent-color: var(--color-bg-brand);
+  margin: 0;
+}
+.bom-spec-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+.bom-spec-table thead th {
+  text-align: left;
+  font-weight: var(--font-weight-semibold);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-border-neutral-2);
+  color: var(--color-text-primary);
+}
+.bom-spec-table tbody td {
+  padding: 8px 12px;
+  color: var(--color-text-secondary);
+}
+.bom-spec-add {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  padding: 4px 0;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-bg-brand);
+  cursor: pointer;
+}
+.bom-spec-add:hover { opacity: 0.8; }
+
+.bom-spec-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px 24px;
+  border: 1px dashed var(--color-border-neutral-3);
+  border-radius: var(--radius-ui);
   background: var(--color-bg-neutral-1);
+  text-align: center;
+}
+.bom-spec-empty__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-ui);
+  background: var(--color-bg-neutral-3);
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+}
+.bom-spec-empty__title {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--text-md);
+  color: var(--color-text-primary);
+}
+.bom-spec-empty__subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.confirm-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 24px 48px 40px;
+}
+.confirm-footer__stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+.confirm-token-note {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-bg-brand);
+}
+.confirm-footer__buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* —— Card footer —— */
@@ -3020,7 +3281,8 @@ html, body.bom-page {
   flex: 1;
   min-height: 0;
 }
-#standalone-view-import.is-hidden {
+#standalone-view-import.is-hidden,
+#standalone-view-scratch.is-hidden {
   display: none !important;
 }
 
@@ -3235,7 +3497,7 @@ html, body.bom-page {
               </svg>
             </button>
             <div id="create-menu" class="create-dropdown" role="menu" aria-labelledby="create-menu-btn" hidden>
-              <button type="button" class="create-dropdown__option" role="menuitem">
+              <button type="button" class="create-dropdown__option" role="menuitem" id="standalone-open-scratch">
                 <span class="create-dropdown__option-icon" aria-hidden="true">
                   <svg
                     class="tabler-svg tabler--16"
@@ -3250,6 +3512,8 @@ html, body.bom-page {
                     <path d="M0 0h24v24H0z" fill="none" stroke="none" />
                     <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
                     <path d="M13.5 6.5l4 4" />
+                    <path d="M16 19h6" />
+                    <path d="M19 16v6" />
                   </svg>
                 </span>
                 <span class="create-dropdown__option-content">
@@ -3271,9 +3535,9 @@ html, body.bom-page {
                   >
                     <path d="M0 0h24v24H0z" fill="none" stroke="none" />
                     <path d="M14 3v4a1 1 0 0 0 1 1h4" />
-                    <path d="M5 13v-8a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2h-5.5" />
-                    <path d="M2 16h7" />
-                    <path d="M6 19l-3 -3l3 -3" />
+                    <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" />
+                    <path d="M12 11v6" />
+                    <path d="M9.5 13.5l2.5 -2.5l2.5 2.5" />
                   </svg>
                 </span>
                 <span class="create-dropdown__option-content">
@@ -3763,7 +4027,7 @@ html, body.bom-page {
                     <path d="M5 12l5 5l10 -10"/>
                   </svg>
                   <span class="upload-file-row__name" id="upload-filename"></span>
-                  <button type="button" class="btn btn--sm btn--secondary upload-file-row__change" id="change-file-btn">Change File</button>
+                  <button type="button" class="btn btn--sm btn--secondary upload-file-row__change" id="change-file-btn">Re-upload File</button>
                 </div>
 
                 <!-- Last configuration — shown only after a file is selected (see showFile / clearFile) -->
@@ -3940,17 +4204,18 @@ html, body.bom-page {
                 <!-- Section: Product Definition -->
                 <div class="confirm-section">
                   <div class="confirm-section__info">
-                    <h3 class="confirm-section__title">Product definition</h3>
+                    <h3 class="confirm-section__title">Product Definition</h3>
                     <div class="confirm-prefilled-badge">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5l10 -10"/></svg>
                       Pre-filled from import
                     </div>
-                    <p class="confirm-section__desc">Name, mass, and identifiers for this product. Values with a "from file" tag were read from your BOM — edit before creating.</p>
+                    <p class="confirm-section__desc">Enter core product attributes that allow Muir Product Intelligence to analyze and break down your product into its components and materials. Product ID is used for tracking and report labeling, and not ingested by Muir Product Intelligence.</p>
+                    <p class="confirm-section__desc">Bill of Materials information can be added as an advanced input below.</p>
                   </div>
                   <div class="confirm-section__form">
                     <div class="confirm-form-card">
                       <div class="form-field">
-                        <label class="form-label">Product name <span class="import-required">*</span> <span class="form-info-icon" title="The display name for this product">ⓘ</span></label>
+                        <label class="form-label">Product name <span class="import-required">*</span> <span class="form-info-icon" title="The display name for this product"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg></span></label>
                         <div class="form-input-wrap">
                           <input type="text" class="form-input" id="conf-product-name" />
                           <span class="from-file-tag" id="conf-name-tag" style="display:none">
@@ -3960,22 +4225,22 @@ html, body.bom-page {
                         </div>
                       </div>
                       <div class="form-field">
-                        <label class="form-label">Product description <span class="form-optional">Optional</span> <span class="form-info-icon" title="Brief description of this product">ⓘ</span></label>
-                        <textarea class="form-input form-textarea" id="conf-product-desc" placeholder="Brief description of what this product is..."></textarea>
+                        <label class="form-label">Product description <span class="form-info-icon" title="Brief description of this product"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg></span></label>
+                        <textarea class="form-input form-textarea" id="conf-product-desc"></textarea>
                       </div>
                       <div class="form-field">
-                        <label class="form-label">Product ID <span class="form-optional">Optional</span> <span class="form-info-icon" title="Internal SKU or part number">ⓘ</span></label>
-                        <input type="text" class="form-input" placeholder="e.g. CAB-SMKR-001" />
+                        <label class="form-label">Product ID <span class="form-info-icon" title="Internal SKU or part number"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg></span></label>
+                        <input type="text" class="form-input" />
                       </div>
                       <div class="form-field">
-                        <label class="form-label">Tags <span class="form-optional">Optional</span> <span class="form-info-icon" title="Comma-separated tags">ⓘ</span></label>
-                        <input type="text" class="form-input" placeholder="e.g. smoker, outdoor, cabinet" />
+                        <label class="form-label">Tags <span class="form-info-icon" title="Comma-separated tags"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg></span></label>
+                        <input type="text" class="form-input" />
                       </div>
                       <div class="form-field form-field--inline">
                         <div class="form-field__grow">
-                          <label class="form-label">Per item mass <span class="import-required">*</span> <span class="form-info-icon" title="Total mass of one unit of this product">ⓘ</span></label>
+                          <label class="form-label">Per item mass <span class="import-required">*</span> <span class="form-info-icon" title="Total mass of one unit of this product"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg></span></label>
                           <div class="form-input-wrap">
-                            <input type="number" class="form-input" id="conf-mass" placeholder="0.0" />
+                            <input type="text" inputmode="decimal" class="form-input" id="conf-mass" />
                             <span class="from-file-tag" id="conf-mass-tag" style="display:none">
                               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5l10-10"/></svg>
                               From file
@@ -3983,8 +4248,8 @@ html, body.bom-page {
                           </div>
                         </div>
                         <div class="form-field__unit">
-                          <label class="form-label">Mass unit <span class="form-info-icon" title="Unit of mass">ⓘ</span></label>
-                          <select class="form-select-unit"><option>kg</option><option>g</option><option>lb</option></select>
+                          <label class="form-label">Mass unit <span class="form-info-icon" title="Unit of mass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg></span></label>
+                          <select class="form-select-unit"><option>kg</option><option>g</option><option>mg</option><option>t</option><option>mT</option><option>lb</option><option>oz</option></select>
                         </div>
                       </div>
                     </div>
@@ -3994,30 +4259,30 @@ html, body.bom-page {
                 <!-- Section: Supply Chain Sourcing -->
                 <div class="confirm-section">
                   <div class="confirm-section__info">
-                    <h3 class="confirm-section__title">Supply chain sourcing</h3>
+                    <h3 class="confirm-section__title">Supply Chain Sourcing</h3>
                     <div class="confirm-prefilled-badge">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5l10 -10"/></svg>
                       Pre-filled from import
                     </div>
-                    <p class="confirm-section__desc">Where parts are made and shipped from. Optional supplier fields help with procurement context; source and destination support transport modeling.</p>
+                    <p class="confirm-section__desc">Specify sourcing details to help Muir Product Intelligence predict your complete supply chain, including manufacturing locations and transportation routes between each point in the production process.</p>
                   </div>
                   <div class="confirm-section__form">
                     <div class="confirm-form-card">
                       <div class="form-field">
                         <div class="form-field__row-header">
-                          <label class="form-label">Supplier <span class="form-optional">Optional</span> <span class="form-info-icon" title="Supplier for this product">ⓘ</span></label>
+                          <label class="form-label">Supplier <span class="form-info-icon" title="Supplier for this product"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg></span></label>
                           <button type="button" class="form-add-btn">+ Add supplier</button>
                         </div>
                         <select class="form-input form-select-full"><option value="">Select supplier...</option></select>
                       </div>
                       <div class="form-field">
-                        <label class="form-label">Supplier installation <span class="form-optional">Optional</span> <span class="form-info-icon" title="Specific facility">ⓘ</span></label>
+                        <label class="form-label">Supplier installation <span class="form-info-icon" title="Specific facility"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg></span></label>
                         <select class="form-input form-select-full" disabled><option value="">Select supplier first...</option></select>
                       </div>
                       <div class="form-field">
-                        <label class="form-label">Source location <span class="form-optional">Optional</span> <span class="form-info-icon" title="Where parts are sourced">ⓘ</span></label>
+                        <label class="form-label">Source location <span class="import-required">*</span> <span class="form-info-icon" title="Where parts are sourced"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg></span></label>
                         <div class="form-input-wrap">
-                          <input type="text" class="form-input" id="conf-source" placeholder="e.g. Shenzhen, China" />
+                          <input type="text" class="form-input" id="conf-source" />
                           <span class="from-file-tag" id="conf-source-tag" style="display:none">
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5l10-10"/></svg>
                             From file
@@ -4025,27 +4290,212 @@ html, body.bom-page {
                         </div>
                       </div>
                       <div class="form-field">
-                        <label class="form-label">Destination location <span class="form-optional">Optional</span> <span class="form-info-icon" title="Where product is shipped to">ⓘ</span></label>
-                        <input type="text" class="form-input" placeholder="e.g. Munich, Germany" />
+                        <label class="form-label">Destination location <span class="import-required">*</span> <span class="form-info-icon" title="Where product is shipped to"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg></span></label>
+                        <input type="text" class="form-input" />
                       </div>
                     </div>
                   </div>
                 </div>
 
-              </div><!-- /confirm-scroll -->
-              <div class="confirm-footer">
-                <a href="#" class="import-cancel standalone-nav-products">Cancel</a>
-                <div class="import-card__actions">
-                  <button type="button" class="btn btn--sm btn--secondary" id="step5-back">Back</button>
-                  <button type="button" class="btn btn--sm btn--dark" id="step5-create">Create</button>
+                <div class="confirm-footer">
+                  <div class="confirm-footer__stack">
+                    <div class="confirm-token-note">Submitting will use 1 token</div>
+                    <div class="confirm-footer__buttons">
+                      <button type="button" class="btn btn--sm btn--secondary" id="step5-back">Back</button>
+                      <a href="#" class="btn btn--sm btn--secondary standalone-nav-products">Cancel</a>
+                      <button type="button" class="btn btn--sm btn--dark" id="step5-create">Create Product</button>
+                    </div>
+                  </div>
                 </div>
-              </div>
+
+              </div><!-- /confirm-scroll -->
             </div>
           </div>
 
         </div><!-- /import-body -->
 
         </div>
+        <!-- ── Scratch creation view ── -->
+        <div class="bom-main is-hidden" id="standalone-view-scratch" hidden>
+          <header class="bom-header">
+            <h1 class="bom-header__title">Create product</h1>
+            <div class="bom-header__create-wrap scratch-mode-wrap">
+              <button type="button" class="btn btn--sm btn--secondary" id="scratch-mode-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="scratch-mode-menu">
+                <svg class="tabler-svg tabler--16" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M21 16.008v-8.018a1.98 1.98 0 0 0 -1 -1.717l-7 -4.008a2.016 2.016 0 0 0 -2 0l-7 4.008c-.619 .355 -1 1.01 -1 1.718v8.018c0 .709 .381 1.363 1 1.717l7 4.008a2.016 2.016 0 0 0 2 0l7 -4.008c.619 -.355 1 -1.01 1 -1.718" />
+                  <path d="M12 22v-10" />
+                  <path d="M12 12l8.73 -5.04" />
+                  <path d="M3.27 6.96l8.73 5.04" />
+                </svg>
+                <span id="scratch-mode-label">Add Single Product</span>
+                <svg class="tabler-svg tabler--16" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M0 0h24v24H0z" fill="none" stroke="none" />
+                  <path d="M6 9l6 6l6 -6" />
+                </svg>
+              </button>
+              <div id="scratch-mode-menu" class="create-dropdown create-dropdown--compact" role="menu" aria-labelledby="scratch-mode-btn" hidden>
+                <button type="button" class="create-dropdown__option create-dropdown__option--compact" role="menuitem" data-mode="single">
+                  <svg class="tabler-svg tabler--16" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M21 16.008v-8.018a1.98 1.98 0 0 0 -1 -1.717l-7 -4.008a2.016 2.016 0 0 0 -2 0l-7 4.008c-.619 .355 -1 1.01 -1 1.718v8.018c0 .709 .381 1.363 1 1.717l7 4.008a2.016 2.016 0 0 0 2 0l7 -4.008c.619 -.355 1 -1.01 1 -1.718" />
+                    <path d="M12 22v-10" />
+                    <path d="M12 12l8.73 -5.04" />
+                    <path d="M3.27 6.96l8.73 5.04" />
+                  </svg>
+                  <span class="create-dropdown__option-title">Add Single Product</span>
+                </button>
+                <button type="button" class="create-dropdown__option create-dropdown__option--compact" role="menuitem" data-mode="multiple">
+                  <svg class="tabler-svg tabler--16" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M7 16.5l-5 -3l5 -3l5 3v5.5l-5 3l0 -5.5" />
+                    <path d="M2 13.5v5.5l5 3" />
+                    <path d="M7 16.545l5 -3.03" />
+                    <path d="M17 16.5l-5 -3l5 -3l5 3v5.5l-5 3l0 -5.5" />
+                    <path d="M12 19l5 3" />
+                    <path d="M17 16.5l5 -3" />
+                    <path d="M12 13.5v-5.5l-5 -3l5 -3l5 3v5.5" />
+                    <path d="M7 5.03v5.455" />
+                    <path d="M12 8l5 -3" />
+                  </svg>
+                  <span class="create-dropdown__option-title">Add Multiple Products</span>
+                </button>
+              </div>
+            </div>
+          </header>
+          <div id="scratch-body" class="import-body import-body--form">
+            <div class="import-step-panel import-step-panel--form">
+            <div class="confirm-layout">
+              <div class="confirm-scroll">
+
+                <!-- Section: Product Definition -->
+                <div class="confirm-section">
+                  <div class="confirm-section__info">
+                    <h3 class="confirm-section__title">Product Definition</h3>
+                    <p class="confirm-section__desc">Enter core product attributes that allow Muir Product Intelligence to analyze and break down your product into its components and materials. Product ID is used for tracking and report labeling, and not ingested by Muir Product Intelligence.</p>
+                    <p class="confirm-section__desc">Bill of Materials information can be added as an advanced input below.</p>
+                  </div>
+                  <div class="confirm-section__form">
+                    <div class="confirm-form-card">
+                      <div class="form-field">
+                        <label class="form-label">Product name <span class="import-required">*</span> <span class="form-info-icon" title="The display name for this product"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg></span></label>
+                        <div class="form-input-wrap">
+                          <input type="text" class="form-input" id="scratch-product-name" />
+                        </div>
+                      </div>
+                      <div class="form-field">
+                        <label class="form-label">Product description <span class="form-info-icon" title="Brief description of this product"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg></span></label>
+                        <textarea class="form-input form-textarea" id="scratch-product-desc"></textarea>
+                      </div>
+                      <div class="form-field">
+                        <label class="form-label">Product ID <span class="form-info-icon" title="Internal SKU or part number"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg></span></label>
+                        <input type="text" class="form-input" />
+                      </div>
+                      <div class="form-field">
+                        <label class="form-label">Tags <span class="form-info-icon" title="Comma-separated tags"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg></span></label>
+                        <input type="text" class="form-input" />
+                      </div>
+                      <div class="form-field form-field--inline">
+                        <div class="form-field__grow">
+                          <label class="form-label">Per item mass <span class="import-required">*</span> <span class="form-info-icon" title="Total mass of one unit of this product"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg></span></label>
+                          <input type="text" inputmode="decimal" class="form-input" id="scratch-mass" />
+                        </div>
+                        <div class="form-field__unit">
+                          <label class="form-label">Mass unit <span class="form-info-icon" title="Unit of mass"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg></span></label>
+                          <select class="form-select-unit"><option>kg</option><option>g</option><option>mg</option><option>t</option><option>mT</option><option>lb</option><option>oz</option></select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section: Supply Chain Sourcing -->
+                <div class="confirm-section">
+                  <div class="confirm-section__info">
+                    <h3 class="confirm-section__title">Supply Chain Sourcing</h3>
+                    <p class="confirm-section__desc">Specify sourcing details to help Muir Product Intelligence predict your complete supply chain, including manufacturing locations and transportation routes between each point in the production process.</p>
+                  </div>
+                  <div class="confirm-section__form">
+                    <div class="confirm-form-card">
+                      <div class="form-field">
+                        <div class="form-field__row-header">
+                          <label class="form-label">Supplier <span class="form-info-icon" title="Supplier for this product"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg></span></label>
+                          <button type="button" class="form-add-btn">+ Add supplier</button>
+                        </div>
+                        <select class="form-input form-select-full"><option value="">Select supplier...</option></select>
+                      </div>
+                      <div class="form-field">
+                        <label class="form-label">Supplier installation <span class="form-info-icon" title="Specific facility"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg></span></label>
+                        <select class="form-input form-select-full" disabled><option value="">Select supplier first...</option></select>
+                      </div>
+                      <div class="form-field">
+                        <label class="form-label">Source location <span class="import-required">*</span> <span class="form-info-icon" title="Where parts are sourced"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg></span></label>
+                        <input type="text" class="form-input" />
+                      </div>
+                      <div class="form-field">
+                        <label class="form-label">Destination location <span class="import-required">*</span> <span class="form-info-icon" title="Where product is shipped to"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></svg></span></label>
+                        <input type="text" class="form-input" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section: Bill of Material Specification (collapsible) -->
+                <details class="bom-spec">
+                  <summary class="bom-spec__summary">
+                    <svg class="bom-spec__chevron tabler-svg tabler--16" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 9l6 6l6 -6"/></svg>
+                    Bill of Material Specification (Optional)
+                  </summary>
+                  <div class="bom-spec__body">
+                    <div class="confirm-section">
+                      <div class="confirm-section__info">
+                        <h3 class="confirm-section__title">Include Materials/Components</h3>
+                        <p class="confirm-section__desc">Adding a bill of materials will provide Muir Product Intelligence with more context to analyze your product. You can either add materials individually or upload a spreadsheet.</p>
+                      </div>
+                      <div class="confirm-section__form">
+                        <div class="confirm-form-card bom-spec-card">
+                          <div class="bom-spec-stats">
+                            <div class="bom-spec-stat"><span class="bom-spec-stat__label">Declared Unit Mass</span><span class="bom-spec-stat__value">0 <span class="bom-spec-stat__unit">g</span></span></div>
+                            <div class="bom-spec-stat"><span class="bom-spec-stat__label">Waste</span><span class="bom-spec-stat__value">0 <span class="bom-spec-stat__unit">g</span></span></div>
+                            <div class="bom-spec-stat"><span class="bom-spec-stat__label">Total Input Mass</span><span class="bom-spec-stat__value">0 <span class="bom-spec-stat__unit">g</span></span></div>
+                          </div>
+                          <div class="bom-spec-toolbar">
+                            <div class="bom-spec-radio-group">
+                              <span>Breakdown Type:</span>
+                              <label class="bom-spec-radio"><input type="radio" name="bom-breakdown" checked /> Mass</label>
+                              <label class="bom-spec-radio"><input type="radio" name="bom-breakdown" /> Percentage</label>
+                            </div>
+                            <button type="button" class="btn btn--sm btn--secondary">
+                              <svg class="tabler-svg tabler--16" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"/><path d="M7 9l5 -5l5 5"/><path d="M12 4v12"/></svg>
+                              Upload Spreadsheet
+                            </button>
+                          </div>
+                          <table class="bom-spec-table">
+                            <thead><tr><th>Material</th><th>Mass (kg)</th><th>Recycled Percentage (optional)</th></tr></thead>
+                            <tbody></tbody>
+                          </table>
+                          <button type="button" class="bom-spec-add">+ Add New Material</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </details>
+
+                <div class="confirm-footer">
+                  <div class="confirm-footer__stack">
+                    <div class="confirm-token-note">Submitting will use 1 token</div>
+                    <div class="confirm-footer__buttons">
+                      <a href="#" class="btn btn--sm btn--secondary standalone-nav-products">Cancel</a>
+                      <button type="button" class="btn btn--sm btn--dark" id="scratch-create">Create Product</button>
+                    </div>
+                  </div>
+                </div>
+
+              </div><!-- /confirm-scroll -->
+            </div>
+            </div>
+          </div>
+        </div><!-- /standalone-view-scratch -->
       </div>
     </div>
 
@@ -4053,22 +4503,21 @@ html, body.bom-page {
 (function () {
   var viewProducts = document.getElementById('standalone-view-products');
   var viewImport = document.getElementById('standalone-view-import');
+  var viewScratch = document.getElementById('standalone-view-scratch');
 
   function showRoute(name) {
-    var isImport = name === 'import';
-    if (isImport) {
-      viewProducts.style.display = 'none';
-      viewImport.style.display = 'flex';
-      viewImport.removeAttribute('hidden');
-      viewImport.classList.remove('is-hidden');
-      document.title = 'Import Bill of Materials — Exploration (standalone)';
-    } else {
-      viewProducts.style.display = 'flex';
-      viewImport.style.display = 'none';
-      viewImport.setAttribute('hidden', '');
-      viewImport.classList.add('is-hidden');
-      document.title = 'BOM Import v2 — Products & Import (standalone demo)';
-    }
+    var views = { products: viewProducts, import: viewImport, scratch: viewScratch };
+    Object.keys(views).forEach(function (key) {
+      var el = views[key];
+      if (!el) return;
+      var active = key === name;
+      el.style.display = active ? 'flex' : 'none';
+      if (active) { el.removeAttribute('hidden'); el.classList.remove('is-hidden'); }
+      else { el.setAttribute('hidden', ''); el.classList.add('is-hidden'); }
+    });
+    if (name === 'import') document.title = 'Import Bill of Materials — Exploration (standalone)';
+    else if (name === 'scratch') document.title = 'Create Product (standalone)';
+    else document.title = 'BOM Import v2 — Products & Import (standalone demo)';
   }
 
   window.showProductsStandalone = function () { showRoute('products'); };
@@ -4086,12 +4535,53 @@ html, body.bom-page {
     });
   }
 
+  var openScratch = document.getElementById('standalone-open-scratch');
+  if (openScratch) {
+    openScratch.addEventListener('click', function () {
+      showRoute('scratch');
+      var menu = document.getElementById('create-menu');
+      var btn = document.getElementById('create-menu-btn');
+      if (menu) menu.hidden = true;
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+    });
+  }
+
   document.querySelectorAll('.standalone-nav-products').forEach(function (a) {
     a.addEventListener('click', function (e) {
       e.preventDefault();
       showRoute('products');
     });
   });
+
+  /* Scratch view: mode dropdown (Add Single / Add Multiple) */
+  var modeBtn = document.getElementById('scratch-mode-btn');
+  var modeMenu = document.getElementById('scratch-mode-menu');
+  var modeLabel = document.getElementById('scratch-mode-label');
+  if (modeBtn && modeMenu && modeLabel) {
+    function closeModeMenu() {
+      modeMenu.hidden = true;
+      modeBtn.setAttribute('aria-expanded', 'false');
+    }
+    modeBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = modeMenu.hidden;
+      modeMenu.hidden = !open;
+      modeBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    modeMenu.querySelectorAll('[data-mode]').forEach(function (opt) {
+      opt.addEventListener('click', function () {
+        var title = opt.querySelector('.create-dropdown__option-title');
+        if (title) modeLabel.textContent = title.textContent;
+        closeModeMenu();
+      });
+    });
+    document.addEventListener('click', function (e) {
+      if (!modeMenu.hidden && !modeBtn.parentElement.contains(e.target)) closeModeMenu();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !modeMenu.hidden) { closeModeMenu(); modeBtn.focus(); }
+    });
+  }
 })();
     </script>
     <script>
@@ -5165,7 +5655,7 @@ html, body.bom-page {
         var reuploadBtn = document.createElement('button');
         reuploadBtn.type = 'button';
         reuploadBtn.className = 'btn btn--xs btn--secondary';
-        reuploadBtn.textContent = 'Change File';
+        reuploadBtn.textContent = 'Re-upload File';
         reuploadBtn.addEventListener('click', function () { fileInput.click(); });
         fileRow.appendChild(reuploadBtn);
 
@@ -5282,6 +5772,66 @@ html, body.bom-page {
         var tbody = document.getElementById('preview-tbody');
         tbody.innerHTML = '';
 
+        function appendAddZone() {
+          var addTr = document.createElement('tr');
+          addTr.className = 'preview-row-add';
+          var addTd = document.createElement('td');
+          addTd.colSpan = PREVIEW_COLS.length;
+          addTd.className = 'preview-row-add__cell';
+          var addBtn = document.createElement('button');
+          addBtn.type = 'button';
+          addBtn.className = 'preview-row-add__btn';
+          addBtn.setAttribute('aria-label', 'Insert row');
+          addBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>';
+          addBtn.addEventListener('click', function () {
+            var newTr = document.createElement('tr');
+            newTr.className = 'preview-row';
+            for (var c = 0; c < PREVIEW_COLS.length; c++) {
+              var td = document.createElement('td');
+              var isLast = c === PREVIEW_COLS.length - 1;
+              td.className = 'preview-td' + (c === 0 ? ' preview-td--row-num' : '') + (isLast ? ' preview-td--actions' : '');
+              if (c === 0) {
+                td.textContent = '';
+              } else {
+                makeEditable(td, '');
+              }
+              if (isLast) {
+                var newDelBtn = document.createElement('button');
+                newDelBtn.type = 'button';
+                newDelBtn.className = 'preview-row__delete';
+                newDelBtn.setAttribute('aria-label', 'Delete row');
+                newDelBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0"/><path d="M10 11l0 6"/><path d="M14 11l0 6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/></svg>';
+                newDelBtn.addEventListener('click', function (ev) {
+                  ev.stopPropagation();
+                  var nextSib = newTr.nextSibling;
+                  newTr.parentNode.removeChild(newTr);
+                  if (nextSib && nextSib.classList && nextSib.classList.contains('preview-row-add')) {
+                    nextSib.parentNode.removeChild(nextSib);
+                  }
+                });
+                td.appendChild(newDelBtn);
+              }
+              newTr.appendChild(td);
+            }
+            var nextAdd = document.createElement('tr');
+            nextAdd.className = 'preview-row-add';
+            var nextTd = document.createElement('td');
+            nextTd.colSpan = PREVIEW_COLS.length;
+            nextTd.className = 'preview-row-add__cell';
+            var nextBtn = addBtn.cloneNode(true);
+            nextBtn.addEventListener('click', addBtn.onclick);
+            nextTd.appendChild(nextBtn);
+            nextAdd.appendChild(nextTd);
+            addTr.parentNode.insertBefore(newTr, addTr.nextSibling);
+            addTr.parentNode.insertBefore(nextAdd, newTr.nextSibling);
+          });
+          addTd.appendChild(addBtn);
+          addTr.appendChild(addTd);
+          tbody.appendChild(addTr);
+        }
+
+        appendAddZone();
+
         dataRows.forEach(function (row, i) {
           var rowNum = startRowNum + i;
           var issues = rowIssues[i] || [];
@@ -5325,12 +5875,27 @@ html, body.bom-page {
           // Unit — annotatable, no liveRows column (derived from qty state)
           var unitIssue = issues.find(function (x) { return x.col === 'unit'; });
           var unitTd = document.createElement('td');
-          unitTd.className = 'preview-td';
+          unitTd.className = 'preview-td preview-td--actions';
           makeAnnotatableCell(unitTd, i, 'unit', unitIssue ? 'piece' : 'kg',
             unitIssue || null, -1);
+          var delBtn = document.createElement('button');
+          delBtn.type = 'button';
+          delBtn.className = 'preview-row__delete';
+          delBtn.setAttribute('aria-label', 'Delete row');
+          delBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0"/><path d="M10 11l0 6"/><path d="M14 11l0 6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/></svg>';
+          delBtn.addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            var next = tr.nextSibling;
+            tr.parentNode.removeChild(tr);
+            if (next && next.classList && next.classList.contains('preview-row-add')) {
+              next.parentNode.removeChild(next);
+            }
+          });
+          unitTd.appendChild(delBtn);
           tr.appendChild(unitTd);
 
           tbody.appendChild(tr);
+          appendAddZone();
         });
 
         // ── Toggle ──
